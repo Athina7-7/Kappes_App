@@ -1,0 +1,8 @@
+# Ignorar dependencias de Node.js
+node_modules/
+
+# Archivos de configuración privadaas
+.env
+
+# Archivos temporales del sistema
+*.log
