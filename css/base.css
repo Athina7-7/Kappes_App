@@ -1,3 +1,111 @@
-.bg-wine {
-  background-color: #540c0c;
+:root {
+  --vino: #5b0f0f;
+  --bg: #ffffff;
+  --text: #3b3b3b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  font-family: system-ui, "Segoe UI", Roboto, Arial;
+}
+
+/* Menú y barra superior */
+.ka-header {
+  height: 140px;
+  background: var(--vino);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.ka-logo {
+  height: 100px;
+  width: auto;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.ka-logo:hover {
+  transform: scale(1.05) rotate(1deg);
+}
+
+.ka-brand {
+  color: #fff;
+}
+
+.ka-hamburger {
+  width: 110px;
+  height: 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ka-hamburger span {
+  display: block;
+  height: 12px;
+  width: 80%;
+  margin: 10px auto;
+  border-radius: 15px;
+  background: #a35252;
+}
+
+/* Menú lateral */
+.ka-menu {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--vino);
+  position: absolute;
+  top: 140px;
+  left: 0;
+  width: 280px;
+  padding: 40px 30px;
+  border-radius: 0 0 12px 12px;
+  color: white;
+}
+
+.ka-menu.show {
+  display: flex;
+}
+
+.ka-menu-logo {
+  margin-bottom: 20px;
+}
+
+.ka-menu-img {
+  width: 140px;
+  height: auto;
+}
+
+.ka-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.ka-menu li {
+  margin: 35px 0;
+}
+
+.ka-menu a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 10px;
 }

@@ -1,90 +1,21 @@
-:root {
-  --vino: #5b0f0f; /* barra superior */
-  --bg: #ffffff;   /* fondo contenido */
-  --text: #3b3b3b; /* texto principal */
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  height: 100%;
-  margin: 0;
-  background: var(--bg);
-  font-family: system-ui, "Segoe UI", Roboto, Arial;
-}
-
-
-/* Header: Barra Superior */
-.ka-header {
-  height: 140px; /*mas alto*/
-  background: var(--vino);
-  padding: 0 40px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;  /* separa izquierda y derecha */
-}
-
-/* Hamburguesa (3 barras) */
-.ka-hamburger {
-  width: 110px;
-  height: 96px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-}
-
-.ka-hamburger span {
-  display: block;
-  height: 20px; /*mas gruesa la hamburguesa*/
-  border-radius: 15px;
-  background: #a35252;
-}
-
-/* Logo / marca */
-.ka-brand {
-  color: #fff;
-}
-
-.ka-logo-container {
-  display: flex;
-  align-items: center;
-}
-
-.ka-logo {
-  height: 100px; /* ajuste tamaño */
-  width: auto;
-}
-
-.ka-appname {
-  color: white;
-  text-align: center;
-}
-
-/* ===== Main ==== */
 .ka-main {
-  min-height: calc(100vh - 100px);
+  min-height: calc(100vh - 140px);
   padding: 24px;
 }
 
 .ka-title {
-  font-size: 3.5rem; /*tamaño del boton*/
-  margin-bottom: 2.5rem; /*Distancia del texto al boton*/
+  font-size: 3.5rem;
+  margin-bottom: 2.5rem;
 }
 
-/* Botón agregar */
 .ka-add-btn {
   background-color: var(--vino);
   color: #fff;
   border: none;
-  width: 100px;   /* ancho fijo */
-  height: 100px;  /* alto fijo igual al ancho */
-  font-size: 3.5rem; /* ícono más grande */
-  border-radius: 50%; /* círculo perfecto */
+  width: 100px;
+  height: 100px;
+  font-size: 3.5rem;
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -95,7 +26,3 @@ html, body {
 .ka-add-btn:hover {
   background-color: #7e1919;
 }
-
-/* DEBUG: quítalo cuando veas esto aplicado */
-body { outline: 6px solid lime !important; }
-
