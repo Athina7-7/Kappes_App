@@ -96,6 +96,3 @@ html, body {
   background-color: #7e1919;
 }
 
-/* DEBUG: quítalo cuando veas esto aplicado */
-body { outline: 6px solid lime !important; }
-
