@@ -24,10 +24,10 @@
             <span class="nombre">{{ producto.nombre }}</span>
             <span class="precio">${{ producto.precio|floatformat:0 }}</span>
             <div class="acciones">
-                <a href="{% url 'editar_producto' producto.id %}" class="accion editar">
+                <a href="{% url 'editar_producto' producto.id_producto %}" class="accion editar">
                     <i class="bi bi-pencil-square"></i>
                 </a>
-                <form action="{% url 'eliminar_producto' producto.id %}" method="post" style="display:inline;">
+                <form action="{% url 'eliminar_producto' producto.id_producto %}" method="post" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="accion eliminar"
                         onclick="return confirm('¿Seguro que deseas eliminar este producto?');">

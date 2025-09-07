@@ -16,7 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from principal import views
+
+from principal.views import views_home, views_producto, views_inventario
 
 
 # en el archivo que se encuentra en la raiz de la carpeta del proyecto el 
@@ -24,10 +25,12 @@ from principal import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
-    path('productos/', views.productos, name='productos'),
-    path('inventario/', views.inventario, name='inventario'),
-    path('producto/eliminar/<int:producto_id>/', views.eliminar_producto, name='eliminar_producto'),
-    path('producto/editar/<int:producto_id>/', views.editar_producto, name='editar_producto'),
-    
+    path('', views_home.home, name='home'),
+
+    path('productos/', views_producto.crear_producto, name='productos'),
+
+    path('inventario/', views_inventario.inventario, name='inventario'),
+    path('producto/eliminar/<int:producto_id>/', views_inventario.eliminar_producto, name='eliminar_producto'),
+    path('producto/editar/<int:producto_id>/', views_inventario.editar_producto, name='editar_producto'),
+
 ]
