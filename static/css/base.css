@@ -1,0 +1,61 @@
+/* En toda la pagina se maneja con esta tipografía */
+body {
+  font-family: Arial, sans-serif;
+}
+
+/* Barra de color vinotinto tiene un grosor de 80px 
+Hice llamado del contenedor nav:  <nav class="navbar navbar-dark"">, la primera palabra*/
+.navbar {
+    background-color: #6a0d1a;
+    height: 80px;
+
+}
+
+/* Ajuste del tamaño y posición del logo
+Hice llamado del contenedor navbar-brand especificando que elemento me refiero a ese contenedor, 
+en este caso es el elemento imagen */
+.navbar-brand img  {
+  /* Tamaño */
+  width: 90px;
+  height: 90px;
+  /* Posición */
+  margin-top: -18px; /* solo un pequeño ajuste, para lograr centrar el logo */
+}
+
+/* MENÚ */
+
+/* Ajuste del logo en el menú */
+.offcanvas-title img{
+  /* Tamaño */
+  width: 120px;
+  height: 120px;
+  /* Posición */
+  margin-left: 100px; /* solo un pequeño ajuste, para lograr centrar el logo */
+}
+
+/* Icono del menú hamburguesa */
+.navbar-toggler{
+  margin-top: -18px;
+}
+
+/* Esconder la X predeterminada en el menú que nos ofrece canva */
+.offcanvas-header .btn-close {
+  display: none;
+}
+
+/* Alineación de los links del menú */
+.offcanvas-body{
+  text-align: center;
+  margin-right: 50px;
+}
+/* "Animación" de los submenús en productos y tipos de ventas */
+.offcanvas .dropdown:hover .dropdown-menu {
+  display: block;
+  margin-top: 0;
+}
+
+/* Fondo del menú */
+.offcanvas{
+  background-color: #6a0d1a;
+}
+

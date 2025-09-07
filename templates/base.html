@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Kappe's App</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <!-- Navbar superior la barra de color vinotinto
+   navbar-dark es para tener letras claras, ya que el fondo es oscuro-->
+  <nav class="navbar navbar-dark">
+
+    <!-- container-fluid: contenedor que ocupa el 100% del ancho disponible de la pantalla, 
+     sin importar el tamaño (desde pantallas pequeñas hasta grandes). -->
+    <div class="container-fluid">
+
+      <!-- Botón del menú hamburguesa en la barra vinotinto
+       todo es estructura que da bootstrap para ya tener el menú desplegable.
+       Se le hizo modificaciones especificas para nuestro diseño-->
+      <button class="navbar-toggler fs-1 shadow-none border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuLateral" aria-controls="menuLateral">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Logo en la barra vinotinto-->
+      <a class="navbar-brand ms-auto" href="{% url 'home' %}">
+        <img src="{% static 'img/logo_kappesApp_sinfondo.png' %}" alt="">
+      </a>
+    </div>
+  </nav>
+  
+
+<!-- Menú lateral (offcanvas)
+ se hace llamado de lo establecido en el menú hamburguesa -->
+  <div class="offcanvas offcanvas-start text-white" tabindex="-1" id="menuLateral" aria-labelledby="menuLateralLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuLateralLabel">
+        <a href="{% url 'home' %}">
+          <img src="{% static 'img/logo_kappesApp_sinfondo.png' %}" alt="">
+        </a>
+      </h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+
+    <!-- Dentro del menú está diseñado por un listado simple -->
+    <div class="offcanvas-body">
+
+      <!-- El menú principal con sus items -->
+      <ul class="navbar-nav">
+
+        <!-- Primer item del menú principal
+         dropdown es una opción de bootstrap para tener un mini-menú desplegable -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-white" href="#" id="submenu" role="button" data-bs-toggle="dropdown" aria-expanded="false"> <i class="bi bi-box-seam"></i> Productos</a>
+            <ul class="dropdown-menu text-center" aria-labelledby="submenu">
+              <li><a class="dropdown-item" href="#">Ver productos</a></li>
+              <li><a class="dropdown-item" href="#">Creación de productos</a></li>
+            </ul>
+        </li>
+
+        <!-- Segundo item del menú principal
+         dropdown es una opción de bootstrap para tener un mini-menú desplegable -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-white" href="#" id="submenu" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-shop"></i> Tipos de ventas</a>
+            <ul class="dropdown-menu text-center" aria-labelledby="submenu">
+              <li><a class="dropdown-item" href="#">Ver tipos de ventas</a></li>
+              <li><a class="dropdown-item" href="#">Creación de tipo de ventas</a></li>
+            </ul>
+        </li>
+
+        <!-- Tercer item del menú principal -->
+        <li class="nav-item">
+          <a class="nav-link text-white" href="#"> <i class="bi bi-bar-chart-line-fill"></i> Ventas</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+
+
+  <!-- Contenido dinámico -->
+   <!-- Aquí es donde al heredar de base.html podrán agregar su contenido
+    teniendo el resto de cosas -->
+  <div class="container-fluid mt-3">
+    {% block content %}{% endblock %}
+  </div>
+
+  <!-- Inclusión del JavaScript de Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/menu.js' %}"></script>
+
+</body>
+</html>
+
+<!-- 
+EXPLICACIÓN DEL ARCHIVO: 
+es un archivo que se encarga de ser una plantilla general para cada una de mis templates, 
+ las cuales heredarán todas las etiquetas de base -->
+
+

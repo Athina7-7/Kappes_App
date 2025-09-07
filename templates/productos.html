@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Producto{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/productos.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1 class="fw-bold mb-4">Producto</h1>
+    <form>
+        <div class="mb-3 text-start">
+            <label class="form-label">Nombre *</label>
+            <input type="text" class="form-control" placeholder="Nombre del producto">
+        </div>
+
+        <div class="mb-3 text-start">
+            <label class="form-label">Descripción</label>
+            <input type="text" class="form-control" placeholder="Descripción del producto">
+        </div>
+
+        <div class="mb-3 text-start">
+            <label class="form-label">Precio *</label>
+            <input type="number" class="form-control" placeholder="Ej: 10000">
+        </div>
+        
+        <button type="submit" class="btn btn-save w-100">Guardar</button>
+    </form>
+</div>
+{% endblock %}
