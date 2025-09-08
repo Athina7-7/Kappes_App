@@ -54,10 +54,10 @@
         <!-- Primer item del menú principal
          dropdown es una opción de bootstrap para tener un mini-menú desplegable -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle text-white" href="#" id="submenu" role="button" data-bs-toggle="dropdown" aria-expanded="false"> <i class="bi bi-box-seam"></i> Productos</a>
+          <a class="nav-link dropdown-toggle text-white" href="" id="submenu" role="button" data-bs-toggle="dropdown" aria-expanded="false"> <i class="bi bi-box-seam"></i> Productos</a>
             <ul class="dropdown-menu text-center" aria-labelledby="submenu">
-              <li><a class="dropdown-item" href="#">Ver productos</a></li>
-              <li><a class="dropdown-item" href="#">Creación de productos</a></li>
+              <li><a class="dropdown-item" href="{% url 'inventario' %}">Ver productos</a></li>
+              <li><a class="dropdown-item" href="{% url 'productos' %}">Creación de productos</a></li>
             </ul>
         </li>
 
