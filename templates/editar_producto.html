@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-container">
+    <h1>Editar producto</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3 text-start">
+            <label class="form-label">Nombre *</label>
+            <input type="text" name="nombre" class="form-control" value="{{ producto.nombre }}">
+        </div>
+
+        <div class="mb-3 text-start">
+            <label class="form-label">Descripción</label>
+            <input type="text" name="descripcion" class="form-control" value="{{ producto.descripcion }}">
+        </div>
+
+        <div class="mb-3 text-start">
+            <label class="form-label">Precio *</label>
+            <input type="number" name="precio" class="form-control" value="{{ producto.precio }}">
+        </div>
+
+        <button type="submit" class="btn btn-save w-100">Actualizar</button>
+    </form>
+</div>
+{% endblock %}
