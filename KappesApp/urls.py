@@ -25,7 +25,7 @@ from principal.views import views_home, views_producto, views_inventario
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
+    # path('', views.home, name='home'),
 
     path('', views_home.home, name='home'),
 
