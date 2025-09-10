@@ -1,0 +1,14 @@
+# Archivos innecesarios de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos temporales de SQLite
+*.sqlite3-journal
+
+# Archivos de Mac
+.DS_Store
+
+# Archivos de VSCode (si usas)
+.vscode/
