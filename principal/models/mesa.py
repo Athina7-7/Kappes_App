@@ -7,4 +7,4 @@ class Mesa(models.Model):
     estado = models.BooleanField(default=True);
 
     def __str__(self):
-        return self.numero
+        return f"Mesas {self.numero} - {'Libre' if self.estado else 'Ocupada'}"

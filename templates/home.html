@@ -4,27 +4,62 @@
 <div class="row">
   <!-- Columna de Mesas -->
   <div class="col-md-6 border-end">
-    <h3 class="text-center fw-bold">Mesas</h3>
-    <div class="d-flex flex-wrap gap-2 justify-content-center mt-3">
+    <h1 class="text-center fw-bold">Mesas</h1>
 
+    <!-- Contenedor de botones de mesas -->
+    <div class="contenedor-mesas">
+      {% for mesa in mesas %}
+          <div class="mesa-botones {% if mesa.estado %}mesa-libre{% else %}mesa-ocupada{% endif %} d-flex align-items-center justify-content-between px-3 py-2 rounded-pill">
+            
+            <!-- Botón principal que cambia el estado -->
+            <form method="post" action="{% url 'estado_mesa' mesa.id_mesa %}" class="m-0">
+              {% csrf_token %}
+              <button type="submit" class="btn text-white p-0 fw-bold">
+                Mesa #{{ mesa.numero }}
+              </button>
+            </form>
+
+            <!-- Botón de eliminar -->
+            <form method="post" action="{% url 'eliminar_mesa' mesa.id_mesa %}" class="m-0">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-link text-white p-0">
+                <i class="bi bi-trash ms-2"></i>
+              </button>
+            </form>
+
+          </div>
+        {% endfor %}
+
+
+    </div> <!-- 🔹 Aquí cierra solo las mesas -->
+
+    <!-- Botón para agregar una mesa (fuera del contenedor de mesas) -->
+    <div class="d-flex justify-content-center mt-3">
+      <form method="post" action="{% url 'agregar_mesa' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-dark btn-lg rounded-circle d-flex align-items-center justify-content-center">
+          <i class="bi bi-plus-lg"></i>
+        </button>
+      </form>
     </div>
 
+    <!-- Leyenda -->
+    <div class="leyenda text-center mt-4">
+      <span class="leyenda-item">
+        <span class="dot libre"></span> Libre
+      </span>
+      <span class="leyenda-item ms-4">
+        <span class="dot ocupado"></span> Ocupado
+      </span>
+    </div>
   </div>
 
   <!-- Columna de Pedidos -->
   <div class="col-md-6">
     <h3 class="text-center fw-bold">Pedidos</h3>
     <div class="mt-3">
-      
+      <!-- Aquí irán los pedidos -->
     </div>
   </div>
 </div>
 {% endblock %}
-
-
-<!-- 
-EXPLICACIÓN DEL ARCHIVO: 
-
-es el archivo principal (home) que será la primera vista, este hereda atraves de extends "base.html"
-  todas las etiquetas, etc. que contiene base.html, y con block content   endblock se indica de donde
-   inicia y acaba el contenido de ese template -->

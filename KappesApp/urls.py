@@ -25,4 +25,7 @@ from principal import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
+    path('agregar-mesa/', views.agregar_mesa, name='agregar_mesa'),
+    path('eliminar-mesa/<int:id>/', views.eliminar_mesa, name='eliminar_mesa'),
+    path('estado-mesa/<int:id>/', views.estado_mesa, name='estado_mesa'),
 ]
