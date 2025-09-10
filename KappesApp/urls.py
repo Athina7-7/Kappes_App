@@ -27,10 +27,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # GESTIÓN-MESA
-    path('', views.home, name='home'),
-    path('agregar-mesa/', views.agregar_mesa, name='agregar_mesa'),
-    path('eliminar-mesa/<int:id>/', views.eliminar_mesa, name='eliminar_mesa'),
-    path('estado-mesa/<int:id>/', views.estado_mesa, name='estado_mesa'),
+    path('', views_home.home, name='home'),
+    path('agregar-mesa/', views_home.agregar_mesa, name='agregar_mesa'),
+    path('eliminar-mesa/<int:id>/', views_home.eliminar_mesa, name='eliminar_mesa'),
+    path('estado-mesa/<int:id>/', views_home.estado_mesa, name='estado_mesa'),
+    path('eliminar-mesa/<int:id>/confirmar/', views_home.confirmar_eliminar_mesa, name='confirmar_eliminar_mesa'),
 
 
     # PRODUCTO-INVENTARIO
@@ -39,5 +40,6 @@ urlpatterns = [
     path('inventario/', views_inventario.inventario, name='inventario'),
     path('producto/eliminar/<int:producto_id>/', views_inventario.eliminar_producto, name='eliminar_producto'),
     path('producto/editar/<int:producto_id>/', views_inventario.editar_producto, name='editar_producto'),
+    
 
 ]

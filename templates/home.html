@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
+
+ {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  {% endblock %}
 
 {% block content %}
 <div class="row">
@@ -9,9 +14,12 @@
     <!-- Contenedor de botones de mesas -->
     <div class="contenedor-mesas">
       {% for mesa in mesas %}
+          <!-- Cada mesa se muestra como un botón con su estado (libre u ocupada) -->
           <div class="mesa-botones {% if mesa.estado %}mesa-libre{% else %}mesa-ocupada{% endif %} d-flex align-items-center justify-content-between px-3 py-2 rounded-pill">
             
-            <!-- Botón principal que cambia el estado -->
+
+            <!-----------MESAS------------------>
+            <!-- Botón principal que cambia el estado de la mesa -->
             <form method="post" action="{% url 'estado_mesa' mesa.id_mesa %}" class="m-0">
               {% csrf_token %}
               <button type="submit" class="btn text-white p-0 fw-bold">
@@ -19,21 +27,17 @@
               </button>
             </form>
 
-            <!-- Botón de eliminar -->
-            <form method="post" action="{% url 'eliminar_mesa' mesa.id_mesa %}" class="m-0">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-link text-white p-0">
-                <i class="bi bi-trash ms-2"></i>
-              </button>
-            </form>
-
+            <!-- Botón para eliminar la mesa, me lleva a la plantilla de confirmación-->
+            <a href="{% url 'confirmar_eliminar_mesa' mesa.id_mesa %}" class="btn btn-link text-white p-0">
+              <i class="bi bi-trash ms-2"></i>
+            </a>
           </div>
         {% endfor %}
+    </div> <!-- Aquí cierra el contenedor de las mesas -->
 
 
-    </div> <!-- 🔹 Aquí cierra solo las mesas -->
 
-    <!-- Botón para agregar una mesa (fuera del contenedor de mesas) -->
+    <!-- Botón para agregar una mesa -->
     <div class="d-flex justify-content-center mt-3">
       <form method="post" action="{% url 'agregar_mesa' %}">
         {% csrf_token %}
@@ -43,7 +47,9 @@
       </form>
     </div>
 
-    <!-- Leyenda -->
+
+
+    <!-- Leyenda para identificar estados -->
     <div class="leyenda text-center mt-4">
       <span class="leyenda-item">
         <span class="dot libre"></span> Libre
@@ -53,6 +59,8 @@
       </span>
     </div>
   </div>
+
+
 
   <!-- Columna de Pedidos -->
   <div class="col-md-6">
