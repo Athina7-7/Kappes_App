@@ -7,6 +7,9 @@ __pycache__/
 # Archivos temporales de SQLite
 *.sqlite3-journal
 
+# Base de datos SQLite
+db.sqlite3
+
 # Archivos de Mac
 .DS_Store
 
