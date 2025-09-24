@@ -16,23 +16,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from principal import views
-from principal.views import views_home, views_producto, views_inventario 
-
-
-# en el archivo que se encuentra en la raiz de la carpeta del proyecto el 
-# cual es urls.py, este indica las urls que usará el usuario para ingresar a los templates.
+from principal.views import views_home, views_producto, views_inventario, views_inicio_sesion
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('', views.home, name='home'),
 
+    # INICIO SESIÓN
+    path('inicio-sesion/', views_inicio_sesion.inicio_sesion, name='inicio_sesion'),
+    
     path('', views_home.home, name='home'),
+   
 
+    # PRODUCTO - INVENTARIO
     path('productos/', views_producto.crear_producto, name='productos'),
-
     path('inventario/', views_inventario.inventario, name='inventario'),
     path('producto/eliminar/<int:producto_id>/', views_inventario.eliminar_producto, name='eliminar_producto'),
     path('producto/editar/<int:producto_id>/', views_inventario.editar_producto, name='editar_producto'),
-
 ]
+

@@ -1,0 +1,129 @@
+:root {
+  --vino: #540c0c; /*Color vinotinto*/
+  --vino-hover:#360a0a; /*Color vinotinto mas oscuro para el hoover*/
+  --texto: #000000; /*Color para el texto*/
+}
+
+body {
+  font-family: 'Arial', sans-serif; /*fuente*/
+  color: var(--texto);
+  background-color: #fff; /*fondo blanco*/
+  margin: 0; /*Elimina el espacio fuera del body*/
+  padding: 0; /*Elimina el espacio dentro del body*/
+  overflow-x: hidden; /* evita el scroll */
+}
+
+
+
+/*Tamaños y pesos más definidos */
+h1 {
+  font-size: 3rem; /*muy grande (48px aprox)*/
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 2.2rem;
+  font-weight: bold;
+}
+
+p {
+  font-size: 1.2rem; /*tamaño legible para el texto normal*/
+}
+
+label { 
+  font-size: 1rem; /*tamaño estándar para etiquetas*/
+  font-weight: bold;
+}
+
+input::placeholder {
+  font-size: 0.85rem; /*un poco más pequeño que el texto normal*/
+  color: #888; /* gris para no resaltar tanto*/
+}
+
+
+
+/* FORMULARIO */
+.form-field {
+  margin-bottom: 20px; /* Espaciado entre campos */
+}
+
+.form-field label {
+  display: block; /* Que la etiqueta quede sobre el input */
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 1rem;
+}
+
+.form-field input {
+  border: none;
+  border-bottom: 2px solid #333;
+  padding: 8px 0;
+  width: 100%;
+  font-size: 1rem;
+   /* Quita el borde azul por defecto al hacer clic */
+  background: transparent;
+}
+
+
+
+/* BOTON INICIAR */
+.btn-vino {
+  background-color: var(--vino); /* Se usa el color vinotinto */
+  color: #fff;
+  border: none; /* Sin borde exterior del botón */
+  padding-block: 0.9rem; /* Espacio vertical dentro del botón */
+  border-radius: 0.6rem; /* redondea las esquinas del boton */
+  font-size: 1.6rem; /* Tamaño del texto del botón */
+  font-weight: bold;
+}
+
+.btn-vino:hover {
+  background-color: var(--vino-hover); /* Se oscurece al pasar el mouse*/
+  color: #fff;
+}
+
+
+
+/* ESTILOS PARA EL MEDIO CIRCULO*/
+
+.right-side {
+  background-color: var(--vino);
+  color: #fff;
+  display: flex; /* Flexbox para alinear */
+  flex-direction: column; /* Alineación vertical */
+  justify-content: center; /* Centrado vertical */
+  align-items: center; /* Centrado horizontal */
+  text-align: center; /* Texto centrado */
+  padding: 3rem; /* Espaciado interior */
+  border-top-left-radius: 50%; /* Crea efecto de medio círculo arriba */
+  border-bottom-left-radius: 50%; /* Lo mismo abajo */
+}
+
+
+
+
+
+.right-side > div { /*Esto asegura que el  contenido  quede por encima del medio circulo*/
+  position: relative;
+  z-index: 1;
+}
+
+
+
+/* BOTON DE REGISTRO */
+.btn-registro {
+  background-color: #fff; /* Fondo blanco */
+  color: var(--vino); /* Texto vinotinto */
+  border: 2px solid var(--vino); /* Borde vinotinto */
+  border-radius: 0.6rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.btn-registro:hover {
+  background-color: #e2d6d6; /* Color de fondo suave en hover */
+  color: var(--vino);
+}
+
+
+

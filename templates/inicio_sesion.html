@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+
+ {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/inicio_sesion.css' %}">
+  {% endblock %}
+
+{% block content %}
+
+<!-- Contenedor a pantalla completa -->
+    <div class="container-fluid min-vh-100">
+      <div class="row min-vh-100">
+
+        <!--Lado Izquierdo: Formulario-->
+        <!--Aca yo creo el espacio que quiero utilizar, el cual irá centrado-->
+        <section class="col-12 col-lg-6 d-flex align-items-center justify-content-center p-4 p-md-5">
+          <div class="w-100" style="max-width: 520px;">
+            <h1 class="display-4 fw-bold mb-4">Iniciar Sesión</h1>
+
+            <!--Aca hacemos el formulario, empezamos con el nombre de usuario-->
+            <form class="needs-validation" method="POST" novalidate>
+              {% csrf_token %} <!--Importante para protegerlo de ataques y para que Django haga el envío-->
+              <div class="form-field">
+                <label for="nombre" style="font-weight: normal;">Nombre</label>
+                <input type="text" id="nombre" name="Nombre" placeholder="Ingresa tu nombre" required>
+              </div>
+
+              <div class="mb-4">
+                <div class="form-field">
+                  <label for="contrasena" style="font-weight: normal;">Contraseña</label>
+                  <input type="password" id="contrasena" name="Contraseña" placeholder="********" required>
+                </div>
+              </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-lg btn-vino px-5 fw-bold">Iniciar</button>
+              </div>
+            </form>
+
+            <!-- 🔴 Bloque de mensajes -->
+              {% if messages %}
+                <div class="mt-3">
+                  {% for message in messages %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+          </div>
+        </section>
+
+      
+        <!--Aca hacemos el lado derecho-->
+            <!--Aca se genera el espacio para el panel derecho-->
+              <aside class="col-12 col-lg-6 right-side">
+                <div class="w-100 text-center text-white" style="max-width: 520px;">
+                  <h1 class="display-2 fw-bold mb-3">¡Bienvenido!</h1>
+                  <p class="fs-3 mb-4">Registre sus datos personales para utilizar todas las funciones del sitio.</p>
+                  <a href="#" class="btn btn-lg px-5 btn-registro">Registro</a>
+                </div>
+              </aside>
+
+
+      </div>
+    </div>
+
+    <!-- Script de validación (mejor fuera del <form> y al final del body) -->
+      <!--Esto me ayuda para validar la pagina, para que me muestre error si hay algo mal
+      o me muestre algo verde, indicandome que los datos se pusieron bien o si los campos están llenos-->
+    <script>
+      (() => {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+          form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+          }, false)
+        })
+      })()
+    </script>
+
+{% endblock %}
