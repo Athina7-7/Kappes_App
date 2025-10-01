@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página de Registro</title>
+  <link rel="stylesheet" href="{% static 'css/registro.css' %}">
+</head>
+<body>
+
+  <!-- Panel izquierdo -->
+  <div class="left-panel">
+    <h1>¡Bienvenido!</h1>
+    <p>Ingrese sus datos personales para utilizar todas las funciones del sitio</p>
+    <button>Inicio sesión</button>
+  </div>
+
+  <!-- Panel derecho -->
+  {% block content %}
+  <div class="right-panel">
+    <h1>Registrarse</h1>
+    <form method="POST" action="{% url 'registro' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required>
+      </div>
+
+      <div class="form-group">
+        <label for="tipo">Tipo de usuario</label>
+        <select id="tipo" name="tipo" required>
+          <option value="">Seleccione...</option>
+          <option value="admin">Administrador</option>
+          <option value="comun">Común</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="contrasena">Contraseña</label>
+        <input type="password" id="contrasena" name="contrasena" placeholder="******" required>
+      </div>
+
+      <button type="submit" class="btn-register">Registro</button>
+    </form>
+  </div>
+  {% endblock %}
+</body>
+</html>

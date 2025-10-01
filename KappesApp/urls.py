@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from principal import views
-from principal.views import views_home, views_producto, views_inventario 
+from principal.views import views_home, views_producto, views_inventario,views_registro
 
 
 # en el archivo que se encuentra en la raiz de la carpeta del proyecto el 
@@ -34,5 +34,6 @@ urlpatterns = [
     path('inventario/', views_inventario.inventario, name='inventario'),
     path('producto/eliminar/<int:producto_id>/', views_inventario.eliminar_producto, name='eliminar_producto'),
     path('producto/editar/<int:producto_id>/', views_inventario.editar_producto, name='editar_producto'),
+    path('registro/', views_registro.registro_usuario, name='registro'),
 
 ]
