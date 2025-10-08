@@ -29,9 +29,9 @@ urlpatterns = [
     # GESTIÓN-MESA
     path('', views_home.home, name='home'),
     path('agregar-mesa/', views_home.agregar_mesa, name='agregar_mesa'),
-    path('eliminar-mesa/<int:id>/', views_home.eliminar_mesa, name='eliminar_mesa'),
-    path('estado-mesa/<int:id>/', views_home.estado_mesa, name='estado_mesa'),
-    path('eliminar-mesa/<int:id>/confirmar/', views_home.confirmar_eliminar_mesa, name='confirmar_eliminar_mesa'),
+    path('eliminar-mesa/<int:id>/', views_home.eliminar_mesa, name='eliminar_mesa'), #Eliminar la mesa
+    path('estado-mesa/<int:id>/', views_home.estado_mesa, name='estado_mesa'), #Cambiar el estado de la mesa
+    path('eliminar-mesa/<int:id>/confirmar/', views_home.confirmar_eliminar_mesa, name='confirmar_eliminar_mesa'), #Confirmar eliminación de la mesa - en pagina intermedia
 
 
     # PRODUCTO-INVENTARIO

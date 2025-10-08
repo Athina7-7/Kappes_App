@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 
- {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
-  {% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -14,26 +14,23 @@
     <!-- Contenedor de botones de mesas -->
     <div class="contenedor-mesas">
       {% for mesa in mesas %}
-          <!-- Cada mesa se muestra como un botón con su estado (libre u ocupada) -->
-          <div class="mesa-botones {% if mesa.estado %}mesa-libre{% else %}mesa-ocupada{% endif %} d-flex align-items-center justify-content-between px-3 py-2 rounded-pill">
-            
+      <!-- Cada mesa se muestra como un botón con su estado (libre u ocupada) -->
+      <div
+        class="mesa-botones {% if mesa.estado %}mesa-libre{% else %}mesa-ocupada{% endif %} d-flex align-items-center justify-content-center px-3 py-2 rounded-pill">
 
-            <!-----------MESAS------------------>
-            <!-- Botón principal que cambia el estado de la mesa -->
-            <form method="post" action="{% url 'estado_mesa' mesa.id_mesa %}" class="m-0">
-              {% csrf_token %}
-              <button type="submit" class="btn text-white p-0 fw-bold">
-                Mesa #{{ mesa.numero }}
-              </button>
-            </form>
+        <!-- Botón principal que cambia el estado de la mesa -->
+        <form method="post" action="{% url 'estado_mesa' mesa.id_mesa %}" class="m-0">
+          {% csrf_token %}
+          <button type="submit" class="btn text-white p-0 fw-bold w-100">
+            Mesa #{{ mesa.numero }}
+          </button>
+        </form>
 
-            <!-- Botón para eliminar la mesa, me lleva a la plantilla de confirmación-->
-            <a href="{% url 'confirmar_eliminar_mesa' mesa.id_mesa %}" class="btn btn-link text-white p-0">
-              <i class="bi bi-trash ms-2"></i>
-            </a>
-          </div>
-        {% endfor %}
-    </div> <!-- Aquí cierra el contenedor de las mesas -->
+        <!-- Checkbox para selección múltiple -->
+        <input type="checkbox" name="mesas_seleccionadas" value="{{ mesa.id_mesa }}" class="checkbox-mesa d-none">
+      </div>
+      {% endfor %}
+    </div> <!--  Cierre contenedor mesas -->
 
 
 
@@ -41,14 +38,15 @@
     <div class="d-flex justify-content-center mt-3">
       <form method="post" action="{% url 'agregar_mesa' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-dark btn-lg rounded-circle d-flex align-items-center justify-content-center">
+        <button type="submit"
+          class="btn btn-dark btn-lg rounded-circle d-flex align-items-center justify-content-center">
           <i class="bi bi-plus-lg"></i>
         </button>
       </form>
     </div>
 
 
-
+    
     <!-- Leyenda para identificar estados -->
     <div class="leyenda text-center mt-4">
       <span class="leyenda-item">
@@ -57,8 +55,23 @@
       <span class="leyenda-item ms-4">
         <span class="dot ocupado"></span> Ocupado
       </span>
+
+      <!-- Botón Selección -->
+      <button id="boton-seleccionar" class="btn btn-outline-dark btn-sm ms-3">
+        Seleccionar mesas
+      </button>
     </div>
-  </div>
+
+
+
+    <!-- Formulario oculto para eliminar varias mesas -->
+    <form id="eliminar-multiples-mesas" method="get" action="{% url 'confirmar_eliminar_mesa' 0 %}"
+      class="d-none mt-3 text-center">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-sm">Eliminar seleccionadas</button>
+    </form>
+  </div> <!-- Cierre columna de mesas -->
+
 
 
 
@@ -68,6 +81,61 @@
     <div class="mt-3">
       <!-- Aquí irán los pedidos -->
     </div>
-  </div>
-</div>
+  </div> <!-- Cierre columna de pedidos -->
+</div> <!-- Cierre fila principal -->
+
+
+
+
+<!-- Script funcional -->
+<!--Aca se usa JavaScript, para darle mayor interactividad a la página-->
+<!--Para que todo funcione automáticamente y no tener que refrescar la página siempre-->
+<script>
+  const botonSeleccionar = document.getElementById("boton-seleccionar");
+  const checkboxes = document.querySelectorAll(".checkbox-mesa");
+  const formEliminar = document.getElementById("eliminar-multiples-mesas");
+  let modoSeleccion = false; //Se pone como false porque todavía no hemos seleccionado mesas
+
+  //ACTIVAR O SELECCONAR MESAS
+  botonSeleccionar.addEventListener("click", () => {
+    modoSeleccion = !modoSeleccion; 
+    //Aca, si el modoSeleccion es true, los checkboses se muestran, y si es false, se ocultan
+    checkboxes.forEach(cb => cb.classList.toggle("d-none", !modoSeleccion)); 
+    //Si no estamos seleccionando, se oculta el formulario de eliminar (d-none)
+    //Si estamos en modo selección, se muestra el formulario (se quita el d-none)
+    formEliminar.classList.toggle("d-none", !modoSeleccion);
+    //Si está activo, muestra "Cancelar selección", si no, "Seleccionar mesas"
+    botonSeleccionar.textContent = modoSeleccion ? "Cancelar selección" : "Seleccionar mesas";
+  });
+
+  //ENVIAR FORMULARIO DE ELIMINAR MESAS
+  formEliminar.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+
+    const seleccionadas = Array.from(checkboxes) //Convertir los checkboxes en un arreglo
+      .filter(cb => cb.checked) //indica los que están marcados
+      .map(cb => cb.value); //se obtiene el id de cada mesa seleccionada
+
+
+      //VALIDAR SELECCIÓN VACÍA
+      //Si el usuario no selecciono ninguna mesa y le dio a eliminar, le va a aparecer esta alerta
+    if (seleccionadas.length === 0) {
+      alert("Selecciona al menos una mesa para eliminar.");
+      return;
+    }
+
+    //Aca se crean inputs ocultos para cada mesa seleccionada y se agregan al formulario.
+    //Esto lo recibe Django y sabe qué mesas eliminar
+    seleccionadas.forEach(id => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "mesas_seleccionadas";
+      input.value = id;
+      formEliminar.appendChild(input);
+    });
+
+    formEliminar.submit(); //Enviar formulario
+  });
+</script>
 {% endblock %}

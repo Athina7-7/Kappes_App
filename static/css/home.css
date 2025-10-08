@@ -11,10 +11,12 @@
   height: 45px;               /* todos del mismo alto */
   display: flex;              /*Se utiliza para alinear el texto + el icono*/
   align-items: center;        /*Centra verticalmente el contenido*/
-  justify-content: space-between; /* texto a la izquierda, icono a la derecha */
+  justify-content: center;    /*Centra horizontalmente el contenido*/
   padding: 0 12px;            /* espacio interno a los lados*/
   border-radius: 25px;        /* Esto es para hacerle los bordes */
   white-space: nowrap;        /*Esto evita que, apartir de la mesa 10 para adelante, el contenido se desborde y se generen mas líneas de lo que debería*/
+  text-align: center;      /*Esto centra el texto en el botón*/;
+  position: relative;        /*Para poder posicionar el checkbox dentro del botón*/
 
 }
 
@@ -61,4 +63,13 @@
 .mesa-ocupada {
   background-color: #000; /* negro */
   color: white;
+}
+
+.checkbox-mesa {
+  position: absolute;
+  right: 12px; /* separa el checkbox del borde derecho del botón */
+  top: 50%;
+  transform: translateY(-50%);
+  scale: 1.2; /* lo hace un poco más grande y visible */
+  cursor: pointer;
 }
