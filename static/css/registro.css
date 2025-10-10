@@ -112,6 +112,21 @@ body {
   background-color: #360a0a;
 }
 
+
+/* BOTON INICIAR */
+.btn-login {
+  background-color: #ffffff;
+  color: #540c0c;
+  font-weight: bold;
+  font-size: 1.4rem;
+  border: none;
+  padding: 1rem 3rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   body {

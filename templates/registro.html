@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   {% load static %}
   <meta charset="UTF-8">
@@ -7,13 +8,15 @@
   <title>Página de Registro</title>
   <link rel="stylesheet" href="{% static 'css/registro.css' %}">
 </head>
+
 <body>
 
   <!-- Panel izquierdo -->
   <div class="left-panel">
     <h1>¡Bienvenido!</h1>
     <p>Ingrese sus datos personales para utilizar todas las funciones del sitio</p>
-    <button>Inicio sesión</button>
+
+    <a href="{% url 'inicio_sesion' %}" class="btn-login">Inicia sesión</a>
   </div>
 
   <!-- Panel derecho -->
@@ -46,4 +49,5 @@
   </div>
   {% endblock %}
 </body>
+
 </html>
