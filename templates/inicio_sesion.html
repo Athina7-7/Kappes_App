@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/inicio_sesion.css' %}">
+</head>
+<body>
+
+
+  <!-- Panel izquierdo (formulario) -->
+  <div class="left-panel">
+    <div class="form-container">
+      <h1>Iniciar Sesión</h1>
+
+
+      <!-- Formulario de login -->
+      <form method="POST" novalidate>
+        {% csrf_token %} <!-- Token de seguridad de Django -->
+
+
+        <!-- Campo: Nombre -->
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" name="Nombre" placeholder="Ingresa tu nombre" required>
+        </div>
+
+
+        <!-- Campo: Contraseña -->
+        <div class="form-group">
+          <label for="contrasena">Contraseña</label>
+          <input type="password" id="contrasena" name="Contraseña" placeholder="********" required>
+        </div>
+
+
+        <!-- Botón de enviar -->
+        <button type="submit" class="btn-login">Iniciar</button>
+      </form>
+
+
+      <!-- Mensajes de error o validación -->
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="alert {{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+
+  <!-- Panel derecho (bienvenida) -->
+  <div class="right-panel">
+    <h1>¡Bienvenido!</h1>
+    <p>Registre sus datos personales para utilizar todas las funciones del sitio</p>
+    <a href="#" class="btn-register">Registro</a>
+  </div>
+
+</body>
+</html>

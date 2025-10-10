@@ -18,10 +18,13 @@ class Usuario(models.Model):
 
     # campo id_usuario, será un campo de models de django automatico
     id_usuario = models.AutoField(primary_key=True)
+
     # campo nombre, será un campo de models de django tipo char
     nombre = models.CharField(max_length=100)
+
     # campo contrasena, será un campo de models de django tipo char, pero luego lo pasamos a tipo hasher
     contrasena = models.CharField(max_length=128)
+
     # campo tipo_usuario, será un campo de models de django tipo char, pero se le hace llamado a TIPO_USUARIO
     # solo esas opciones establecidas, por eso el choices. 
     tipo_usuario = models.CharField(max_length=10, choices=TIPO_USUARIO)
@@ -30,6 +33,7 @@ class Usuario(models.Model):
     # el parametro realmente importante es self, ya que el recibe todo el Objeto de usuario, los demás
     # parametros no reciben nada (tener presente que es por Django)
     def save(self, *args, **kwargs):
+        
         # si el objeto usuario en el campo contrasena no está en formato hashing (pbkdf2_)
         if not self.contrasena.startswith('pbkdf2_'):
             # el objeto usuario en el campo contrasena guardará el nuevo valor (hasheado) con ayuda de la funcion
