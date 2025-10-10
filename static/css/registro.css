@@ -1,0 +1,146 @@
+/* Reset y fuentes */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
+}
+
+body {
+  display: flex;
+  height: 100vh;
+  flex-direction: row;
+}
+
+/* Panel izquierdo */
+.left-panel {
+  flex: 1;
+  background-color: #540c0c;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 3.2rem;
+  border-top-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+}
+
+.left-panel h1 {
+  font-size: 4rem;
+  margin-bottom: 1.2rem;
+}
+
+.left-panel p {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  max-width: 28rem;
+}
+
+.left-panel button {
+  background-color: white;
+  color: #540c0c;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.left-panel button:hover {
+  background-color: #ffffffcb;
+}
+
+/* Panel derecho */
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem;
+}
+
+.right-panel h1 {
+  font-size: 3rem;
+  margin-bottom: 3rem;
+  color: #2b2b2b;
+  text-align: center;
+}
+
+/* Formulario */
+.form-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.form-group input {
+  width: 100%;
+  margin-bottom: 1rem;
+  border: none;
+  border-bottom: 2px solid #4b4b4b;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+/* Botón registrar */
+.btn-register {
+  display: block;
+  margin: 2rem auto 0 auto;
+  background-color: #540c0c;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border: none;
+  padding: 1rem 3rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  text-align: center;
+}
+
+.btn-register:hover {
+  background-color: #360a0a;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  body {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .left-panel {
+    border-radius: 0;
+    padding: 1.5rem 1rem;
+  }
+
+  .left-panel h1 {
+    font-size: 2rem;
+  }
+
+  .left-panel p {
+    font-size: 1rem;
+  }
+
+  .right-panel {
+    padding: 2rem 1rem;
+  }
+
+  .form-container {
+    max-width: 100%;
+  }
+
+  .btn-register {
+    width: 100%;
+  }
+}

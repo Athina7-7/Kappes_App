@@ -1,12 +1,21 @@
 from django.contrib import admin
 from django.urls import path
-from principal.views import views_home, views_producto, views_inventario, views_inicio_sesion
+from principal.views import (
+    views_home,
+    views_producto,
+    views_inventario,
+    views_inicio_sesion,
+    views_registro
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
     # INICIO SESIÓN
     path('inicio-sesion/', views_inicio_sesion.inicio_sesion, name='inicio_sesion'),
+
+    # REGISTRO USUARIO
+    path('registro/', views_registro.registro_usuario, name='registro'),
 
     # GESTIÓN-MESA
     path('', views_home.home, name='home'),
