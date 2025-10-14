@@ -86,6 +86,9 @@
   font-size: 0.95rem;       /* tamaño de letra */
   border: 2px solid #540c0c; /* color de borde vino */
   color: #540c0c;           /* color del texto vino */
+  top: 10px;
+  left: 20px;
+  z-index:2;
   transition: all 0.3s ease; /* suaviza el cambio de color cuando se pasa por encima el boton */
 }
 
@@ -220,4 +223,12 @@
   color: #1f1a17;
   transform: scale(1.02);
 }
+
+
+/* Precio: estilo normal, más suave */
+.precio-item {
+  font-weight: normal;
+  color: #333;
+}
+
 

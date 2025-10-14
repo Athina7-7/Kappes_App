@@ -6,241 +6,245 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-  <!-- Columna de Mesas -->
-  <div class="col-md-6 border-end">
-    <h1 class="text-center fw-bold">Mesas</h1>
+<div class="container-fluid px-4">
+  <div class="row g-4">
+    <!-- Columna de Mesas -->
+    <div class="col-12 col-lg-6 border-end border-2">
+      <h1 class="text-center fw-bold mb-4">Mesas</h1>
 
-    <!-- Contenedor de botones de mesas -->
-    <div class="contenedor-mesas">
-      {% for mesa in mesas %}
-      <!-- Cada mesa se muestra como un botón con su estado (libre u ocupada) -->
-      <div
-        class="mesa-botones {% if mesa.estado %}mesa-libre{% else %}mesa-ocupada{% endif %} d-flex align-items-center justify-content-center px-3 py-2 rounded-pill">
+      <!-- Contenedor de botones de mesas -->
+      <div class="contenedor-mesas d-flex flex-wrap justify-contentcenter gap-3">
+        {% for mesa in mesas %}
+        <!-- Cada mesa se muestra como un botón con su estado (libre u ocupada) -->
+        <div
+          class="mesa-botones {% if mesa.estado %}mesa-libre{% else %}mesa-ocupada{% endif %} d-flex align-items-center justify-content-center px-3 py-2 rounded-pill">
 
-        <!-- Botón principal que cambia el estado de la mesa -->
-        <form method="post" action="{% url 'estado_mesa' mesa.id_mesa %}" class="m-0">
+          <!-- Botón principal que cambia el estado de la mesa -->
+          <form method="post" action="{% url 'estado_mesa' mesa.id_mesa %}" class="m-0">
+            {% csrf_token %}
+            <button type="button" class="btn text-white p-0 fw-bold w-100" 
+                    data-bs-toggle="modal"  
+                    data-bs-target="#modalOrden"
+                    onclick="abrirModal('{{ mesa.numero }}')">
+              Mesa #{{ mesa.numero }}
+            </button>
+          </form>
+
+          <!-- Checkbox para selección múltiple -->
+          <input type="checkbox" name="mesas_seleccionadas" value="{{ mesa.id_mesa }}" class="checkbox-mesa d-none">
+        </div>
+        {% endfor %}
+      </div> <!--  Cierre contenedor mesas -->
+
+
+
+      <!-- Botón para agregar una mesa -->
+      <div class="d-flex justify-content-center mt-3">
+        <form method="post" action="{% url 'agregar_mesa' %}">
           {% csrf_token %}
-          <button type="button" class="btn text-white p-0 fw-bold w-100" 
-                  data-bs-toggle="modal"  
-                  data-bs-target="#modalOrden"
-                  onclick="abrirModal('{{ mesa.numero }}')">
-            Mesa #{{ mesa.numero }}
+          <button type="submit"
+            class="btn btn-dark btn-lg rounded-circle d-flex align-items-center justify-content-center">
+            <i class="bi bi-plus-lg"></i>
           </button>
         </form>
-
-        <!-- Checkbox para selección múltiple -->
-        <input type="checkbox" name="mesas_seleccionadas" value="{{ mesa.id_mesa }}" class="checkbox-mesa d-none">
-      </div>
-      {% endfor %}
-    </div> <!--  Cierre contenedor mesas -->
-
-
-
-    <!-- Botón para agregar una mesa -->
-    <div class="d-flex justify-content-center mt-3">
-      <form method="post" action="{% url 'agregar_mesa' %}">
-        {% csrf_token %}
-        <button type="submit"
-          class="btn btn-dark btn-lg rounded-circle d-flex align-items-center justify-content-center">
-          <i class="bi bi-plus-lg"></i>
-        </button>
-      </form>
-    </div>
-
-
-    
-    <!-- Leyenda para identificar estados -->
-    <div class="leyenda text-center mt-4">
-      <span class="leyenda-item">
-        <span class="dot libre"></span> Libre
-      </span>
-      <span class="leyenda-item ms-4">
-        <span class="dot ocupado"></span> Ocupado
-      </span>
-
-      <!-- Botón Selección -->
-      <button id="boton-seleccionar" class="btn btn-outline-dark btn-sm ms-3">
-        Seleccionar mesas
-      </button>
-    </div>
-
-
-
-    <!-- Formulario oculto para eliminar varias mesas -->
-    <form id="eliminar-multiples-mesas" method="get" action="{% url 'confirmar_eliminar_mesa' 0 %}"
-      class="d-none mt-3 text-center">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-danger btn-sm">Eliminar seleccionadas</button>
-    </form>
-  </div> <!-- Cierre columna de mesas -->
-
-
-
-
-
-
-  <!-- Columna de Pedidos -->
-  <div class="col-md-6 border-end position-relative">
-    <!-- Botones arriba a la izquierda -->
-    <div class="boton-filtro d-flex flex-column position-absolute start-0 mt-2 ms-4" role="group">
-      <button type="button" class="btn btn-outline-dark mb-2">Domicilio</button>
-      <button type="button" class="btn btn-outline-dark">Mesas</button>
-    </div>
-
-    <!-- Título centrado -->
-    <h1 class="fw-bold mb-0 text-center mt-2">Pedidos</h1>
-
-
-
-    <!-- Aquí luego colocaremos la barra de búsqueda -->
-      <div class="barra-busqueda d-flex justify-content-center align-items-center mt-3 mb-4">
-        <input type="text" class="form-control input-busqueda">
-        <button class="btn boton-buscar ms-2">
-          <i class="bi bi-search"></i> <!--ic
-          ono de lupa-->
-        </button>
-      </div>
-
-      <!-- Contenedor de Pedidos -->
-      <div id="lista-pedidos" class="mt-4 px-4 d-flex flex-column gap-3">
-        {% for orden in ordenes %}
-          <div class="card shadow-sm p-3 border-0 rounded-3"
-              data-id="{{ orden.id_orden }}"
-              style="background-color: #f8f9fa; border-left: 6px solid #540c0c;">
-
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="fw-bold mb-0">
-                  Orden #{{ orden.id_orden }} — Mesa #{{ orden.id_mesa.numero|default:"-" }}
-                </h6>
-                <div class="btn-group">
-                  <!-- Botón editar -->
-                  <button type="button" class="btn btn-sm btn-outline-dark btn-editar"
-                          data-id="{{ orden.id_orden }}">
-                    <i class="bi bi-pencil"></i>
-                  </button>
-                  <!-- Botón eliminar -->
-                  <button type="button" class="btn btn-sm btn-outline-danger">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </div>
-              </div>
-            <p class="mb-1"><strong>Nombre del Cliente:</strong> {{ orden.nombre_cliente|default_if_none:"No especificado" }}</p>
-            <ul class="list-unstyled mb-0 ps-2">
-              {% for item in orden.detalles %}
-                <li>• {{ item.nombre }} ({{ item.cantidad }})</li>
-              {% endfor %}
-            </ul>
-            <p class="mt-2 fw-bold text-end text-vino">Total: ${{ orden.total }}</p>
-          </div>
-        {% empty %}
-          <p class="text-muted">No hay órdenes registradas.</p>
-        {% endfor %}
-
       </div>
 
 
-
-
-      <!-- MODAL PARA CREAR ORDEN -->
-
-      <!--tuve que dejar algunos nombres en ingles para que me funcionara bien el bootstrap-->
-      <!--Si lo dejaba en espanol tenia que hacer mas trabajo-->
       
-       <!--Esto me ayuda para hacer la ventana emergente para crear la orden-->
-       <!--fade: esto me ayuda para agregarle animación a la ventana-->
-       <!--aria-hidden="true" : significa que al principio la ventana no es visible para el usuario hasta que le di clic-->
-      <div class="modal fade" id="modalOrden" tabindex="-1" aria-labelledby="modalOrdenLabel" aria-hidden="true">
-        <!--Estos "modal-dialog" me ayuda para organizar el TAMANO de la ventana y que se vea centrado-->
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-          <div class="modal-content"> <!--Este es el bloque que puede ver el usuario y aca está todo su contendio-->
+      <!-- Leyenda para identificar estados -->
+      <div class="leyenda text-center mt-4">
+        <span class="leyenda-item">
+          <span class="dot libre"></span> Libre
+        </span>
+        <span class="leyenda-item ms-4">
+          <span class="dot ocupado"></span> Ocupado
+        </span>
+
+        <!-- Botón Selección -->
+        <button id="boton-seleccionar" class="btn btn-outline-dark btn-sm ms-3">
+          Seleccionar mesas
+        </button>
+      </div>
 
 
-            <!-- Encabezado -->
-            <div class="modal-header"> <!--Parte superior-->
-              <!--Aca se conecta para que sea accesible para el usuario-->
-              <h5 class="modal-title fw-bold" id="modalOrdenLabel">Orden #<span id="numeroOrden"></span> Mesa #<span id="numeroMesa"></h5> <!--Titulo de la ventana-->
-              <!--Boton para cerrar-->
-              <!--Aca se cierra la visibilidad para el usuario-->
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button> 
+
+      <!-- Formulario oculto para eliminar varias mesas -->
+      <form id="eliminar-multiples-mesas" method="get" action="{% url 'confirmar_eliminar_mesa' 0 %}"
+        class="d-none mt-3 text-center">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm">Eliminar seleccionadas</button>
+      </form>
+    </div> <!-- Cierre columna de mesas -->
+
+
+
+
+
+
+    <!-- Columna de Pedidos -->
+    <div class="col-12 col-lg-6 position-relative">
+      <!-- Botones arriba a la izquierda -->
+      <div class="position-relative mb-4">
+        <div class="boton-filtro d-flex flex-wrap flex-column position-absolute justify-content-center gap-2 mb-3" role="group">
+          <button type="button" class="btn btn-outline-dark mb-2">Domicilio</button>
+          <button type="button" class="btn btn-outline-dark">Mesas</button>
+        </div>
+      </div>
+
+      <!-- Título centrado -->
+      <h1 class="fw-bold mb-0 text-center mt-2">Pedidos</h1>
+
+
+
+      <!-- Aquí luego colocaremos la barra de búsqueda -->
+        <div class="barra-busqueda d-flex justify-content-center align-items-center mb-4 mt-5">
+          <input type="text" class="form-control input-busqueda w-75">
+          <button class="btn boton-buscar ms-2">
+            <i class="bi bi-search"></i> <!--ic
+            ono de lupa-->
+          </button>
+        </div>
+
+        <!-- Contenedor de Pedidos -->
+        <div id="lista-pedidos" class="mt-4 px-4 d-flex flex-column gap-3">
+          {% for orden in ordenes %}
+            <div class="card shadow-sm p-3 border-0 rounded-3"
+                data-id="{{ orden.id_orden }}"
+                style="background-color: #f8f9fa; border-left: 6px solid #540c0c;">
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="fw-bold mb-0">
+                    Orden #{{ orden.id_orden }} — Mesa #{{ orden.id_mesa.numero|default:"-" }}
+                  </h6>
+                  <div class="btn-group">
+                    <!-- Botón editar -->
+                    <button type="button" class="btn btn-sm btn-outline-dark btn-editar"
+                            data-id="{{ orden.id_orden }}">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <!-- Botón eliminar -->
+                    <button type="button" class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              <p class="mb-1"><strong>Nombre del Cliente:</strong> {{ orden.nombre_cliente|default_if_none:"No especificado" }}</p>
+              <ul class="list-unstyled mb-0 ps-2">
+                {% for item in orden.detalles %}
+                  <li>• {{ item.nombre }} ({{ item.cantidad }})</li>
+                {% endfor %}
+              </ul>
+              <p class="mt-2 fw-bold text-end text-vino">Total: ${{ orden.total }}</p>
             </div>
+          {% empty %}
+            <p class="text-muted">No hay órdenes registradas.</p>
+          {% endfor %}
+
+        </div>
 
 
-            <!-- Cuerpo -->
-            <div class="modal-body"> <!--Aca se almacena el contenido-->
-              <h6 class="fw-bold mb-2">Producto/Platillos</h6>
-              <!--Barra de busqueda-->
-              <div class="barra-busqueda d-flex align-items-center mb-3 position-relative">
-                <!--Después del Placeholder se gestiona para evitar que me aparezca el historial de lo que he escrito en el input-->
-                <input type="text" id="buscador-producto" class="form-control input-busqueda" placeholder="Busca platillos/productos",
-                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 
-                <button class="btn btn-buscar ms-2"><i class="bi bi-search"></i></button>
 
-                <!-- Cuadro de resultados (gris) -->
-                <div id="resultados" class="list-group position-absolute w-100 mt-1 shadow" style="z-index: 1000;"></div>
+        <!-- MODAL PARA CREAR ORDEN -->
+
+        <!--tuve que dejar algunos nombres en ingles para que me funcionara bien el bootstrap-->
+        <!--Si lo dejaba en espanol tenia que hacer mas trabajo-->
+        
+        <!--Esto me ayuda para hacer la ventana emergente para crear la orden-->
+        <!--fade: esto me ayuda para agregarle animación a la ventana-->
+        <!--aria-hidden="true" : significa que al principio la ventana no es visible para el usuario hasta que le di clic-->
+        <div class="modal fade" id="modalOrden" tabindex="-1" aria-labelledby="modalOrdenLabel" aria-hidden="true">
+          <!--Estos "modal-dialog" me ayuda para organizar el TAMANO de la ventana y que se vea centrado-->
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content"> <!--Este es el bloque que puede ver el usuario y aca está todo su contendio-->
+
+
+              <!-- Encabezado -->
+              <div class="modal-header"> <!--Parte superior-->
+                <!--Aca se conecta para que sea accesible para el usuario-->
+                <h5 class="modal-title fw-bold" id="modalOrdenLabel">Orden #<span id="numeroOrden"></span> Mesa #<span id="numeroMesa"></h5> <!--Titulo de la ventana-->
+                <!--Boton para cerrar-->
+                <!--Aca se cierra la visibilidad para el usuario-->
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button> 
               </div>
-            
 
-              <!-- Sección de Adiciones -->
-              <!-- Sección de Adiciones -->
-              <div class="mt-4">
-                <div class="accordion" id="accordionAdiciones">
-                  <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingAdiciones">
-                      <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseAdiciones" aria-expanded="false" aria-controls="collapseAdiciones">
-                        + Adiciones
-                      </button>
-                    </h2>
-                    <div id="collapseAdiciones" class="accordion-collapse collapse" aria-labelledby="headingAdiciones"
-                      data-bs-parent="#accordionAdiciones">
-                      <div class="accordion-body">
-                        <!-- Adiciones predefinidas -->
-                        <div id="lista-adiciones" class="list-group">
-                          <button class="list-group-item list-group-item-action">Agua</button>
-                          <button class="list-group-item list-group-item-action">Jugo</button>
-                          <button class="list-group-item list-group-item-action">Arroz</button>
-                          <button class="list-group-item list-group-item-action">Pasta</button>
-                          <button class="list-group-item list-group-item-action">Ensalada</button>
+
+              <!-- Cuerpo -->
+              <div class="modal-body"> <!--Aca se almacena el contenido-->
+                <h6 class="fw-bold mb-2">Producto/Platillos</h6>
+                <!--Barra de busqueda-->
+                <div class="barra-busqueda d-flex align-items-center mb-3 position-relative">
+                  <!--Después del Placeholder se gestiona para evitar que me aparezca el historial de lo que he escrito en el input-->
+                  <input type="text" id="buscador-producto" class="form-control input-busqueda" placeholder="Busca platillos/productos",
+                  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+                  <button class="btn btn-buscar ms-2"><i class="bi bi-search"></i></button>
+
+                  <!-- Cuadro de resultados (gris) -->
+                  <div id="resultados" class="list-group position-absolute w-100 mt-1 shadow" style="z-index: 1000;"></div>
+                </div>
+              
+
+                <!-- Sección de Adiciones -->
+                <!-- Sección de Adiciones -->
+                <div class="mt-4">
+                  <div class="accordion" id="accordionAdiciones">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingAdiciones">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse"
+                          data-bs-target="#collapseAdiciones" aria-expanded="false" aria-controls="collapseAdiciones">
+                          + Adiciones
+                        </button>
+                      </h2>
+                      <div id="collapseAdiciones" class="accordion-collapse collapse" aria-labelledby="headingAdiciones"
+                        data-bs-parent="#accordionAdiciones">
+                        <div class="accordion-body">
+                          <!-- Adiciones predefinidas -->
+                          <div id="lista-adiciones" class="list-group">
+                            <button class="list-group-item list-group-item-action">Agua</button>
+                            <button class="list-group-item list-group-item-action">Jugo</button>
+                            <button class="list-group-item list-group-item-action">Arroz</button>
+                            <button class="list-group-item list-group-item-action">Pasta</button>
+                            <button class="list-group-item list-group-item-action">Ensalada</button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+
+                  <!-- Detalles -->
+                  <h6 class="fw-bold mb-2 mt-4">Detalles</h6>
+                  <div id="detalles" class="mb-3"></div>
+
+                  <div class="d-flex justify-content-end">
+                    <h6 class="fw-bold">Total: <span id="total-dinamico">$0</span></h6>
+                  </div>
+
+                  <div class="mt-3">
+                    <label for="nombre_cliente" class="form-label">Este pedido esta a nombre de: </label>
+                    <input type="text" id="nombre_cliente" class="form-control" placeholder="Nombre del cliente" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                  </div>
+
                 </div>
 
-                <!-- Detalles -->
-                <h6 class="fw-bold mb-2 mt-4">Detalles</h6>
-                <div id="detalles" class="mb-3"></div>
-
-                <div class="d-flex justify-content-end">
-                  <h6 class="fw-bold">Total: <span id="total-dinamico">$0</span></h6>
+                <!-- Pie - Footer: Parte inferior del modal-->
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-dark" id="guardar-orden">Guardar</button>
                 </div>
 
-                <div class="mt-3">
-                  <label for="nombre_cliente" class="form-label">Este pedido esta a nombre de: </label>
-                  <input type="text" id="nombre_cliente" class="form-control" placeholder="Nombre del cliente">
+                  
                 </div>
-
               </div>
 
-              <!-- Pie - Footer: Parte inferior del modal-->
-              <div class="modal-footer">
-                <button type="button" class="btn btn-dark" id="guardar-orden">Guardar</button>
-              </div>
-
-                
-              </div>
             </div>
-
           </div>
         </div>
-      </div>
 
-    
+      
 
-  </div>
-</div> <!-- Cierre fila principal -->
+    </div>
+  </div> <!-- Cierre fila principal -->
+ </div> 
 
 
 
@@ -303,15 +307,23 @@
     modoEdicion = false;
     idOrdenActual = null;
 
-    // Obtener el número de orden (solo para mostrar)
-    const ultimaOrden = document.querySelectorAll('.card').length;
-    const siguienteOrden = ultimaOrden + 1;
+    // --- Obtener el número de orden más alto actualmente ---
+    const ordenes = document.querySelectorAll('.card[data-id]');
+    let siguienteOrden = 1; // Valor por defecto si no hay órdenes aún
 
-    // Mostrar número de orden y mesa en el modal
+    if (ordenes.length > 0) {
+      // Extrae todos los IDs numéricos desde los data-id de las tarjetas
+      const ids = Array.from(ordenes).map(c => parseInt(c.dataset.id));
+      // Busca el número mayor y le suma 1 para la siguiente orden
+      const maxId = Math.max(...ids);
+      siguienteOrden = maxId + 1;
+    }
+
+    // --- Mostrar número de orden y mesa en el modal ---
     document.getElementById("numeroOrden").textContent = siguienteOrden;
     document.getElementById("numeroMesa").textContent = numeroMesa;
 
-    // Limpiar los datos del modal (por si venía de una edición anterior)
+    // --- Limpiar los datos del modal ---
     document.getElementById("nombre_cliente").value = "";
     document.getElementById("detalles").innerHTML = "";
     document.getElementById("total-dinamico").textContent = "$0";
@@ -361,6 +373,7 @@
   });
 
   // Mostrar detalles del producto seleccionado
+  // Mostrar detalles del producto seleccionado
   function mostrarDetalles(prod) {
     const contenedor = document.createElement('div');
     contenedor.classList.add(
@@ -373,24 +386,29 @@
       'rounded'
     );
 
-    //Nombre del Producto
-    const info = document.createElement('span');
-    info.textContent = prod.nombre;
+    // Nombre en negrita
+    const nombre = document.createElement('strong');
+    nombre.textContent = prod.nombre;
 
-    //Precio del producto
+    // Precio normal
     const precio = document.createElement('span');
-    precio.textContent = `$${prod.precio}`;
-    precio.classList.add('fw-bold', 'ms-2');
+    precio.textContent = ` $${prod.precio}`;
+    precio.classList.add('text-muted');
+
+    // Combinar ambos
+    const info = document.createElement('div');
+    info.classList.add('d-flex', 'align-items-center', 'gap-1');
+    info.appendChild(nombre);
+    info.appendChild(precio);
 
     const cantidad = document.createElement('input');
     cantidad.type = 'number';
     cantidad.min = '1';
     cantidad.value = '1';
     cantidad.classList.add('form-control', 'w-25', 'me-2');
-
     cantidad.addEventListener('change', () => {
-    cantidad.setAttribute('value', cantidad.value);
-    actualizarTotal(); //recalcula total cada vez que se cambie la cantidad
+      cantidad.setAttribute('value', cantidad.value);
+      actualizarTotal();
     });
 
     const eliminar = document.createElement('button');
@@ -398,14 +416,12 @@
     eliminar.textContent = 'X';
     eliminar.addEventListener('click', () => {
       contenedor.remove();
-      actualizarTotal(); //recalcula el total si se elimina algo
+      actualizarTotal();
     });
 
-    // Ensamblar todo
     const bloqueIzq = document.createElement('div');
     bloqueIzq.classList.add('d-flex', 'align-items-center', 'gap-2');
     bloqueIzq.appendChild(info);
-    bloqueIzq.appendChild(precio);
 
     contenedor.appendChild(bloqueIzq);
     contenedor.appendChild(cantidad);
@@ -414,8 +430,9 @@
     detalles.appendChild(contenedor);
     cantidad.focus();
 
-    actualizarTotal(); // recalcula al agregar nuevo producto
-    }
+    actualizarTotal();
+  }
+
 </script>
 
 
@@ -434,13 +451,14 @@
   };
 
   // Lógica para agregar adiciones seleccionadas
+  // Lógica para agregar adiciones seleccionadas
   botonesAdiciones.forEach(boton => {
     boton.addEventListener('click', () => {
       const nombreAdicion = boton.textContent.trim();
 
       // Verificar si ya fue agregada
       const yaExiste = Array.from(detallesAdiciones.children).some(div =>
-        div.querySelector('span')?.textContent.includes(nombreAdicion)
+        div.textContent.includes(nombreAdicion)
       );
 
       if (yaExiste) {
@@ -460,10 +478,20 @@
         'rounded'
       );
 
-      // Nombre + Precio de la adición
-      const info = document.createElement('span');
-      info.textContent = `${nombreAdicion}  $${preciosAdiciones[nombreAdicion]}`;
-      info.classList.add('fw-bold', 'ms-2');
+      // Nombre en negrita
+      const nombre = document.createElement('strong');
+      nombre.textContent = nombreAdicion;
+
+      // Precio normal
+      const precio = document.createElement('span');
+      precio.textContent = ` $${preciosAdiciones[nombreAdicion]}`;
+      precio.classList.add('text-muted');
+
+      // Combinar ambos
+      const info = document.createElement('div');
+      info.classList.add('d-flex', 'align-items-center', 'gap-1');
+      info.appendChild(nombre);
+      info.appendChild(precio);
 
       // Campo cantidad
       const cantidad = document.createElement('input');
@@ -471,10 +499,9 @@
       cantidad.min = '1';
       cantidad.value = '1';
       cantidad.classList.add('form-control', 'w-25', 'me-2');
-
       cantidad.addEventListener('change', () => {
         cantidad.setAttribute('value', cantidad.value);
-        actualizarTotal(); // recalcula el total si cambia la cantidad
+        actualizarTotal();
       });
 
       // Botón eliminar
@@ -483,7 +510,7 @@
       eliminar.textContent = 'X';
       eliminar.addEventListener('click', () => {
         contenedor.remove();
-        actualizarTotal(); // recalcula al eliminar
+        actualizarTotal();
       });
 
       contenedor.appendChild(info);
@@ -493,9 +520,10 @@
       detallesAdiciones.appendChild(contenedor);
       cantidad.focus();
 
-      actualizarTotal(); // recalcula el total al agregar una adición
+      actualizarTotal();
     });
   });
+
 </script>
 
 
@@ -505,23 +533,20 @@ async function actualizarTotal() {
   let total = 0;
 
   for (let div of detalles) {
-    // obtiene nombre (sin el signo $)
-    const nombre = div.querySelector('span').textContent.replace('$', '').trim();
+    // Obtiene la cantidad
     const cantidad = parseInt(div.querySelector('input').value);
+
+    // Intenta obtener el precio directamente del texto dentro del div
+    // Ejemplo de texto: "Menu de la Noche $4000"
+    let texto = div.textContent;
     let precio = 0;
 
-    // buscar precio del producto o usar precio fijo si es adición
-    try {
-      const response = await fetch(`/buscar_producto/?q=${nombre}`);
-      const productos = await response.json();
-
-      if (productos.length > 0) {
-        precio = productos[0].precio;
-      } else {
-        precio = 2000; // Precio fijo para adiciones
-      }
-    } catch {
-      precio = 2000;
+    // Busca un número después del signo $
+    const match = texto.match(/\$([0-9]+)/);
+    if (match) {
+      precio = parseInt(match[1]); // Extrae el número del precio
+    } else {
+      precio = 2000; // Valor por defecto si no se encuentra precio (para adiciones)
     }
 
     total += precio * cantidad;
@@ -541,69 +566,73 @@ async function actualizarTotal() {
   const botonGuardar = document.getElementById('guardar-orden');
 
 // Modifica la función del botón guardar
-botonGuardar.addEventListener('click', async () => {
-    // Obtener el número de mesa del span en lugar de un input que no existe
+// --- BOTÓN GUARDAR ORDEN ---
+  botonGuardar.addEventListener('click', async () => {
     const numeroMesa = document.getElementById('numeroMesa').textContent.replace('Mesa #', '');
     const detalles = document.getElementById('detalles').children;
     const nombreCliente = document.getElementById('nombre_cliente').value;
 
     if (detalles.length === 0) {
-        alert('Agrega al menos un producto o adición antes de guardar.');
-        return;
+      alert('Agrega al menos un producto o adición antes de guardar.');
+      return;
     }
 
-    // Modificar cómo se obtienen los productos para incluir precios
+    // Extraer correctamente los productos o adiciones con su precio
     const productos = Array.from(detalles).map(div => {
-        const nombre = div.querySelector('span').textContent.split('$')[0].trim();
-        const cantidad = parseInt(div.querySelector('input').value);
-        // Obtener el precio del span si existe
-        const precioText = div.querySelector('span').textContent.split('$')[1];
-        const precio = precioText ? parseInt(precioText) : 0;
-        
-        return {
-            nombre: nombre,
-            cantidad: cantidad,
-            precio: precio
-        };
+      const nombre = div.querySelector('strong')?.textContent.trim() || 'Producto sin nombre';
+      const precioMatch = div.textContent.match(/\$([0-9]+)/);
+      const precio = precioMatch ? parseInt(precioMatch[1]) : 0;
+      const cantidad = parseInt(div.querySelector('input').value);
+
+      return {
+        nombre: nombre,
+        cantidad: cantidad,
+        precio: precio
+      };
     });
 
+    // Calcular total correctamente
+    const total = productos.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+
     const data = {
-        mesa: numeroMesa,
-        productos: productos,
-        nombre_cliente: nombreCliente
+      mesa: numeroMesa,
+      productos: productos,
+      nombre_cliente: nombreCliente,
+      total: total
     };
 
     try {
-        let url = '/guardar_orden/';
-        let method = 'POST';
+      let url = '/guardar_orden/';
+      let method = 'POST';
 
-        if (modoEdicion && idOrdenActual) {
-            url = `/editar_orden/${idOrdenActual}/`;
-        }
+      if (modoEdicion && idOrdenActual) {
+        url = `/editar_orden/${idOrdenActual}/`;
+      }
 
-        const response = await fetch(url, {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify(data)
-        });
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(data)
+      });
 
-        const result = await response.json();
+      const result = await response.json();
 
-        if (response.ok && result.success) {
-            alert(modoEdicion ? 'Orden actualizada correctamente' : 'Orden guardada correctamente');
-            location.reload();
-        } else {
-            alert('Error: ' + (result.error || 'No se pudo guardar la orden'));
-        }
+      if (response.ok && result.success) {
+        alert(modoEdicion ? 'Orden actualizada correctamente' : 'Orden guardada correctamente');
+        location.reload();
+      } else {
+        alert('Error: ' + (result.error || 'No se pudo guardar la orden'));
+      }
 
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error de conexión con el servidor.');
+      console.error('Error:', error);
+      alert('Error de conexión con el servidor.');
     }
-});  
+  });
+ 
 
 
   // Mostrar visualmente la orden en la lista de pedidos
@@ -693,6 +722,7 @@ botonGuardar.addEventListener('click', async () => {
   });
 </script>
 
+
 <script>
 document.addEventListener('click', async function(e) {
   const boton = e.target.closest('.btn-editar');
@@ -711,14 +741,13 @@ document.addEventListener('click', async function(e) {
       return;
     }
 
-    // Mostrar correctamente la información
+    // Mostrar información en el modal
     document.getElementById("numeroOrden").textContent = data.id;
     document.getElementById("numeroMesa").textContent = data.mesa;
     document.getElementById("nombre_cliente").value = data.nombre_cliente || "";
     document.getElementById("detalles").innerHTML = "";
-    document.getElementById("total-dinamico").textContent = `$${data.total}`;
 
-    // Agregar los productos
+    // Agregar productos/adiciones
     data.detalles.forEach(item => {
       const contenedor = document.createElement('div');
       contenedor.classList.add(
@@ -726,31 +755,48 @@ document.addEventListener('click', async function(e) {
         'mb-2', 'border', 'p-2', 'rounded'
       );
 
-      const info = document.createElement('span');
-      info.textContent = `${item.nombre} $${item.precio}`;
+      // Nombre y precio
+      const info = document.createElement('div');
+      info.classList.add('d-flex', 'align-items-center', 'gap-1');
+      const nombre = document.createElement('strong');
+      nombre.textContent = item.nombre;
+      const precio = document.createElement('span');
+      precio.textContent = ` $${item.precio}`;
+      precio.classList.add('text-muted');
+      info.appendChild(nombre);
+      info.appendChild(precio);
 
+      // Input de cantidad
       const cantidad = document.createElement('input');
       cantidad.type = 'number';
       cantidad.min = '1';
       cantidad.value = item.cantidad;
       cantidad.classList.add('form-control', 'w-25', 'me-2');
-      cantidad.addEventListener('change', () => cantidad.setAttribute('value', cantidad.value));
 
+      // 🔥 Evento para recalcular total dinámicamente
+      cantidad.addEventListener('change', () => {
+        cantidad.setAttribute('value', cantidad.value);
+        actualizarTotal(); // recalcula el total al modificar cantidad
+      });
+
+      // Botón eliminar
       const eliminar = document.createElement('button');
       eliminar.classList.add('btn', 'btn-outline-danger', 'btn-sm');
       eliminar.textContent = 'X';
-      eliminar.addEventListener('click', () => contenedor.remove());
+      eliminar.addEventListener('click', () => {
+        contenedor.remove();
+        actualizarTotal();
+      });
 
-      const bloqueIzq = document.createElement('div');
-      bloqueIzq.classList.add('d-flex', 'align-items-center', 'gap-2');
-      bloqueIzq.appendChild(info);
-
-      contenedor.appendChild(bloqueIzq);
+      contenedor.appendChild(info);
       contenedor.appendChild(cantidad);
       contenedor.appendChild(eliminar);
 
       document.getElementById("detalles").appendChild(contenedor);
     });
+
+    // Calcular total inicial
+    actualizarTotal();
 
     // Mostrar modal
     const modal = new bootstrap.Modal(document.getElementById('modalOrden'));
@@ -762,6 +808,7 @@ document.addEventListener('click', async function(e) {
   }
 });
 </script>
+
 
 
 

@@ -16,19 +16,12 @@ def home(request):
     ordenes = Orden.objects.all().order_by('id_orden')
     total_ordenes = Orden.objects.count()
 
-    # Siempre intentar reiniciar el contador al cargar la página
-    try:
-        with connection.cursor() as cursor:
-            # Reiniciar el contador de SQLite
-            cursor.execute("UPDATE sqlite_sequence SET seq = 0 WHERE name='principal_orden'")
-            # Si no existe el registro, lo creamos
-            cursor.execute("INSERT OR IGNORE INTO sqlite_sequence (name, seq) VALUES ('principal_orden', 0)")
-            print("Contador de órdenes reiniciado.")
-    except Exception as e:
-        print("Error al reiniciar el contador:", e)
-
-    return render(request, 'home.html', {'mesas': mesas, 'ordenes': ordenes})
-
+    # Agrega nuevamente esta línea:
+    return render(request, 'home.html', {
+        'mesas': mesas,
+        'ordenes': ordenes,
+        'total_ordenes': total_ordenes
+    })
 
 
 
@@ -152,53 +145,58 @@ def guardar_orden(request):
         try:
             usuario = Usuario.objects.filter(nombre__iexact=request.user.username).first()
         except Usuario.DoesNotExist:
-            usuario = None  # Por si no lo encuentra
+            usuario = None
 
-        # --- Calcular total ---
         total = 0
         for item in detalles:
             nombre_producto = item.get("nombre", "").strip()
             cantidad = int(item.get("cantidad", 1))
-
-            # Buscar el producto en la base de datos
             producto = Producto.objects.filter(nombre__iexact=nombre_producto).first()
-
             if producto:
                 precio = int(producto.precio)
             else:
-                # Si no está en la tabla de productos, se considera una adición (ej: agua, arroz...)
-                precio = 2000  
-
+                precio = 2000
             total += precio * cantidad
 
-        # Crear la orden con el total ya calculado
         nueva_orden = Orden.objects.create(
             id_usuario=usuario,
             id_mesa=mesa,
             id_tipoVenta=tipo_venta,
             nombre_cliente=data.get("nombre_cliente", ""),
-            detalles=detalles,  # si lo estás guardando en JSONField
+            detalles=detalles,
             total=total
         )
+
+        # Marcar mesa como ocupada
+        mesa.estado = False
+        mesa.save()
 
         return JsonResponse({
             "success": True,
             "id_orden": nueva_orden.id_orden,
-            "total": total  # lo devolvemos también al frontend
+            "total": total
         })
 
     return JsonResponse({"success": False, "error": "Método no permitido"})
+
 
 
 def eliminar_orden(request, id_orden):
     if request.method == "POST":
         try:
             orden = Orden.objects.get(id_orden=id_orden)
+            mesa = orden.id_mesa  # guardamos la mesa antes de eliminar la orden
             orden.delete()
+
+            # Marcar la mesa como libre
+            mesa.estado = True
+            mesa.save()
+
             return JsonResponse({"success": True})
         except Orden.DoesNotExist:
             return JsonResponse({"success": False, "error": "La orden no existe"})
     return JsonResponse({"success": False, "error": "Método no permitido"})
+
 
 
 def editar_orden(request, id_orden):
