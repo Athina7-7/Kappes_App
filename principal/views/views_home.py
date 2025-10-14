@@ -1,14 +1,34 @@
 from django.shortcuts import render, redirect, get_object_or_404
 #get_object_or_404: me ayuda. abuscar un objeto en la base de datos, y si no existe, django
 #devuelve un error 404 (página no encontrada)
-from principal.models import Mesa
+from django.contrib import messages
+from django.db import connection 
+from principal.models import Mesa, Producto, Orden, tipoVenta, Usuario
+from django.http import JsonResponse
+from django.db.models import Q
+import json
 
 # la carpeta principal contiene toda la lógica de la página, se le 
 # indica con el archivo views.py lo que se verá (llamado a los templates)
 
 def home(request):
-    mesas = Mesa.objects.all().order_by("numero")  # obtener todas las mesas ordenadas
-    return render(request, "home.html", {"mesas": mesas})
+    mesas = Mesa.objects.all().order_by('numero')
+    ordenes = Orden.objects.all().order_by('id_orden')
+    total_ordenes = Orden.objects.count()
+
+    # Siempre intentar reiniciar el contador al cargar la página
+    try:
+        with connection.cursor() as cursor:
+            # Reiniciar el contador de SQLite
+            cursor.execute("UPDATE sqlite_sequence SET seq = 0 WHERE name='principal_orden'")
+            # Si no existe el registro, lo creamos
+            cursor.execute("INSERT OR IGNORE INTO sqlite_sequence (name, seq) VALUES ('principal_orden', 0)")
+            print("Contador de órdenes reiniciado.")
+    except Exception as e:
+        print("Error al reiniciar el contador:", e)
+
+    return render(request, 'home.html', {'mesas': mesas, 'ordenes': ordenes})
+
 
 
 
@@ -95,3 +115,133 @@ def confirmar_eliminar_mesa(request, id):
             mesa.save()
 
         return redirect("home")
+
+
+
+
+def buscar_producto(request):
+    termino = request.GET.get('q', '').strip()  # Lo que el usuario escribió
+    if not termino:
+        return JsonResponse([], safe=False)
+
+    productos = Producto.objects.filter(nombre__icontains=termino)
+    data = list(productos.values('id_producto', 'nombre', 'precio'))
+    return JsonResponse(data, safe=False)
+
+
+def buscar_adicion(request):
+    query = request.GET.get('q', '')
+    resultados = Adicion.objects.filter(nombre__icontains=query)
+    data = list(resultados.values('id', 'nombre'))
+    return JsonResponse(data, safe=False)
+
+
+def guardar_orden(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        id_mesa = data.get("mesa")
+        detalles = data.get("productos", [])
+
+        try:
+            mesa = Mesa.objects.get(numero=id_mesa)
+        except Mesa.DoesNotExist:
+            return JsonResponse({"success": False, "error": "La mesa no existe"})
+
+        tipo_venta, _ = tipoVenta.objects.get_or_create(nombre="En Mesa")
+
+        try:
+            usuario = Usuario.objects.filter(nombre__iexact=request.user.username).first()
+        except Usuario.DoesNotExist:
+            usuario = None  # Por si no lo encuentra
+
+        # --- Calcular total ---
+        total = 0
+        for item in detalles:
+            nombre_producto = item.get("nombre", "").strip()
+            cantidad = int(item.get("cantidad", 1))
+
+            # Buscar el producto en la base de datos
+            producto = Producto.objects.filter(nombre__iexact=nombre_producto).first()
+
+            if producto:
+                precio = int(producto.precio)
+            else:
+                # Si no está en la tabla de productos, se considera una adición (ej: agua, arroz...)
+                precio = 2000  
+
+            total += precio * cantidad
+
+        # Crear la orden con el total ya calculado
+        nueva_orden = Orden.objects.create(
+            id_usuario=usuario,
+            id_mesa=mesa,
+            id_tipoVenta=tipo_venta,
+            nombre_cliente=data.get("nombre_cliente", ""),
+            detalles=detalles,  # si lo estás guardando en JSONField
+            total=total
+        )
+
+        return JsonResponse({
+            "success": True,
+            "id_orden": nueva_orden.id_orden,
+            "total": total  # lo devolvemos también al frontend
+        })
+
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+
+def eliminar_orden(request, id_orden):
+    if request.method == "POST":
+        try:
+            orden = Orden.objects.get(id_orden=id_orden)
+            orden.delete()
+            return JsonResponse({"success": True})
+        except Orden.DoesNotExist:
+            return JsonResponse({"success": False, "error": "La orden no existe"})
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+
+def editar_orden(request, id_orden):
+    if request.method == "GET":
+        try:
+            orden = Orden.objects.get(id_orden=id_orden)
+            return JsonResponse({
+                "success": True,
+                "id": orden.id_orden,
+                "nombre_cliente": orden.nombre_cliente,
+                "mesa": orden.id_mesa.numero,
+                "detalles": orden.detalles,
+                "total": orden.total
+            })
+        except Orden.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Orden no encontrada."})
+
+    elif request.method == "POST":
+        data = json.loads(request.body)
+        try:
+            orden = Orden.objects.get(id_orden=id_orden)
+        except Orden.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Orden no existe."})
+
+        # Actualizar los datos
+        orden.nombre_cliente = data.get("nombre_cliente", orden.nombre_cliente)
+        orden.detalles = data.get("productos", orden.detalles)
+
+        # Recalcular total
+        total = 0
+        for item in orden.detalles:
+            nombre_producto = item.get("nombre", "").strip()
+            cantidad = int(item.get("cantidad", 1))
+            producto = Producto.objects.filter(nombre__iexact=nombre_producto).first()
+            if producto:
+                precio = int(producto.precio)
+            else:
+                precio = 2000
+            total += precio * cantidad
+
+        orden.total = total
+        orden.save()
+
+        return JsonResponse({"success": True, "total": total})
+
+    return JsonResponse({"success": False, "error": "Método no permitido"})

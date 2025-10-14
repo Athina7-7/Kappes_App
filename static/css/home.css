@@ -1,8 +1,9 @@
 .contenedor-mesas {
-  display: flex;
-  flex-wrap: wrap; /* que los botones pasen a otra fila si no caben */
-  gap: 15px;       /* espacio entre botones */
-  justify-content: center; /* centrarlos */
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 👈 5 columnas por fila */
+  gap: 25px; /* Espaciado entre mesas */
+  justify-items: center; /* Centra cada mesa horizontalmente */
+  margin-top: 20px;
 }
 
 .mesa-botones {
@@ -73,3 +74,150 @@
   scale: 1.2; /* lo hace un poco más grande y visible */
   cursor: pointer;
 }
+
+
+
+/*FILTRO DE BOTONCES - MESA Y DOMICILIO*/
+/* Estilo de los botones de filtro */
+.boton-filtro .btn {
+  border-radius: 50px;      /* hace los bordes más redondeados */
+  padding: 8px 25px;        /* agranda el botón (alto y ancho) */
+  font-weight: 500;         /* texto más marcado */
+  font-size: 0.95rem;       /* tamaño de letra */
+  border: 2px solid #540c0c; /* color de borde vino */
+  color: #540c0c;           /* color del texto vino */
+  transition: all 0.3s ease; /* suaviza el cambio de color cuando se pasa por encima el boton */
+}
+
+/* Efecto al pasar el mouse */
+.boton-filtro .btn:hover {
+  background-color: #540c0c;
+  color: white;
+}
+
+
+
+
+/*BARRA DE BUSQUEDA*/
+
+/* Contenedor principal de la barra */
+.barra-busqueda {
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto; /* centra horizontalmente */
+}
+
+/* Campo de texto */
+.input-busqueda {
+  border: 2px solid #000;
+  border-radius: 50px;       /* bordes redondeados */
+  padding: 8px 15px;
+  outline: none;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+/* Efecto al hacer clic */
+.input-busqueda:focus {
+  border-color: #540c0c;
+  box-shadow: 0 0 5px rgba(84, 12, 12, 0.3);
+}
+
+/* Botón con ícono */
+.boton-buscar {
+  background-color: white;
+  border: 2px solid #000;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+/* Hover del botón */
+.boton-buscar:hover {
+  background-color: #540c0c;
+  color: white;
+  border-color: #540c0c;
+}
+
+
+
+
+/* ESTILO MODAL */
+/*Los nombres se colocaron en inglés para que me funcionara bien el bootstrap, porque si lo colocaba en espanol, tenía que hacer más trabajo*/
+.modal-content {
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+  border-bottom: none;
+}
+
+.modal-footer {
+  justify-content: center !important;
+  padding: 1rem 1.5rem; /* agrega espacio a los lados */
+}
+
+/* Evitar que el botón se pegue o se salga del borde */
+.modal-footer .btn {
+  min-width: 120px; /* ancho mínimo para que se vea proporcionado */
+  margin-top: 0.5rem;
+}
+
+/* Ajusta el contenido interno del modal */
+.modal-body {
+  max-height: 70vh; /* evita que se salga si hay muchos ítems */
+  overflow-y: auto;
+  padding: 1.5rem 2rem;
+}
+
+/* Aumenta un poco el ancho del modal */
+.modal-lg {
+  max-width: 700px;
+}
+
+.modal-content {
+  min-height: 700px; /* o el valor que desees */
+}
+
+#resultados {
+  position: absolute;
+  top: 55px; /* antes estaba cerca del input, ahora más abajo */
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1050; /* asegura que quede encima de todo */
+}
+
+#resultados .list-group-item {
+  cursor: pointer;
+  background-color: #fff;
+  border: none;
+  padding: 10px 15px;
+  transition: all 0.2s ease;
+}
+
+#resultados .list-group-item:hover {
+  background-color: #e8dcdc; /* tono vino claro */
+  color: #1f1a17; /* texto oscuro */
+  transform: scale(1.02); /* pequeño efecto visual */
+}
+
+
+#panel-adiciones {
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+#resultados-adiciones .list-group-item:hover {
+  background-color: #e4f1e4; /* tono verde claro */
+  color: #1f1a17;
+  transform: scale(1.02);
+}
+

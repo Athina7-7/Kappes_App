@@ -4,7 +4,7 @@ from .producto import Producto
 
 class detalleOrden(models.Model):
     id_detalle = models.AutoField(primary_key=True)
-    id_orden = models.ForeignKey(Orden, on_delete=models.CASCADE, related_name='detalles')
+    id_orden = models.ForeignKey(Orden, on_delete=models.CASCADE, related_name='detalle_items')
     id_producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
     # blank=True significa que el campo puede dejarse vacío en formularios (no es obligatorio rellenarlo).
