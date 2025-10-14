@@ -27,7 +27,6 @@ urlpatterns = [
 
     # CREACION DE ORDENES
     path('buscar_producto/', views_home.buscar_producto, name='buscar_producto'),
-    path('buscar_adicion/', views_home.buscar_adicion, name='buscar_adicion'),
     path('guardar_orden/', views_home.guardar_orden, name='guardar_orden'),
     path('eliminar_orden/<int:id_orden>/', views_home.eliminar_orden, name='eliminar_orden'),
     path('editar_orden/<int:id_orden>/', views_home.editar_orden, name='editar_orden'),

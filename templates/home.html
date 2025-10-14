@@ -13,22 +13,32 @@
       <h1 class="text-center fw-bold mb-4">Mesas</h1>
 
       <!-- Contenedor de botones de mesas -->
-      <div class="contenedor-mesas d-flex flex-wrap justify-contentcenter gap-3">
+      <div class="contenedor-mesas d-flex flex-wrap justify-content-center gap-3">
         {% for mesa in mesas %}
         <!-- Cada mesa se muestra como un botón con su estado (libre u ocupada) -->
         <div
           class="mesa-botones {% if mesa.estado %}mesa-libre{% else %}mesa-ocupada{% endif %} d-flex align-items-center justify-content-center px-3 py-2 rounded-pill">
 
           <!-- Botón principal que cambia el estado de la mesa -->
-          <form method="post" action="{% url 'estado_mesa' mesa.id_mesa %}" class="m-0">
-            {% csrf_token %}
-            <button type="button" class="btn text-white p-0 fw-bold w-100" 
-                    data-bs-toggle="modal"  
-                    data-bs-target="#modalOrden"
-                    onclick="abrirModal('{{ mesa.numero }}')">
-              Mesa #{{ mesa.numero }}
-            </button>
-          </form>
+          <!-- Botón principal que abre el modal o muestra alerta si está ocupada -->
+            <form method="post" action="{% url 'estado_mesa' mesa.id_mesa %}" class="m-0">
+              {% csrf_token %}
+              <button
+                type="button"
+                class="btn text-white p-0 fw-bold w-100"
+                {% if not mesa.estado %}disabled style="background-color: #000; cursor: not-allowed;"{% endif %}
+                {% if mesa.estado %}
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalOrden"
+                  onclick="abrirModal('{{ mesa.numero }}')"
+                {% else %}
+                  onclick="alert('Esta mesa está ocupada. Elimina la orden para liberarla.')"
+                {% endif %}
+              >
+                Mesa #{{ mesa.numero }}
+              </button>
+            </form>
+
 
           <!-- Checkbox para selección múltiple -->
           <input type="checkbox" name="mesas_seleccionadas" value="{{ mesa.id_mesa }}" class="checkbox-mesa d-none">
@@ -175,7 +185,7 @@
                 <!--Barra de busqueda-->
                 <div class="barra-busqueda d-flex align-items-center mb-3 position-relative">
                   <!--Después del Placeholder se gestiona para evitar que me aparezca el historial de lo que he escrito en el input-->
-                  <input type="text" id="buscador-producto" class="form-control input-busqueda" placeholder="Busca platillos/productos",
+                  <input type="text" id="buscador-producto" class="form-control input-busqueda" placeholder="Busca platillos/productos"
                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 
                   <button class="btn btn-buscar ms-2"><i class="bi bi-search"></i></button>
@@ -184,33 +194,7 @@
                   <div id="resultados" class="list-group position-absolute w-100 mt-1 shadow" style="z-index: 1000;"></div>
                 </div>
               
-
-                <!-- Sección de Adiciones -->
-                <!-- Sección de Adiciones -->
                 <div class="mt-4">
-                  <div class="accordion" id="accordionAdiciones">
-                    <div class="accordion-item">
-                      <h2 class="accordion-header" id="headingAdiciones">
-                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse"
-                          data-bs-target="#collapseAdiciones" aria-expanded="false" aria-controls="collapseAdiciones">
-                          + Adiciones
-                        </button>
-                      </h2>
-                      <div id="collapseAdiciones" class="accordion-collapse collapse" aria-labelledby="headingAdiciones"
-                        data-bs-parent="#accordionAdiciones">
-                        <div class="accordion-body">
-                          <!-- Adiciones predefinidas -->
-                          <div id="lista-adiciones" class="list-group">
-                            <button class="list-group-item list-group-item-action">Agua</button>
-                            <button class="list-group-item list-group-item-action">Jugo</button>
-                            <button class="list-group-item list-group-item-action">Arroz</button>
-                            <button class="list-group-item list-group-item-action">Pasta</button>
-                            <button class="list-group-item list-group-item-action">Ensalada</button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
                   <!-- Detalles -->
                   <h6 class="fw-bold mb-2 mt-4">Detalles</h6>
@@ -437,97 +421,6 @@
 
 
 <script>
-  // Obtener botones de adiciones y el contenedor de detalles
-  const botonesAdiciones = document.querySelectorAll('#lista-adiciones .list-group-item');
-  const detallesAdiciones = document.getElementById('detalles');
-
-  // Asignar precios por defecto a las adiciones
-  const preciosAdiciones = {
-    'Agua': 2000,
-    'Jugo': 2000,
-    'Arroz': 2000,
-    'Pasta': 2000,
-    'Ensalada': 2000
-  };
-
-  // Lógica para agregar adiciones seleccionadas
-  // Lógica para agregar adiciones seleccionadas
-  botonesAdiciones.forEach(boton => {
-    boton.addEventListener('click', () => {
-      const nombreAdicion = boton.textContent.trim();
-
-      // Verificar si ya fue agregada
-      const yaExiste = Array.from(detallesAdiciones.children).some(div =>
-        div.textContent.includes(nombreAdicion)
-      );
-
-      if (yaExiste) {
-        alert(`${nombreAdicion} ya fue agregada.`);
-        return;
-      }
-
-      // Crear bloque visual en "Detalles"
-      const contenedor = document.createElement('div');
-      contenedor.classList.add(
-        'd-flex',
-        'align-items-center',
-        'justify-content-between',
-        'mb-2',
-        'border',
-        'p-2',
-        'rounded'
-      );
-
-      // Nombre en negrita
-      const nombre = document.createElement('strong');
-      nombre.textContent = nombreAdicion;
-
-      // Precio normal
-      const precio = document.createElement('span');
-      precio.textContent = ` $${preciosAdiciones[nombreAdicion]}`;
-      precio.classList.add('text-muted');
-
-      // Combinar ambos
-      const info = document.createElement('div');
-      info.classList.add('d-flex', 'align-items-center', 'gap-1');
-      info.appendChild(nombre);
-      info.appendChild(precio);
-
-      // Campo cantidad
-      const cantidad = document.createElement('input');
-      cantidad.type = 'number';
-      cantidad.min = '1';
-      cantidad.value = '1';
-      cantidad.classList.add('form-control', 'w-25', 'me-2');
-      cantidad.addEventListener('change', () => {
-        cantidad.setAttribute('value', cantidad.value);
-        actualizarTotal();
-      });
-
-      // Botón eliminar
-      const eliminar = document.createElement('button');
-      eliminar.classList.add('btn', 'btn-outline-danger', 'btn-sm');
-      eliminar.textContent = 'X';
-      eliminar.addEventListener('click', () => {
-        contenedor.remove();
-        actualizarTotal();
-      });
-
-      contenedor.appendChild(info);
-      contenedor.appendChild(cantidad);
-      contenedor.appendChild(eliminar);
-
-      detallesAdiciones.appendChild(contenedor);
-      cantidad.focus();
-
-      actualizarTotal();
-    });
-  });
-
-</script>
-
-
-<script>
 async function actualizarTotal() {
   const detalles = document.getElementById('detalles').children;
   let total = 0;
@@ -546,7 +439,7 @@ async function actualizarTotal() {
     if (match) {
       precio = parseInt(match[1]); // Extrae el número del precio
     } else {
-      precio = 2000; // Valor por defecto si no se encuentra precio (para adiciones)
+      precio = 0; // Valor por defecto si no se encuentra precio (para adiciones)
     }
 
     total += precio * cantidad;
@@ -684,6 +577,19 @@ async function actualizarTotal() {
   }
 </script>
 
+<script>
+// --- Función auxiliar para buscar un botón por su texto ---
+function querySelectorContains(texto) {
+  const botones = document.querySelectorAll("button");
+  for (let boton of botones) {
+    if (boton.textContent.trim() === texto.trim()) {
+      return boton;
+    }
+  }
+  return null;
+}
+</script>
+
 
 <script>
   // --- Función para eliminar órdenes ---
@@ -709,11 +615,38 @@ async function actualizarTotal() {
         const result = await response.json();
 
         if (result.success) {
+          // Elimina la tarjeta visualmente
           card.remove();
           alert(`Orden #${idOrden} eliminada correctamente.`);
+
+          // --- Actualiza la mesa correspondiente ---
+          const mesaTexto = card.querySelector('h6').textContent;
+          const match = mesaTexto.match(/Mesa #(\d+)/);
+          if (match) {
+            const numeroMesa = match[1];
+            const botonMesa = querySelectorContains(`Mesa #${numeroMesa}`);
+
+            if (botonMesa) {
+              // Cambiar estado visual del botón
+              botonMesa.disabled = false;
+              botonMesa.style.cursor = "pointer";
+              botonMesa.removeAttribute("style"); 
+              botonMesa.setAttribute("data-bs-toggle", "modal");
+              botonMesa.setAttribute("data-bs-target", "#modalOrden");
+              botonMesa.setAttribute("onclick", `abrirModal('${numeroMesa}')`);
+
+              // Cambiar la clase del contenedor a "mesa-libre"
+              const contenedor = botonMesa.closest('.mesa-botones');
+              if (contenedor) {
+                contenedor.classList.remove('mesa-ocupada');
+                contenedor.classList.add('mesa-libre');
+              }
+            }
+          }
         } else {
           alert(`Error: ${result.error}`);
         }
+
       } catch (error) {
         console.error(error);
         alert("Error al intentar eliminar la orden.");
@@ -721,6 +654,7 @@ async function actualizarTotal() {
     }
   });
 </script>
+
 
 
 <script>
@@ -773,7 +707,7 @@ document.addEventListener('click', async function(e) {
       cantidad.value = item.cantidad;
       cantidad.classList.add('form-control', 'w-25', 'me-2');
 
-      // 🔥 Evento para recalcular total dinámicamente
+      // Evento para recalcular total dinámicamente
       cantidad.addEventListener('change', () => {
         cantidad.setAttribute('value', cantidad.value);
         actualizarTotal(); // recalcula el total al modificar cantidad

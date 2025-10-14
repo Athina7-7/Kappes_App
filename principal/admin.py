@@ -3,7 +3,6 @@ from .models import Mesa, Producto, tipoVenta, Usuario, Orden, detalleOrden, zon
 
 # Registramos cada modelo en el admin para poder visualziarlo en: http://127.0.0.1:8000/admin/
 
-# 🔹 1) Inline para poder agregar los productos dentro de una orden
 class DetalleOrdenInline(admin.TabularInline):
     model = detalleOrden
     extra = 1  # cuántas filas vacías aparecen para agregar productos nuevos
@@ -30,6 +29,4 @@ admin.site.register(Mesa)
 admin.site.register(Producto)
 admin.site.register(tipoVenta)
 admin.site.register(Usuario)
-#admin.site.register(Orden)
-admin.site.register(detalleOrden)
 admin.site.register(zonaDomicilio)

@@ -26,16 +26,16 @@ class Orden(models.Model):
         return f"Orden #{self.id_orden} — Mesa {self.id_mesa.numero if self.id_mesa else 'Sin mesa'}"
 
     def save(self, *args, **kwargs):
-        total = 0  # <- ahora es entero
+        total = 0
 
         for item in self.detalles:
             nombre_producto = item.get("nombre")
             cantidad = int(item.get("cantidad", 1))
             try:
                 producto = Producto.objects.get(nombre=nombre_producto)
-                total += producto.precio * cantidad  # multiplicación normal
+                total += producto.precio * cantidad
             except Producto.DoesNotExist:
-                total += 2000 * cantidad  # Precio fijo para adiciones
+                total += 0  # Si el producto no existe, no suma nada
 
         self.total = total
         super().save(*args, **kwargs)

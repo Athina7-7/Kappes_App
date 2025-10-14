@@ -122,12 +122,6 @@ def buscar_producto(request):
     return JsonResponse(data, safe=False)
 
 
-def buscar_adicion(request):
-    query = request.GET.get('q', '')
-    resultados = Adicion.objects.filter(nombre__icontains=query)
-    data = list(resultados.values('id', 'nombre'))
-    return JsonResponse(data, safe=False)
-
 
 def guardar_orden(request):
     if request.method == "POST":
@@ -158,6 +152,14 @@ def guardar_orden(request):
                 precio = 2000
             total += precio * cantidad
 
+        # Si no hay órdenes registradas, reiniciamos el contador del ID
+        if Orden.objects.count() == 0:
+            from django.db import connection
+            with connection.cursor() as cursor:
+                # Este comando reinicia el contador de la tabla (funciona para SQLite, PostgreSQL y MySQL)
+                cursor.execute("DELETE FROM sqlite_sequence WHERE name='principal_orden';")
+
+        # Crear la nueva orden normalmente
         nueva_orden = Orden.objects.create(
             id_usuario=usuario,
             id_mesa=mesa,
@@ -234,7 +236,7 @@ def editar_orden(request, id_orden):
             if producto:
                 precio = int(producto.precio)
             else:
-                precio = 2000
+                precio = 0
             total += precio * cantidad
 
         orden.total = total
