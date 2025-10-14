@@ -58,3 +58,11 @@ en este caso es el elemento imagen */
 .offcanvas{
   background-color: #6a0d1a;
 }
+
+/* Personalización del tamaño del menú desplegable */
+.dropdown-menu {
+  width: 300px; 
+  text-align: center;
+  padding: 0.5rem 0; 
+  border-radius: 8px; 
+}
