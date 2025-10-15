@@ -245,3 +245,29 @@ def editar_orden(request, id_orden):
         return JsonResponse({"success": True, "total": total})
 
     return JsonResponse({"success": False, "error": "Método no permitido"})
+
+
+def buscar_orden(request):
+    termino = request.GET.get('q', '').strip().lower()
+
+    # Si no hay texto, devolver todas las órdenes
+    if not termino:
+        ordenes = Orden.objects.all().order_by('id_orden')
+    else:
+        ordenes = Orden.objects.filter(
+            Q(nombre_cliente__icontains=termino) | 
+            Q(id_orden__icontains=termino)
+        ).order_by('id_orden')
+
+    # Convertimos las órdenes a formato JSON
+    data = []
+    for orden in ordenes:
+        data.append({
+            "id_orden": orden.id_orden,
+            "mesa": orden.id_mesa.numero if orden.id_mesa else None,
+            "nombre_cliente": orden.nombre_cliente or "No especificado",
+            "detalles": orden.detalles,
+            "total": orden.total
+        })
+    
+    return JsonResponse(data, safe=False)

@@ -232,3 +232,18 @@
 }
 
 
+/* Estilo unificado para ambos botones circulares */
+.btn.btn-dark.btn-lg.rounded-circle {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn.btn-dark.btn-lg.rounded-circle:hover {
+  background-color: #721717; /* tono vino */
+  transform: scale(1.08);
+}

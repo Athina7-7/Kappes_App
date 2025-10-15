@@ -108,8 +108,8 @@
 
       <!-- Aquí luego colocaremos la barra de búsqueda -->
         <div class="barra-busqueda d-flex justify-content-center align-items-center mb-4 mt-5">
-          <input type="text" class="form-control input-busqueda w-75">
-          <button class="btn boton-buscar ms-2">
+          <input type="text" class="form-control input-busqueda w-75" id="buscador-orden" placeholder="Buscar orden o cliente" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <button class="btn boton-buscar ms-2" id="btn-buscar-orden">
             <i class="bi bi-search"></i> <!--ic
             ono de lupa-->
           </button>
@@ -152,9 +152,18 @@
 
         </div>
 
+        <!-- Botón para hacer un nuevo pedido -->
+        <div class="d-flex justify-content-center mt-4">
+          <button 
+            type="button" 
+            class="btn btn-dark btn-lg rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+            title="Hacer nuevo pedido">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
 
 
-
+        
         <!-- MODAL PARA CREAR ORDEN -->
 
         <!--tuve que dejar algunos nombres en ingles para que me funcionara bien el bootstrap-->
@@ -743,9 +752,145 @@ document.addEventListener('click', async function(e) {
 });
 </script>
 
+<script>
+  const buscadorOrden = document.getElementById('buscador-orden');
+  const btnBuscarOrden = document.getElementById('btn-buscar-orden');
+  const listaPedidos = document.getElementById('lista-pedidos');
+
+  // --- Función para renderizar resultados (con botones y eventos) ---
+  function renderizarPedidos(ordenes) {
+    listaPedidos.innerHTML = ''; // limpia el contenedor
+
+    if (ordenes.length === 0) {
+      listaPedidos.innerHTML = '<p class="text-muted text-center">No se encontraron órdenes.</p>';
+      return;
+    }
+
+    ordenes.forEach(orden => {
+      const card = document.createElement('div');
+      card.classList.add('card', 'shadow-sm', 'p-3', 'border-0', 'rounded-3');
+      card.style.backgroundColor = '#f8f9fa';
+      card.style.borderLeft = '6px solid #540c0c';
+      card.dataset.id = orden.id_orden;
+
+      const detallesHTML = orden.detalles.map(item => 
+        `<li>• ${item.nombre} (${item.cantidad})</li>`
+      ).join('');
+
+      // --- Se agrega también el grupo de botones ---
+      card.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="fw-bold mb-0">
+            Orden #${orden.id_orden} — Mesa #${orden.mesa ?? '-'}
+          </h6>
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-dark btn-editar" data-id="${orden.id_orden}">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar" data-id="${orden.id_orden}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+        <p class="mb-1"><strong>Cliente:</strong> ${orden.nombre_cliente}</p>
+        <ul class="list-unstyled mb-0 ps-2">${detallesHTML}</ul>
+        <p class="mt-2 fw-bold text-end text-vino">Total: $${orden.total}</p>
+      `;
+
+      listaPedidos.appendChild(card);
+    });
+
+    // --- Reasignar eventos después de renderizar ---
+    asignarEventosOrdenes();
+  }
 
 
+  // Función de búsqueda
+  async function buscarOrden() {
+    const query = buscadorOrden.value.trim();
+    try {
+      const response = await fetch(`/buscar_orden/?q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      renderizarPedidos(data);
+    } catch (error) {
+      console.error('Error al buscar órdenes:', error);
+    }
+  }
 
+  btnBuscarOrden.addEventListener('click', buscarOrden);
+  buscadorOrden.addEventListener('input', buscarOrden);
 
+  
+  // --- Función para reactivar eventos de edición y eliminación después de renderizar ---
+function asignarEventosOrdenes() {
+  document.querySelectorAll('.btn-eliminar').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const idOrden = e.currentTarget.getAttribute('data-id');
+      if (!confirm(`¿Deseas eliminar la orden #${idOrden}?`)) return;
+
+      try {
+        const response = await fetch(`/eliminar_orden/${idOrden}/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          e.currentTarget.closest('.card').remove();
+          alert(`Orden #${idOrden} eliminada correctamente.`);
+        } else {
+          alert(`Error: ${result.error}`);
+        }
+      } catch (error) {
+        console.error('Error al eliminar:', error);
+      }
+    });
+  });
+
+  document.querySelectorAll('.btn-editar').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const idOrden = e.currentTarget.getAttribute('data-id');
+      modoEdicion = true;
+      idOrdenActual = idOrden;
+
+      try {
+        const response = await fetch(`/editar_orden/${idOrden}/`);
+        const data = await response.json();
+
+        if (!data.success) {
+          alert('No se pudo cargar la orden.');
+          return;
+        }
+
+        // --- Rellenar datos en el modal ---
+        document.getElementById("numeroOrden").textContent = data.id;
+        document.getElementById("numeroMesa").textContent = data.mesa;
+        document.getElementById("nombre_cliente").value = data.nombre_cliente || "";
+        document.getElementById("detalles").innerHTML = "";
+
+        data.detalles.forEach(item => {
+          const contenedor = document.createElement('div');
+          contenedor.classList.add('d-flex','align-items-center','justify-content-between','mb-2','border','p-2','rounded');
+          contenedor.innerHTML = `
+            <div class="d-flex align-items-center gap-1">
+              <strong>${item.nombre}</strong><span class="text-muted"> $${item.precio}</span>
+            </div>
+            <input type="number" min="1" value="${item.cantidad}" class="form-control w-25 me-2">
+            <button class="btn btn-outline-danger btn-sm">X</button>
+          `;
+          document.getElementById("detalles").appendChild(contenedor);
+        });
+
+        actualizarTotal();
+        const modal = new bootstrap.Modal(document.getElementById('modalOrden'));
+        modal.show();
+      } catch (error) {
+        console.error('Error al editar:', error);
+      }
+    });
+  });
+}
+
+</script>
 
 {% endblock %}

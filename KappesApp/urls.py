@@ -30,6 +30,7 @@ urlpatterns = [
     path('guardar_orden/', views_home.guardar_orden, name='guardar_orden'),
     path('eliminar_orden/<int:id_orden>/', views_home.eliminar_orden, name='eliminar_orden'),
     path('editar_orden/<int:id_orden>/', views_home.editar_orden, name='editar_orden'),
+    path('buscar_orden/', views_home.buscar_orden, name='buscar_orden'),
 
     
 
