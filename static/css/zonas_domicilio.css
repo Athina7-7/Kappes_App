@@ -1,0 +1,112 @@
+/* Contenedor general */
+.zona-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Barra de búsqueda */
+.search-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #2d2a2a;
+  border-radius: 30px;
+  padding: 5px 15px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.search-bar input {
+  border: none;
+  flex: 1;
+  outline: none;
+  font-size: 1rem;
+}
+
+.search-bar i {
+  font-size: 1.3rem;
+  color: #2d2a2a;
+}
+
+/* Lista de zonas */
+.zona-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.zona-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffc891;
+  padding: 12px 18px;
+  border-radius: 12px;
+}
+
+.zona-item .nombre {
+  font-size: 1.1rem;
+  color: #2d2a2a;
+}
+
+.zona-item .precio {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #2d2a2a;
+}
+
+.acciones {
+  display: flex;
+  gap: 10px;
+}
+
+.acciones .accion {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.acciones .editar i {
+  color: #6c757d;
+}
+
+.acciones .eliminar i {
+  color: #6c757d;
+}
+
+.acciones .editar:hover i {
+  color: #0d6efd;
+}
+
+.acciones .eliminar:hover i {
+  color: #dc3545;
+}
+
+/* Botón de agregar */
+.add-btn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.btn-add {
+  background-color: #000;
+  color: #fff;
+  font-size: 2rem;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.btn-add:hover {
+  transform: scale(1.05);
+  background-color: #540c0c;
+}

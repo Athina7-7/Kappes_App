@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Zonas de Domicilio{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/zonas_domicilio.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="zona-container">
+    <h1 class="fw-bold mb-4 text-center">Zonas de Domicilio</h1>
+
+    <!-- Barra de búsqueda -->
+    <div class="search-bar mb-4">
+        <input type="text" class="form-control" placeholder="Búsqueda de lugares domicilio">
+        <i class="bi bi-search"></i>
+    </div>
+
+    <!-- Lista de zonas -->
+    <div class="zona-list">
+        {% for zona in zonas %}
+        <div class="zona-item">
+            <span class="nombre">{{ zona.nombre_zona }}</span>
+            <span class="precio">${{ zona.ajuste_precio|floatformat:0 }}</span>
+            <div class="acciones">
+                <a href="{% url 'editar_zona' zona.id_zona %}" class="accion editar">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+                <form action="{% url 'eliminar_zona' zona.id_zona %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="accion eliminar"
+                        onclick="return confirm('¿Seguro que deseas eliminar esta zona?');">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">No hay zonas de domicilio registradas.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Botón para agregar nueva zona -->
+    <div class="add-btn-container">
+        <a href="{% url 'nuevo_domicilio' %}" class="btn-add">
+            <i class="bi bi-plus"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}
