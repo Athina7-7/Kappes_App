@@ -6,7 +6,7 @@ from .producto import Producto
 
 
 class Orden(models.Model):
-    id_orden = models.AutoField(primary_key=True)
+    id_orden = models.PositiveIntegerField(primary_key=True)
     # on_delete: qué pasa cuando se borra el objeto padre.
     # CASCADE: borra también las órdenes relacionadas.
     # related_name: el nombre que se usará para acceder a la relación inversa.

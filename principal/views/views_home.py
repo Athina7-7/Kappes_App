@@ -152,15 +152,20 @@ def guardar_orden(request):
                 precio = 2000
             total += precio * cantidad
 
-        # Si no hay órdenes registradas, reiniciamos el contador del ID
-        if Orden.objects.count() == 0:
-            from django.db import connection
-            with connection.cursor() as cursor:
-                # Este comando reinicia el contador de la tabla (funciona para SQLite, PostgreSQL y MySQL)
-                cursor.execute("DELETE FROM sqlite_sequence WHERE name='principal_orden';")
+        todas_ordenes = Orden.objects.order_by('id_orden').values_list('id_orden', flat=True)
+        siguiente_numero = 1
 
-        # Crear la nueva orden normalmente
+        if todas_ordenes:
+            for i, id_actual in enumerate(todas_ordenes, start=1):
+                if i != id_actual:
+                    siguiente_numero = i
+                    break
+            else:
+                siguiente_numero = todas_ordenes.last() + 1
+
+        # --- Crear nueva orden ---
         nueva_orden = Orden.objects.create(
+            id_orden=siguiente_numero,
             id_usuario=usuario,
             id_mesa=mesa,
             id_tipoVenta=tipo_venta,
@@ -169,10 +174,11 @@ def guardar_orden(request):
             total=total
         )
 
-        # Marcar mesa como ocupada
+        # --- Marcar mesa como ocupada ---
         mesa.estado = False
         mesa.save()
 
+        # --- Respuesta JSON ---
         return JsonResponse({
             "success": True,
             "id_orden": nueva_orden.id_orden,
