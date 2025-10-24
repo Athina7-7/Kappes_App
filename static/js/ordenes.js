@@ -11,10 +11,15 @@ function abrirModal(numeroMesa) {
 
     if (ordenes.length > 0) {
       // Extrae todos los IDs numéricos desde los data-id de las tarjetas
-      const ids = Array.from(ordenes).map(c => parseInt(c.dataset.id));
-      // Busca el número mayor y le suma 1 para la siguiente orden
-      const maxId = Math.max(...ids);
-      siguienteOrden = maxId + 1;
+      const cards = document.querySelectorAll('#lista-pedidos h6');
+        const numeros = Array.from(cards)
+        .map(el => {
+            const match = el.textContent.match(/Orden #(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+        })
+        .filter(num => !isNaN(num));
+
+        siguienteOrden = numeros.length > 0 ? Math.max(...numeros) + 1 : 1;
     }
 
     // --- Mostrar número de orden y mesa en el modal ---
@@ -204,7 +209,8 @@ async function actualizarTotal() {
       mesa: numeroMesa,
       productos: productos,
       nombre_cliente: nombreCliente,
-      total: total
+      total: total,
+      numero_orden: document.getElementById("numeroOrden").textContent
     };
 
     try {
@@ -254,7 +260,7 @@ async function actualizarTotal() {
 
     card.innerHTML = `
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="fw-bold mb-0">Orden #${id} — Mesa #${mesa}</h6>
+        <h6 class="fw-bold mb-0">Orden #${orden.numero_orden ?? orden.id_orden} — Mesa #${orden.mesa ?? '-'}</h6>
         <button class="btn btn-sm btn-outline-danger">
           <i class="bi bi-trash"></i>
         </button>
@@ -292,21 +298,24 @@ async function actualizarTotal() {
 
 
 
-// --- ELIMINAR ÓRDENES (actualización dinámica) ---
-// --- ELIMINAR ÓRDENES (actualización dinámica sin recargar) ---
-document.addEventListener('click', async function(e) {
-  const boton = e.target.closest('.btn-outline-danger');
-  if (!boton) return;
+  // --- ELIMINAR ÓRDENES ---
+  document.addEventListener('click', async function(e) {
+    const boton = e.target.closest('.btn-eliminar');
+    if (!boton) return; // No hizo clic en un botón eliminar
 
-  const card = boton.closest('.card');
-  const idOrden = card.getAttribute('data-id'); 
+    const card = boton.closest('.card');
+    const idOrden = card.getAttribute('data-id'); 
+    const numeroOrden = boton.getAttribute('data-numero');
 
   if (!idOrden) return alert("No se encontró el ID de la orden.");
 
-  // ✅ Buscar el número de orden visible en el texto del h6
-  const titulo = card.querySelector('h6')?.textContent || '';
-  const match = titulo.match(/Orden\s*#(\d+)/);
-  const numeroVisible = match ? match[1] : idOrden;  // usa el número del texto si existe
+    
+    if (confirm(`¿Deseas eliminar la orden #${numeroOrden}?`)) {
+      try {
+        const response = await fetch(`/eliminar_orden/${idOrden}/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
 
   if (confirm(`¿Deseas eliminar la orden #${numeroVisible}?`)) {
     try {
@@ -315,11 +324,18 @@ document.addEventListener('click', async function(e) {
         headers: { 'X-CSRFToken': getCookie('csrftoken') }
       });
 
-      const result = await response.json();
+        if (result.success) {
+          // Elimina la tarjeta visualmente
+          card.remove();
+          alert(`Orden #${numeroOrden} eliminada correctamente.`);
 
-      if (result.success) {
-        // 🔹 Elimina visualmente la tarjeta
-        card.remove();
+          // --- Actualiza la mesa correspondiente ---
+          const mesaTexto = card.querySelector('h6').textContent;
+          const match = mesaTexto.match(/Mesa #(\d+)/);
+          if (match) {
+            const numeroMesa = match[1];
+            const botonMesa = Array.from(document.querySelectorAll('.mesa-botones button'))
+            .find(b => b.textContent.trim() === `Mesa #${numeroMesa}`);
 
         // 🔹 Extrae la mesa y la libera inmediatamente
         const mesaTexto = titulo.match(/Mesa #(\d+)/);
@@ -360,7 +376,7 @@ document.addEventListener('click', async function(e) {
     }
 
     // Mostrar información en el modal
-    document.getElementById("numeroOrden").textContent = data.id;
+    document.getElementById("numeroOrden").textContent = data.numero_orden ?? data.id_orden;
     document.getElementById("numeroMesa").textContent = data.mesa;
     document.getElementById("nombre_cliente").value = data.nombre_cliente || "";
     document.getElementById("detalles").innerHTML = "";
@@ -500,29 +516,6 @@ document.addEventListener('click', async function(e) {
   
   // --- Función para reactivar eventos de edición y eliminación después de renderizar ---
 function asignarEventosOrdenes() {
-  document.querySelectorAll('.btn-eliminar').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const idOrden = e.currentTarget.getAttribute('data-id');
-      if (!confirm(`¿Deseas eliminar la orden #${idOrden}?`)) return;
-
-      try {
-        const response = await fetch(`/eliminar_orden/${idOrden}/`, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': getCookie('csrftoken') }
-        });
-        const result = await response.json();
-
-        if (result.success) {
-          e.currentTarget.closest('.card').remove();
-          alert(`Orden #${idOrden} eliminada correctamente.`);
-        } else {
-          alert(`Error: ${result.error}`);
-        }
-      } catch (error) {
-        console.error('Error al eliminar:', error);
-      }
-    });
-  });
 
   document.querySelectorAll('.btn-editar').forEach(btn => {
     btn.addEventListener('click', async (e) => {
