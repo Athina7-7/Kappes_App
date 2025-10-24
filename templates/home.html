@@ -124,7 +124,11 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <h6 class="fw-bold mb-0">
-                    Orden #{{ orden.id_orden }} — Mesa #{{ orden.id_mesa.numero|default:"-" }}
+                    <!--Esto es para enumerar las ordenes, para que solo se muestren en el front-->
+                    <h6 class="fw-bold mb-0">
+                      Orden #{{ forloop.counter }} — Mesa #{{orden.mesa.numero}}
+                    </h6>
+
                   </h6>
                   <div class="btn-group">
                     <!-- Botón editar -->
@@ -247,8 +251,8 @@
 <!--Para que todo funcione automáticamente y no tener que refrescar la página siempre-->
 
 
+<script src="{% static 'js/utils.js' %}"></script> <!--Funciones auxiliares-->
 <script src="{% static 'js/mesas.js' %}"></script> <!--Para seleccionar las mesas y ver cuáles se eliminar y cuáles no-->
 <script src="{% static 'js/ordenes.js' %}"></script> <!--Para crear una nueva orden-->
-<script src="{% static 'js/utils.js' %}"></script> <!--Funciones auxiliares-->
 
 {% endblock %}

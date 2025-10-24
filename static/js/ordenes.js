@@ -1,3 +1,4 @@
+
 // --- CREACIÓN DE ÓRDENES ---
 function abrirModal(numeroMesa) {
     // Reiniciar el modo edición cada vez que se abre un nuevo modal
@@ -291,67 +292,51 @@ async function actualizarTotal() {
 
 
 
-  // --- ELIMINAR ÓRDENES ---
-  document.addEventListener('click', async function(e) {
-    const boton = e.target.closest('.btn-outline-danger');
-    if (!boton) return; // No hizo clic en un botón eliminar
+// --- ELIMINAR ÓRDENES (actualización dinámica) ---
+// --- ELIMINAR ÓRDENES (actualización dinámica sin recargar) ---
+document.addEventListener('click', async function(e) {
+  const boton = e.target.closest('.btn-outline-danger');
+  if (!boton) return;
 
-    const card = boton.closest('.card');
-    const idOrden = card.getAttribute('data-id'); 
+  const card = boton.closest('.card');
+  const idOrden = card.getAttribute('data-id'); 
 
-    if (!idOrden) {
-      alert("No se encontró el ID de la orden.");
-      return;
-    }
+  if (!idOrden) return alert("No se encontró el ID de la orden.");
 
-    if (confirm(`¿Deseas eliminar la orden #${idOrden}?`)) {
-      try {
-        const response = await fetch(`/eliminar_orden/${idOrden}/`, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': getCookie('csrftoken') }
-        });
+  // ✅ Buscar el número de orden visible en el texto del h6
+  const titulo = card.querySelector('h6')?.textContent || '';
+  const match = titulo.match(/Orden\s*#(\d+)/);
+  const numeroVisible = match ? match[1] : idOrden;  // usa el número del texto si existe
 
-        const result = await response.json();
+  if (confirm(`¿Deseas eliminar la orden #${numeroVisible}?`)) {
+    try {
+      const response = await fetch(`/eliminar_orden/${idOrden}/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+      });
 
-        if (result.success) {
-          // Elimina la tarjeta visualmente
-          card.remove();
-          alert(`Orden #${idOrden} eliminada correctamente.`);
+      const result = await response.json();
 
-          // --- Actualiza la mesa correspondiente ---
-          const mesaTexto = card.querySelector('h6').textContent;
-          const match = mesaTexto.match(/Mesa #(\d+)/);
-          if (match) {
-            const numeroMesa = match[1];
-            const botonMesa = querySelectorContains(`Mesa #${numeroMesa}`);
+      if (result.success) {
+        // 🔹 Elimina visualmente la tarjeta
+        card.remove();
 
-            if (botonMesa) {
-              // Cambiar estado visual del botón
-              botonMesa.disabled = false;
-              botonMesa.style.cursor = "pointer";
-              botonMesa.removeAttribute("style"); 
-              botonMesa.setAttribute("data-bs-toggle", "modal");
-              botonMesa.setAttribute("data-bs-target", "#modalOrden");
-              botonMesa.setAttribute("onclick", `abrirModal('${numeroMesa}')`);
+        // 🔹 Extrae la mesa y la libera inmediatamente
+        const mesaTexto = titulo.match(/Mesa #(\d+)/);
+        if (mesaTexto) liberarMesa(mesaTexto[1]);
 
-              // Cambiar la clase del contenedor a "mesa-libre"
-              const contenedor = botonMesa.closest('.mesa-botones');
-              if (contenedor) {
-                contenedor.classList.remove('mesa-ocupada');
-                contenedor.classList.add('mesa-libre');
-              }
-            }
-          }
-        } else {
-          alert(`Error: ${result.error}`);
-        }
-
-      } catch (error) {
-        console.error(error);
-        alert("Error al intentar eliminar la orden.");
+        alert(`Orden #${numeroVisible} eliminada correctamente.`);
+      } else {
+        alert(`Error: ${result.error}`);
       }
+
+    } catch (error) {
+      console.error(error);
+      alert("Error al intentar eliminar la orden.");
     }
-  });
+  }
+});
+
 
 
 

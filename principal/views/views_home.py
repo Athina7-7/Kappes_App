@@ -129,43 +129,29 @@ def guardar_orden(request):
         id_mesa = data.get("mesa")
         detalles = data.get("productos", [])
 
+        # --- Buscar mesa ---
         try:
             mesa = Mesa.objects.get(numero=id_mesa)
         except Mesa.DoesNotExist:
             return JsonResponse({"success": False, "error": "La mesa no existe"})
 
+        # --- Tipo de venta ---
         tipo_venta, _ = tipoVenta.objects.get_or_create(nombre="En Mesa")
 
-        try:
-            usuario = Usuario.objects.filter(nombre__iexact=request.user.username).first()
-        except Usuario.DoesNotExist:
-            usuario = None
+        # --- Usuario (puede ser None si no existe coincidencia) ---
+        usuario = Usuario.objects.filter(nombre__iexact=request.user.username).first()
 
+        # --- Calcular total ---
         total = 0
         for item in detalles:
             nombre_producto = item.get("nombre", "").strip()
             cantidad = int(item.get("cantidad", 1))
             producto = Producto.objects.filter(nombre__iexact=nombre_producto).first()
-            if producto:
-                precio = int(producto.precio)
-            else:
-                precio = 2000
+            precio = int(producto.precio) if producto else 2000
             total += precio * cantidad
 
-        todas_ordenes = Orden.objects.order_by('id_orden').values_list('id_orden', flat=True)
-        siguiente_numero = 1
-
-        if todas_ordenes:
-            for i, id_actual in enumerate(todas_ordenes, start=1):
-                if i != id_actual:
-                    siguiente_numero = i
-                    break
-            else:
-                siguiente_numero = todas_ordenes.last() + 1
-
-        # --- Crear nueva orden ---
+        # --- Crear nueva orden (sin calcular ID manual) ---
         nueva_orden = Orden.objects.create(
-            id_orden=siguiente_numero,
             id_usuario=usuario,
             id_mesa=mesa,
             id_tipoVenta=tipo_venta,
@@ -181,11 +167,12 @@ def guardar_orden(request):
         # --- Respuesta JSON ---
         return JsonResponse({
             "success": True,
-            "id_orden": nueva_orden.id_orden,
+            "id_orden": nueva_orden.id_orden,  # Django genera el ID automáticamente
             "total": total
         })
 
     return JsonResponse({"success": False, "error": "Método no permitido"})
+
 
 
 
