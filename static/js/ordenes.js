@@ -1,4 +1,3 @@
-
 // --- CREACIÓN DE ÓRDENES ---
 function abrirModal(numeroMesa) {
     // Reiniciar el modo edición cada vez que se abre un nuevo modal
@@ -307,7 +306,10 @@ async function actualizarTotal() {
     const idOrden = card.getAttribute('data-id'); 
     const numeroOrden = boton.getAttribute('data-numero');
 
-  if (!idOrden) return alert("No se encontró el ID de la orden.");
+    if (!idOrden) {
+      alert("No se encontró el ID de la orden.");
+      return;
+    }
 
     
     if (confirm(`¿Deseas eliminar la orden #${numeroOrden}?`)) {
@@ -317,12 +319,7 @@ async function actualizarTotal() {
           headers: { 'X-CSRFToken': getCookie('csrftoken') }
         });
 
-  if (confirm(`¿Deseas eliminar la orden #${numeroVisible}?`)) {
-    try {
-      const response = await fetch(`/eliminar_orden/${idOrden}/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': getCookie('csrftoken') }
-      });
+        const result = await response.json();
 
         if (result.success) {
           // Elimina la tarjeta visualmente
@@ -337,22 +334,33 @@ async function actualizarTotal() {
             const botonMesa = Array.from(document.querySelectorAll('.mesa-botones button'))
             .find(b => b.textContent.trim() === `Mesa #${numeroMesa}`);
 
-        // 🔹 Extrae la mesa y la libera inmediatamente
-        const mesaTexto = titulo.match(/Mesa #(\d+)/);
-        if (mesaTexto) liberarMesa(mesaTexto[1]);
+            if (botonMesa) {
+              // Cambiar estado visual del botón
+              botonMesa.disabled = false;
+              botonMesa.style.cursor = "pointer";
+              botonMesa.removeAttribute("style"); 
+              botonMesa.setAttribute("data-bs-toggle", "modal");
+              botonMesa.setAttribute("data-bs-target", "#modalOrden");
+              botonMesa.setAttribute("onclick", `abrirModal('${numeroMesa}')`);
 
-        alert(`Orden #${numeroVisible} eliminada correctamente.`);
-      } else {
-        alert(`Error: ${result.error}`);
+              // Cambiar la clase del contenedor a "mesa-libre"
+              const contenedor = botonMesa.closest('.mesa-botones');
+              if (contenedor) {
+                contenedor.classList.remove('mesa-ocupada');
+                contenedor.classList.add('mesa-libre');
+              }
+            }
+          }
+        } else {
+          alert(`Error: ${result.error}`);
+        }
+
+      } catch (error) {
+        console.error(error);
+        alert("Error al intentar eliminar la orden.");
       }
-
-    } catch (error) {
-      console.error(error);
-      alert("Error al intentar eliminar la orden.");
     }
-  }
-});
-
+  });
 
 
 
