@@ -568,3 +568,53 @@ function asignarEventosOrdenes() {
     });
   });
 }
+
+
+
+
+// --- CAMBIAR ESTADO DE PAGO DE LAS ÓRDENES ---
+document.querySelectorAll('.estado-pago').forEach(badge => {
+  badge.addEventListener('click', function () {
+    const idOrden = this.getAttribute('data-id');
+
+    fetch(`/cambiar_estado/${idOrden}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken'), // Necesario para Django
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Cambiar visualmente el estado en la interfaz
+          this.textContent = data.nuevo_estado.charAt(0).toUpperCase() + data.nuevo_estado.slice(1);
+          if (data.nuevo_estado === 'pago') {
+            this.classList.remove('bg-danger');
+            this.classList.add('bg-success');
+          } else {
+            this.classList.remove('bg-success');
+            this.classList.add('bg-danger');
+          }
+        } else {
+          console.error('Error:', data.error);
+        }
+      })
+      .catch(error => console.error('Error en la petición:', error));
+  });
+});
+
+// Función para obtener el token CSRF de las cookies
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + '=') {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}

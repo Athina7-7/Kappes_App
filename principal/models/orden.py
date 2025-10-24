@@ -40,3 +40,9 @@ class Orden(models.Model):
 
         self.total = total
         super().save(*args, **kwargs)
+
+    estado_pago = models.CharField(
+    max_length=10,
+    choices=[('pendiente', 'Pendiente'), ('pago', 'Pago')],
+    default='pendiente'
+)

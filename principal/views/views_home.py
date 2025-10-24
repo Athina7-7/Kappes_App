@@ -276,3 +276,18 @@ def buscar_orden(request):
         })
     
     return JsonResponse(data, safe=False)
+
+def cambiar_estado(request, id_orden):
+    if request.method == "POST":
+        try:
+            orden = Orden.objects.get(id_orden=id_orden)
+            # Cambiar el estado
+            if orden.estado_pago == "pendiente":
+                orden.estado_pago = "pago"
+            else:
+                orden.estado_pago = "pendiente"
+            orden.save()
+            return JsonResponse({"success": True, "nuevo_estado": orden.estado_pago})
+        except Orden.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Orden no encontrada."})
+    return JsonResponse({"success": False, "error": "Método no permitido."})

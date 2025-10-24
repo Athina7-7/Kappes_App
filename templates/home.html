@@ -126,19 +126,26 @@
                   <h6 class="fw-bold mb-0">
                     Orden #{{ orden.numero_orden }} — Mesa #{{ orden.id_mesa.numero|default:"-" }}
                   </h6>
-                  <div class="btn-group">
-                    <!-- Botón editar -->
-                    <button type="button" class="btn btn-sm btn-outline-dark btn-editar"
-                            data-id="{{ orden.id_orden }}">
-                      <i class="bi bi-pencil"></i>
-                    </button>
-                    <!-- Botón eliminar -->
-                    <button type="button"
-                            class="btn btn-sm btn-outline-danger btn-eliminar"
-                            data-id="{{ orden.id_orden }}"
-                            data-numero="{{ orden.numero_orden }}">
-                      <i class="bi bi-trash"></i>
-                    </button>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge {% if orden.estado_pago == 'pendiente' %}bg-danger{% else %}bg-success{% endif %} estado-pago"
+                          data-id="{{ orden.id_orden }}"
+                          style="cursor:pointer;">
+                      {{ orden.estado_pago|capfirst }}
+                    </span>
+                    <div class="btn-group">
+                      <!-- Botón editar -->
+                      <button type="button" class="btn btn-sm btn-outline-dark btn-editar"
+                              data-id="{{ orden.id_orden }}">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <!-- Botón eliminar -->
+                      <button type="button"
+                              class="btn btn-sm btn-outline-danger btn-eliminar"
+                              data-id="{{ orden.id_orden }}"
+                              data-numero="{{ orden.numero_orden }}">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
                   </div>
                 </div>
               <p class="mb-1"><strong>Nombre del Cliente:</strong> {{ orden.nombre_cliente|default_if_none:"No especificado" }}</p>
