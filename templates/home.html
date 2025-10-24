@@ -124,7 +124,7 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <h6 class="fw-bold mb-0">
-                    Orden #{{ orden.id_orden }} — Mesa #{{ orden.id_mesa.numero|default:"-" }}
+                    Orden #{{ orden.numero_orden }} — Mesa #{{ orden.id_mesa.numero|default:"-" }}
                   </h6>
                   <div class="btn-group">
                     <!-- Botón editar -->
@@ -133,7 +133,10 @@
                       <i class="bi bi-pencil"></i>
                     </button>
                     <!-- Botón eliminar -->
-                    <button type="button" class="btn btn-sm btn-outline-danger">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger btn-eliminar"
+                            data-id="{{ orden.id_orden }}"
+                            data-numero="{{ orden.numero_orden }}">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -247,8 +250,9 @@
 <!--Para que todo funcione automáticamente y no tener que refrescar la página siempre-->
 
 
+<script src="{% static 'js/utils.js' %}"></script> <!--Funciones auxiliares-->
 <script src="{% static 'js/mesas.js' %}"></script> <!--Para seleccionar las mesas y ver cuáles se eliminar y cuáles no-->
 <script src="{% static 'js/ordenes.js' %}"></script> <!--Para crear una nueva orden-->
-<script src="{% static 'js/utils.js' %}"></script> <!--Funciones auxiliares-->
+
 
 {% endblock %}

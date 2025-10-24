@@ -13,6 +13,7 @@ class Orden(models.Model):
     id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='ordenes', null=True, blank=True)
     # SET_NULL: pone ese campo en NULL si el objeto padre se borra (por eso necesita null=True).
     # blank:blank=True significa que el campo puede dejarse vacío en formularios (no es obligatorio rellenarlo).
+    numero_orden = models.PositiveIntegerField(default=0)
     id_mesa = models.ForeignKey(Mesa, on_delete=models.SET_NULL, null=True, blank=True, related_name='ordenes')
     id_tipoVenta = models.ForeignKey(tipoVenta, on_delete=models.CASCADE, related_name='ordenes')
     

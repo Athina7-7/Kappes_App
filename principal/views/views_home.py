@@ -135,32 +135,26 @@ def guardar_orden(request):
             return JsonResponse({"success": False, "error": "La mesa no existe"})
 
         tipo_venta, _ = tipoVenta.objects.get_or_create(nombre="En Mesa")
-
-        try:
-            usuario = Usuario.objects.filter(nombre__iexact=request.user.username).first()
-        except Usuario.DoesNotExist:
-            usuario = None
+        usuario = Usuario.objects.filter(nombre__iexact=request.user.username).first()
 
         total = 0
         for item in detalles:
             nombre_producto = item.get("nombre", "").strip()
             cantidad = int(item.get("cantidad", 1))
             producto = Producto.objects.filter(nombre__iexact=nombre_producto).first()
-            if producto:
-                precio = int(producto.precio)
-            else:
-                precio = 2000
+            precio = int(producto.precio) if producto else 2000
             total += precio * cantidad
 
-        # Si no hay órdenes registradas, reiniciamos el contador del ID
-        if Orden.objects.count() == 0:
-            from django.db import connection
-            with connection.cursor() as cursor:
-                # Este comando reinicia el contador de la tabla (funciona para SQLite, PostgreSQL y MySQL)
-                cursor.execute("DELETE FROM sqlite_sequence WHERE name='principal_orden';")
+        #  Calcular el número de orden continuo
+        ordenes_existentes = list(Orden.objects.order_by('numero_orden'))
+        numeros_usados = [o.numero_orden for o in ordenes_existentes]
+        siguiente_numero = 1
+        while siguiente_numero in numeros_usados:
+            siguiente_numero += 1
 
-        # Crear la nueva orden normalmente
+        # Crear la nueva orden
         nueva_orden = Orden.objects.create(
+            numero_orden=siguiente_numero,
             id_usuario=usuario,
             id_mesa=mesa,
             id_tipoVenta=tipo_venta,
@@ -169,13 +163,13 @@ def guardar_orden(request):
             total=total
         )
 
-        # Marcar mesa como ocupada
         mesa.estado = False
         mesa.save()
 
         return JsonResponse({
             "success": True,
             "id_orden": nueva_orden.id_orden,
+            "numero_orden": nueva_orden.numero_orden,  # enviar este al frontend
             "total": total
         })
 
@@ -187,10 +181,15 @@ def eliminar_orden(request, id_orden):
     if request.method == "POST":
         try:
             orden = Orden.objects.get(id_orden=id_orden)
-            mesa = orden.id_mesa  # guardamos la mesa antes de eliminar la orden
+            mesa = orden.id_mesa
             orden.delete()
 
-            # Marcar la mesa como libre
+            # Reasignar números continuos
+            ordenes_restantes = Orden.objects.all().order_by('id_orden')
+            for i, o in enumerate(ordenes_restantes, start=1):
+                o.numero_orden = i
+                o.save()
+
             mesa.estado = True
             mesa.save()
 
@@ -208,6 +207,7 @@ def editar_orden(request, id_orden):
             return JsonResponse({
                 "success": True,
                 "id": orden.id_orden,
+                "numero_orden": orden.numero_orden,
                 "nombre_cliente": orden.nombre_cliente,
                 "mesa": orden.id_mesa.numero,
                 "detalles": orden.detalles,
