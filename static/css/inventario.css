@@ -29,6 +29,17 @@
   color: #2d2a2a;
 }
 
+.btn-search {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #2d2a2a;
+  font-size: 1.3rem;
+}
+.btn-search:hover {
+  color: #000;
+}
+
 /* Lista de productos */
 .productos-list {
   display: flex;
@@ -83,4 +94,30 @@
 
 .acciones .eliminar:hover i {
   color: #dc3545;
+}
+
+/* Botón de agregar */
+.add-btn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.btn-add {
+  background-color: #540c0c;
+  color: #fff;
+  font-size: 2rem;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.btn-add:hover {
+  transform: scale(1.05);
+  background-color: #000;
 }

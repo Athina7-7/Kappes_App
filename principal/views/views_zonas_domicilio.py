@@ -1,27 +1,34 @@
-from django.shortcuts import render, redirect
-from principal.models.zonaDomicilio import zonaDomicilio
-from principal.models.tipoVenta import tipoVenta
+from django.shortcuts import render, redirect, get_object_or_404
+from principal.models.zonaDomicilio import Domicilio
+from django.db.models import Q
 
 def zonas_domicilio(request):
-    if request.method == "POST":
-        id_tipo = request.POST.get('id_tipo')
-        nombre_zona = request.POST.get('nombre_zona')
-        ajuste_precio = request.POST.get('ajuste_precio')
+    query = request.GET.get('q', '')
+    domicilios = Domicilio.objects.all()
 
-        # Crear y guardar el nuevo registro
-        zonaDomicilio.objects.create(
-            id_tipo_id=id_tipo,
-            nombre_zona=nombre_zona,
-            ajuste_precio=ajuste_precio
+    if query:
+        domicilios = domicilios.filter(
+            Q(lugar__icontains=query) | Q(nombre_cliente__icontains=query)
         )
 
-        # Redirigir para evitar reenvío del formulario
-        return redirect('zonas_domicilio')
+    return render(request, "zonas_domicilio.html", {"domicilios": domicilios})
 
-    zonas = zonaDomicilio.objects.all()
-    tipos = tipoVenta.objects.all()
+def editar_domicilio(request, domicilio_id):
+    domicilio = get_object_or_404(Domicilio, id=domicilio_id)
 
-    return render(request, 'zonas_domicilio.html', {
-        'zonas': zonas,
-        'tipos': tipos
-    })
+    if request.method == "POST":
+        domicilio.lugar = request.POST.get("lugar")
+        domicilio.descripcion = request.POST.get("descripcion")
+        domicilio.precio = request.POST.get("precio")
+        domicilio.nombre_cliente = request.POST.get("nombre_cliente")
+        domicilio.save()
+
+        return redirect("zonas_domicilio")
+
+    return render(request, "editar_domicilio.html", {"domicilio": domicilio})
+
+
+def eliminar_domicilio(request, domicilio_id):
+    domicilio = get_object_or_404(Domicilio, id=domicilio_id)
+    domicilio.delete()
+    return redirect("zonas_domicilio")

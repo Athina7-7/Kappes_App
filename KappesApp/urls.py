@@ -36,4 +36,6 @@ urlpatterns = [
     path('registro/', views_registro.registro_usuario, name='registro'),
     path('nuevo_domicilio/', views_nuevo_domicilio.nuevo_domicilio, name='nuevo_domicilio'),
     path('zonas_domicilio/', views_zonas_domicilio.zonas_domicilio, name='zonas_domicilio'),
+    path("editar_domicilio/editar/<int:domicilio_id>/", views_zonas_domicilio.editar_domicilio, name="editar_domicilio"),
+    path("eliminar_domicilio/eliminar/<int:domicilio_id>/", views_zonas_domicilio.eliminar_domicilio, name="eliminar_domicilio"),
 ]

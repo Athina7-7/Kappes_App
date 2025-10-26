@@ -1,5 +1,5 @@
 /* Contenedor general */
-.zona-container {
+.inventario-container {
   max-width: 700px;
   margin: 0 auto;
   padding: 20px;
@@ -14,7 +14,8 @@
   border-radius: 30px;
   padding: 5px 15px;
   max-width: 500px;
-  margin: 0 auto;
+  margin: 0 auto 25px auto;
+  background-color: #fff;
 }
 
 .search-bar input {
@@ -22,6 +23,15 @@
   flex: 1;
   outline: none;
   font-size: 1rem;
+  padding: 8px;
+  color: #2d2a2a;
+  background: transparent;
+}
+
+.search-bar button {
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .search-bar i {
@@ -29,15 +39,20 @@
   color: #2d2a2a;
 }
 
-/* Lista de zonas */
-.zona-list {
+.search-bar input::placeholder {
+  color: #888;
+}
+
+/* Lista de domicilios */
+.productos-list {
   display: flex;
   flex-direction: column;
   gap: 15px;
   margin-top: 20px;
 }
 
-.zona-item {
+/* Cada domicilio */
+.producto-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -46,17 +61,23 @@
   border-radius: 12px;
 }
 
-.zona-item .nombre {
+.producto-item .nombre {
   font-size: 1.1rem;
   color: #2d2a2a;
 }
 
-.zona-item .precio {
+.producto-item .precio {
   font-weight: bold;
   font-size: 1.1rem;
   color: #2d2a2a;
 }
 
+.producto-item .cliente {
+  font-size: 1rem;
+  color: #2d2a2a;
+}
+
+/* Acciones (editar y eliminar) */
 .acciones {
   display: flex;
   gap: 10px;
@@ -93,7 +114,7 @@
 }
 
 .btn-add {
-  background-color: #000;
+  background-color: #540c0c;
   color: #fff;
   font-size: 2rem;
   border-radius: 50%;
@@ -108,5 +129,5 @@
 
 .btn-add:hover {
   transform: scale(1.05);
-  background-color: #540c0c;
+  background-color: #000;
 }

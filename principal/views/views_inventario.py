@@ -3,7 +3,12 @@ from principal.models import Producto
 from principal.forms import ProductoForm
 
 def inventario(request):
-    productos = Producto.objects.all()
+    query = request.GET.get('q')
+    if query:
+        productos = Producto.objects.filter(nombre__icontains=query)
+    else:
+        productos = Producto.objects.all()
+    
     return render(request, 'inventario.html', {'productos': productos})
 
 def eliminar_producto(request, producto_id):
