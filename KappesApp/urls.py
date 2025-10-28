@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from principal import views
 from principal.views import views_home, views_producto, views_inventario,views_registro, views_nuevo_domicilio, views_zonas_domicilio
+from principal.views import views_inicio_sesion
 
 # en el archivo que se encuentra en la raiz de la carpeta del proyecto el 
 # cual es urls.py, este indica las urls que usará el usuario para ingresar a los templates.
