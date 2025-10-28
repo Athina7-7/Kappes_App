@@ -6,83 +6,248 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-  <!-- Columna de Mesas -->
-  <div class="col-md-6 border-end">
-    <h1 class="text-center fw-bold">Mesas</h1>
+<div class="container-fluid px-4">
+  <div class="row g-4">
+    <!-- Columna de Mesas -->
+    <div class="col-12 col-lg-6 border-end border-2">
+      <h1 class="text-center fw-bold mb-4">Mesas</h1>
 
-    <!-- Contenedor de botones de mesas -->
-    <div class="contenedor-mesas">
-      {% for mesa in mesas %}
-      <!-- Cada mesa se muestra como un botón con su estado (libre u ocupada) -->
-      <div
-        class="mesa-botones {% if mesa.estado %}mesa-libre{% else %}mesa-ocupada{% endif %} d-flex align-items-center justify-content-center px-3 py-2 rounded-pill">
+      <!-- Contenedor de botones de mesas -->
+      <div class="contenedor-mesas d-flex flex-wrap justify-content-center gap-3">
+        {% for mesa in mesas %}
+        <!-- Cada mesa se muestra como un botón con su estado (libre u ocupada) -->
+        <div
+          class="mesa-botones {% if mesa.estado %}mesa-libre{% else %}mesa-ocupada{% endif %} d-flex align-items-center justify-content-center px-3 py-2 rounded-pill">
 
-        <!-- Botón principal que cambia el estado de la mesa -->
-        <form method="post" action="{% url 'estado_mesa' mesa.id_mesa %}" class="m-0">
+          <!-- Botón principal que cambia el estado de la mesa -->
+          <!-- Botón principal que abre el modal o muestra alerta si está ocupada -->
+            <form method="post" action="{% url 'estado_mesa' mesa.id_mesa %}" class="m-0">
+              {% csrf_token %}
+              <button
+                type="button"
+                class="btn text-white p-0 fw-bold w-100"
+                {% if not mesa.estado %}disabled style="background-color: #000; cursor: not-allowed;"{% endif %}
+                {% if mesa.estado %}
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalOrden"
+                  onclick="abrirModal('{{ mesa.numero }}')"
+                {% else %}
+                  onclick="alert('Esta mesa está ocupada. Elimina la orden para liberarla.')"
+                {% endif %}
+              >
+                Mesa #{{ mesa.numero }}
+              </button>
+            </form>
+
+
+          <!-- Checkbox para selección múltiple -->
+          <input type="checkbox" name="mesas_seleccionadas" value="{{ mesa.id_mesa }}" class="checkbox-mesa d-none">
+        </div>
+        {% endfor %}
+      </div> <!--  Cierre contenedor mesas -->
+
+
+
+      <!-- Botón para agregar una mesa -->
+      <div class="d-flex justify-content-center mt-3">
+        <form method="post" action="{% url 'agregar_mesa' %}">
           {% csrf_token %}
-          <button type="submit" class="btn text-white p-0 fw-bold w-100">
-            Mesa #{{ mesa.numero }}
+          <button type="submit"
+            class="btn btn-dark btn-lg rounded-circle d-flex align-items-center justify-content-center">
+            <i class="bi bi-plus-lg"></i>
           </button>
         </form>
-
-        <!-- Checkbox para selección múltiple -->
-        <input type="checkbox" name="mesas_seleccionadas" value="{{ mesa.id_mesa }}" class="checkbox-mesa d-none">
       </div>
-      {% endfor %}
-    </div> <!--  Cierre contenedor mesas -->
 
 
+      
+      <!-- Leyenda para identificar estados -->
+      <div class="leyenda text-center mt-4">
+        <span class="leyenda-item">
+          <span class="dot libre"></span> Libre
+        </span>
+        <span class="leyenda-item ms-4">
+          <span class="dot ocupado"></span> Ocupado
+        </span>
 
-    <!-- Botón para agregar una mesa -->
-    <div class="d-flex justify-content-center mt-3">
-      <form method="post" action="{% url 'agregar_mesa' %}">
-        {% csrf_token %}
-        <button type="submit"
-          class="btn btn-dark btn-lg rounded-circle d-flex align-items-center justify-content-center">
-          <i class="bi bi-plus-lg"></i>
+        <!-- Botón Selección -->
+        <button id="boton-seleccionar" class="btn btn-outline-dark btn-sm ms-3">
+          Seleccionar mesas
         </button>
+      </div>
+
+
+
+      <!-- Formulario oculto para eliminar varias mesas -->
+      <form id="eliminar-multiples-mesas" method="get" action="{% url 'confirmar_eliminar_mesa' 0 %}"
+        class="d-none mt-3 text-center">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm">Eliminar seleccionadas</button>
       </form>
+    </div> <!-- Cierre columna de mesas -->
+
+
+
+
+
+
+    <!-- Columna de Pedidos -->
+    <div class="col-12 col-lg-6 position-relative">
+      <!-- Botones arriba a la izquierda -->
+      <div class="position-relative mb-4">
+        <div class="boton-filtro d-flex flex-wrap flex-column position-absolute justify-content-center gap-2 mb-3" role="group">
+          <button type="button" class="btn btn-outline-dark mb-2">Domicilio</button>
+          <button type="button" class="btn btn-outline-dark">Mesas</button>
+        </div>
+      </div>
+
+      <!-- Título centrado -->
+      <h1 class="fw-bold mb-0 text-center mt-2">Pedidos</h1>
+
+
+
+      <!-- Aquí luego colocaremos la barra de búsqueda -->
+        <div class="barra-busqueda d-flex justify-content-center align-items-center mb-4 mt-5">
+          <input type="text" class="form-control input-busqueda w-75" id="buscador-orden" placeholder="Buscar orden o cliente" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <button class="btn boton-buscar ms-2" id="btn-buscar-orden">
+            <i class="bi bi-search"></i> <!--ic
+            ono de lupa-->
+          </button>
+        </div>
+
+        <!-- Contenedor de Pedidos -->
+        <div id="lista-pedidos" class="mt-4 px-4 d-flex flex-column gap-3">
+          {% for orden in ordenes %}
+            <div class="card shadow-sm p-3 border-0 rounded-3"
+                data-id="{{ orden.id_orden }}"
+                style="background-color: #f8f9fa; border-left: 6px solid #540c0c;">
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="fw-bold mb-0">
+                    Orden #{{ orden.numero_orden }} — Mesa #{{ orden.id_mesa.numero|default:"-" }}
+                  </h6>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge {% if orden.estado_pago == 'pendiente' %}bg-danger{% else %}bg-success{% endif %} estado-pago"
+                          data-id="{{ orden.id_orden }}"
+                          style="cursor:pointer;">
+                      {{ orden.estado_pago|capfirst }}
+                    </span>
+                    <div class="btn-group">
+                      <!-- Botón editar -->
+                      <button type="button" class="btn btn-sm btn-outline-dark btn-editar"
+                              data-id="{{ orden.id_orden }}">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <!-- Botón eliminar -->
+                      <button type="button"
+                              class="btn btn-sm btn-outline-danger btn-eliminar"
+                              data-id="{{ orden.id_orden }}"
+                              data-numero="{{ orden.numero_orden }}">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              <p class="mb-1"><strong>Nombre del Cliente:</strong> {{ orden.nombre_cliente|default_if_none:"No especificado" }}</p>
+              <ul class="list-unstyled mb-0 ps-2">
+                {% for item in orden.detalles %}
+                  <li>• {{ item.nombre }} ({{ item.cantidad }})</li>
+                {% endfor %}
+              </ul>
+              <p class="mt-2 fw-bold text-end text-vino">Total: ${{ orden.total }}</p>
+            </div>
+          {% empty %}
+            <p class="text-muted">No hay órdenes registradas.</p>
+          {% endfor %}
+
+        </div>
+
+        <!-- Botón para hacer un nuevo pedido -->
+        <div class="d-flex justify-content-center mt-4">
+          <button 
+            type="button" 
+            class="btn btn-dark btn-lg rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+            title="Hacer nuevo pedido">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+
+
+        
+        <!-- MODAL PARA CREAR ORDEN -->
+
+        <!--tuve que dejar algunos nombres en ingles para que me funcionara bien el bootstrap-->
+        <!--Si lo dejaba en espanol tenia que hacer mas trabajo-->
+        
+        <!--Esto me ayuda para hacer la ventana emergente para crear la orden-->
+        <!--fade: esto me ayuda para agregarle animación a la ventana-->
+        <!--aria-hidden="true" : significa que al principio la ventana no es visible para el usuario hasta que le di clic-->
+        <div class="modal fade" id="modalOrden" tabindex="-1" aria-labelledby="modalOrdenLabel" aria-hidden="true">
+          <!--Estos "modal-dialog" me ayuda para organizar el TAMANO de la ventana y que se vea centrado-->
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content"> <!--Este es el bloque que puede ver el usuario y aca está todo su contendio-->
+
+
+              <!-- Encabezado -->
+              <div class="modal-header"> <!--Parte superior-->
+                <!--Aca se conecta para que sea accesible para el usuario-->
+                <h5 class="modal-title fw-bold" id="modalOrdenLabel">Orden #<span id="numeroOrden"></span> Mesa #<span id="numeroMesa"></h5> <!--Titulo de la ventana-->
+                <!--Boton para cerrar-->
+                <!--Aca se cierra la visibilidad para el usuario-->
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button> 
+              </div>
+
+
+              <!-- Cuerpo -->
+              <div class="modal-body"> <!--Aca se almacena el contenido-->
+                <h6 class="fw-bold mb-2">Producto/Platillos</h6>
+                <!--Barra de busqueda-->
+                <div class="barra-busqueda d-flex align-items-center mb-3 position-relative">
+                  <!--Después del Placeholder se gestiona para evitar que me aparezca el historial de lo que he escrito en el input-->
+                  <input type="text" id="buscador-producto" class="form-control input-busqueda" placeholder="Busca platillos/productos"
+                  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+                  <button class="btn btn-buscar ms-2"><i class="bi bi-search"></i></button>
+
+                  <!-- Cuadro de resultados (gris) -->
+                  <div id="resultados" class="list-group position-absolute w-100 mt-1 shadow" style="z-index: 1000;"></div>
+                </div>
+              
+                <div class="mt-4">
+
+                  <!-- Detalles -->
+                  <h6 class="fw-bold mb-2 mt-4">Detalles</h6>
+                  <div id="detalles" class="mb-3"></div>
+
+                  <div class="d-flex justify-content-end">
+                    <h6 class="fw-bold">Total: <span id="total-dinamico">$0</span></h6>
+                  </div>
+
+                  <div class="mt-3">
+                    <label for="nombre_cliente" class="form-label">Este pedido esta a nombre de: </label>
+                    <input type="text" id="nombre_cliente" class="form-control" placeholder="Nombre del cliente" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                  </div>
+
+                </div>
+
+                <!-- Pie - Footer: Parte inferior del modal-->
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-dark" id="guardar-orden">Guardar</button>
+                </div>
+
+                  
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      
+
     </div>
-
-
-    
-    <!-- Leyenda para identificar estados -->
-    <div class="leyenda text-center mt-4">
-      <span class="leyenda-item">
-        <span class="dot libre"></span> Libre
-      </span>
-      <span class="leyenda-item ms-4">
-        <span class="dot ocupado"></span> Ocupado
-      </span>
-
-      <!-- Botón Selección -->
-      <button id="boton-seleccionar" class="btn btn-outline-dark btn-sm ms-3">
-        Seleccionar mesas
-      </button>
-    </div>
-
-
-
-    <!-- Formulario oculto para eliminar varias mesas -->
-    <form id="eliminar-multiples-mesas" method="get" action="{% url 'confirmar_eliminar_mesa' 0 %}"
-      class="d-none mt-3 text-center">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-danger btn-sm">Eliminar seleccionadas</button>
-    </form>
-  </div> <!-- Cierre columna de mesas -->
-
-
-
-
-  <!-- Columna de Pedidos -->
-  <div class="col-md-6">
-    <h3 class="text-center fw-bold">Pedidos</h3>
-    <div class="mt-3">
-      <!-- Aquí irán los pedidos -->
-    </div>
-  </div> <!-- Cierre columna de pedidos -->
-</div> <!-- Cierre fila principal -->
+  </div> <!-- Cierre fila principal -->
+ </div> 
 
 
 
@@ -90,52 +255,10 @@
 <!-- Script funcional -->
 <!--Aca se usa JavaScript, para darle mayor interactividad a la página-->
 <!--Para que todo funcione automáticamente y no tener que refrescar la página siempre-->
-<script>
-  const botonSeleccionar = document.getElementById("boton-seleccionar");
-  const checkboxes = document.querySelectorAll(".checkbox-mesa");
-  const formEliminar = document.getElementById("eliminar-multiples-mesas");
-  let modoSeleccion = false; //Se pone como false porque todavía no hemos seleccionado mesas
-
-  //ACTIVAR O SELECCONAR MESAS
-  botonSeleccionar.addEventListener("click", () => {
-    modoSeleccion = !modoSeleccion; 
-    //Aca, si el modoSeleccion es true, los checkboses se muestran, y si es false, se ocultan
-    checkboxes.forEach(cb => cb.classList.toggle("d-none", !modoSeleccion)); 
-    //Si no estamos seleccionando, se oculta el formulario de eliminar (d-none)
-    //Si estamos en modo selección, se muestra el formulario (se quita el d-none)
-    formEliminar.classList.toggle("d-none", !modoSeleccion);
-    //Si está activo, muestra "Cancelar selección", si no, "Seleccionar mesas"
-    botonSeleccionar.textContent = modoSeleccion ? "Cancelar selección" : "Seleccionar mesas";
-  });
-
-  //ENVIAR FORMULARIO DE ELIMINAR MESAS
-  formEliminar.addEventListener("submit", (e) => {
-    e.preventDefault();
 
 
-    const seleccionadas = Array.from(checkboxes) //Convertir los checkboxes en un arreglo
-      .filter(cb => cb.checked) //indica los que están marcados
-      .map(cb => cb.value); //se obtiene el id de cada mesa seleccionada
+<script src="{% static 'js/utils.js' %}"></script> <!--Funciones auxiliares-->
+<script src="{% static 'js/mesas.js' %}"></script> <!--Para seleccionar las mesas y ver cuáles se eliminar y cuáles no-->
+<script src="{% static 'js/ordenes.js' %}"></script> <!--Para crear una nueva orden-->
 
-
-      //VALIDAR SELECCIÓN VACÍA
-      //Si el usuario no selecciono ninguna mesa y le dio a eliminar, le va a aparecer esta alerta
-    if (seleccionadas.length === 0) {
-      alert("Selecciona al menos una mesa para eliminar.");
-      return;
-    }
-
-    //Aca se crean inputs ocultos para cada mesa seleccionada y se agregan al formulario.
-    //Esto lo recibe Django y sabe qué mesas eliminar
-    seleccionadas.forEach(id => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = "mesas_seleccionadas";
-      input.value = id;
-      formEliminar.appendChild(input);
-    });
-
-    formEliminar.submit(); //Enviar formulario
-  });
-</script>
 {% endblock %}

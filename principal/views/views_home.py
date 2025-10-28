@@ -1,14 +1,27 @@
 from django.shortcuts import render, redirect, get_object_or_404
 #get_object_or_404: me ayuda. abuscar un objeto en la base de datos, y si no existe, django
 #devuelve un error 404 (página no encontrada)
-from principal.models import Mesa
+from django.contrib import messages
+from django.db import connection 
+from principal.models import Mesa, Producto, Orden, tipoVenta, Usuario
+from django.http import JsonResponse
+from django.db.models import Q
+import json
 
 # la carpeta principal contiene toda la lógica de la página, se le 
 # indica con el archivo views.py lo que se verá (llamado a los templates)
 
 def home(request):
-    mesas = Mesa.objects.all().order_by("numero")  # obtener todas las mesas ordenadas
-    return render(request, "home.html", {"mesas": mesas})
+    mesas = Mesa.objects.all().order_by('numero')
+    ordenes = Orden.objects.all().order_by('id_orden')
+    total_ordenes = Orden.objects.count()
+
+    # Agrega nuevamente esta línea:
+    return render(request, 'home.html', {
+        'mesas': mesas,
+        'ordenes': ordenes,
+        'total_ordenes': total_ordenes
+    })
 
 
 
@@ -95,3 +108,186 @@ def confirmar_eliminar_mesa(request, id):
             mesa.save()
 
         return redirect("home")
+
+
+
+
+def buscar_producto(request):
+    termino = request.GET.get('q', '').strip()  # Lo que el usuario escribió
+    if not termino:
+        return JsonResponse([], safe=False)
+
+    productos = Producto.objects.filter(nombre__icontains=termino)
+    data = list(productos.values('id_producto', 'nombre', 'precio'))
+    return JsonResponse(data, safe=False)
+
+
+
+def guardar_orden(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        id_mesa = data.get("mesa")
+        detalles = data.get("productos", [])
+
+        # --- Buscar mesa ---
+        try:
+            mesa = Mesa.objects.get(numero=id_mesa)
+        except Mesa.DoesNotExist:
+            return JsonResponse({"success": False, "error": "La mesa no existe"})
+
+        # --- Tipo de venta ---
+        tipo_venta, _ = tipoVenta.objects.get_or_create(nombre="En Mesa")
+        usuario = Usuario.objects.filter(nombre__iexact=request.user.username).first()
+
+        # --- Calcular total ---
+        total = 0
+        for item in detalles:
+            nombre_producto = item.get("nombre", "").strip()
+            cantidad = int(item.get("cantidad", 1))
+            producto = Producto.objects.filter(nombre__iexact=nombre_producto).first()
+            precio = int(producto.precio) if producto else 2000
+            total += precio * cantidad
+
+        #  Calcular el número de orden continuo
+        ordenes_existentes = list(Orden.objects.order_by('numero_orden'))
+        numeros_usados = [o.numero_orden for o in ordenes_existentes]
+        siguiente_numero = 1
+        while siguiente_numero in numeros_usados:
+            siguiente_numero += 1
+
+        # Crear la nueva orden
+        nueva_orden = Orden.objects.create(
+            numero_orden=siguiente_numero,
+            id_usuario=usuario,
+            id_mesa=mesa,
+            id_tipoVenta=tipo_venta,
+            nombre_cliente=data.get("nombre_cliente", ""),
+            detalles=detalles,
+            total=total
+        )
+
+        mesa.estado = False
+        mesa.save()
+
+        # --- Respuesta JSON ---
+        return JsonResponse({
+            "success": True,
+            "id_orden": nueva_orden.id_orden,
+            "numero_orden": nueva_orden.numero_orden,  # enviar este al frontend
+            "total": total
+        })
+
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+
+
+
+def eliminar_orden(request, id_orden):
+    if request.method == "POST":
+        try:
+            orden = Orden.objects.get(id_orden=id_orden)
+            mesa = orden.id_mesa
+            orden.delete()
+
+            # Reasignar números continuos
+            ordenes_restantes = Orden.objects.all().order_by('id_orden')
+            for i, o in enumerate(ordenes_restantes, start=1):
+                o.numero_orden = i
+                o.save()
+
+            mesa.estado = True
+            mesa.save()
+
+            return JsonResponse({"success": True})
+        except Orden.DoesNotExist:
+            return JsonResponse({"success": False, "error": "La orden no existe"})
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+
+
+def editar_orden(request, id_orden):
+    if request.method == "GET":
+        try:
+            orden = Orden.objects.get(id_orden=id_orden)
+            return JsonResponse({
+                "success": True,
+                "id": orden.id_orden,
+                "numero_orden": orden.numero_orden,
+                "nombre_cliente": orden.nombre_cliente,
+                "mesa": orden.id_mesa.numero,
+                "detalles": orden.detalles,
+                "total": orden.total
+            })
+        except Orden.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Orden no encontrada."})
+
+    elif request.method == "POST":
+        data = json.loads(request.body)
+        try:
+            orden = Orden.objects.get(id_orden=id_orden)
+        except Orden.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Orden no existe."})
+
+        # Actualizar los datos
+        orden.nombre_cliente = data.get("nombre_cliente", orden.nombre_cliente)
+        orden.detalles = data.get("productos", orden.detalles)
+
+        # Recalcular total
+        total = 0
+        for item in orden.detalles:
+            nombre_producto = item.get("nombre", "").strip()
+            cantidad = int(item.get("cantidad", 1))
+            producto = Producto.objects.filter(nombre__iexact=nombre_producto).first()
+            if producto:
+                precio = int(producto.precio)
+            else:
+                precio = 0
+            total += precio * cantidad
+
+        orden.total = total
+        orden.save()
+
+        return JsonResponse({"success": True, "total": total})
+
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+
+def buscar_orden(request):
+    termino = request.GET.get('q', '').strip().lower()
+
+    # Si no hay texto, devolver todas las órdenes
+    if not termino:
+        ordenes = Orden.objects.all().order_by('id_orden')
+    else:
+        ordenes = Orden.objects.filter(
+            Q(nombre_cliente__icontains=termino) | 
+            Q(id_orden__icontains=termino)
+        ).order_by('id_orden')
+
+    # Convertimos las órdenes a formato JSON
+    data = []
+    for orden in ordenes:
+        data.append({
+            "id_orden": orden.id_orden,
+            "mesa": orden.id_mesa.numero if orden.id_mesa else None,
+            "nombre_cliente": orden.nombre_cliente or "No especificado",
+            "detalles": orden.detalles,
+            "total": orden.total
+        })
+    
+    return JsonResponse(data, safe=False)
+
+def cambiar_estado(request, id_orden):
+    if request.method == "POST":
+        try:
+            orden = Orden.objects.get(id_orden=id_orden)
+            # Cambiar el estado
+            if orden.estado_pago == "pendiente":
+                orden.estado_pago = "pago"
+            else:
+                orden.estado_pago = "pendiente"
+            orden.save()
+            return JsonResponse({"success": True, "nuevo_estado": orden.estado_pago})
+        except Orden.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Orden no encontrada."})
+    return JsonResponse({"success": False, "error": "Método no permitido."})

@@ -23,6 +23,18 @@ urlpatterns = [
     path('estado-mesa/<int:id>/', views_home.estado_mesa, name='estado_mesa'),
     path('eliminar-mesa/<int:id>/confirmar/', views_home.confirmar_eliminar_mesa, name='confirmar_eliminar_mesa'),
 
+
+    # CREACION DE ORDENES
+    path('buscar_producto/', views_home.buscar_producto, name='buscar_producto'),
+    path('guardar_orden/', views_home.guardar_orden, name='guardar_orden'),
+    path('eliminar_orden/<int:id_orden>/', views_home.eliminar_orden, name='eliminar_orden'),
+    path('editar_orden/<int:id_orden>/', views_home.editar_orden, name='editar_orden'),
+    path('buscar_orden/', views_home.buscar_orden, name='buscar_orden'),
+    path('cambiar_estado/<int:id_orden>/', views_home.cambiar_estado, name='cambiar_estado'),
+
+
+    
+
     # PRODUCTO - INVENTARIO
     path('productos/', views_producto.crear_producto, name='productos'),
     path('inventario/', views_inventario.inventario, name='inventario'),
