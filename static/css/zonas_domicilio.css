@@ -14,7 +14,8 @@
   border-radius: 30px;
   padding: 5px 15px;
   max-width: 500px;
-  margin: 0 auto;
+  margin: 0 auto 25px auto;
+  background-color: #fff;
 }
 
 .search-bar input {
@@ -22,6 +23,15 @@
   flex: 1;
   outline: none;
   font-size: 1rem;
+  padding: 8px;
+  color: #2d2a2a;
+  background: transparent;
+}
+
+.search-bar button {
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .search-bar i {
@@ -29,18 +39,11 @@
   color: #2d2a2a;
 }
 
-.btn-search {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #2d2a2a;
-  font-size: 1.3rem;
-}
-.btn-search:hover {
-  color: #000;
+.search-bar input::placeholder {
+  color: #888;
 }
 
-/* Lista de productos */
+/* Lista de domicilios */
 .productos-list {
   display: flex;
   flex-direction: column;
@@ -48,6 +51,7 @@
   margin-top: 20px;
 }
 
+/* Cada domicilio */
 .producto-item {
   display: flex;
   justify-content: space-between;
@@ -68,6 +72,12 @@
   color: #2d2a2a;
 }
 
+.producto-item .cliente {
+  font-size: 1rem;
+  color: #2d2a2a;
+}
+
+/* Acciones (editar y eliminar) */
 .acciones {
   display: flex;
   gap: 10px;

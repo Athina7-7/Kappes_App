@@ -4,4 +4,4 @@ from .orden import Orden
 from .producto import Producto
 from .tipoVenta import tipoVenta
 from .usuario import Usuario
-from .zonaDomicilio import zonaDomicilio
+from .zonaDomicilio import Domicilio

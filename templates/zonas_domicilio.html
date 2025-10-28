@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Zonas de Domicilio{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/zonas_domicilio.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="inventario-container">
+    <h1 class="fw-bold mb-4 text-center">Zonas de Domicilio</h1>
+
+    <!-- Barra de búsqueda -->
+    <div class="search-bar">
+        <form method="get" action="{% url 'zonas_domicilio' %}">
+            <input type="text" name="q" placeholder="Buscar zona" value="{{ request.GET.q|default:'' }}">
+            <button type="submit"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+
+    <!-- Lista de domicilios -->
+    <div class="productos-list">
+        {% for domicilio in domicilios %}
+        <div class="producto-item">
+            <span class="nombre">{{ domicilio.lugar }}</span>
+            <span class="precio">${{ domicilio.precio|floatformat:0 }}</span>
+            <span class="cliente">{{ domicilio.nombre_cliente }}</span>
+            
+            <div class="acciones">
+                <a href="{% url 'editar_domicilio' domicilio.id %}" class="accion editar">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+                <form action="{% url 'eliminar_domicilio' domicilio.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="accion eliminar"
+                        onclick="return confirm('¿Seguro que deseas eliminar esta zona de domicilio?');">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">No hay domicilios registrados.</p>
+        {% endfor %}
+
+        <!-- Botón para agregar nuevo domicilio -->
+        <div class="add-btn-container">
+            <a href="{% url 'nuevo_domicilio' %}" class="btn-add">
+                <i class="bi bi-plus"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

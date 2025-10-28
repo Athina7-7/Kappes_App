@@ -1,25 +1,33 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Editar Producto{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/productos.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="form-container">
-    <h1>Editar producto</h1>
+    <h1 class="fw-bold mb-4">Editar Producto</h1>
     <form method="post">
         {% csrf_token %}
         <div class="mb-3 text-start">
             <label class="form-label">Nombre *</label>
-            <input type="text" name="nombre" class="form-control" value="{{ producto.nombre }}">
+            <input type="text" class="form-control" name="nombre" value="{{ producto.nombre }}" required>
         </div>
 
         <div class="mb-3 text-start">
             <label class="form-label">Descripción</label>
-            <input type="text" name="descripcion" class="form-control" value="{{ producto.descripcion }}">
+            <input type="text" class="form-control" name="descripcion" value="{{ producto.descripcion }}">
         </div>
 
         <div class="mb-3 text-start">
             <label class="form-label">Precio *</label>
-            <input type="number" name="precio" class="form-control" value="{{ producto.precio }}">
+            <input type="number" class="form-control" name="precio" value="{{ producto.precio }}" required>
         </div>
 
-        <button type="submit" class="btn btn-save w-100">Actualizar</button>
+        <button type="submit" class="btn btn-save w-100">Guardar Cambios</button>
     </form>
 </div>
 {% endblock %}
