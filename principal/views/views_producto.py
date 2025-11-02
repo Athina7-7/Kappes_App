@@ -13,5 +13,5 @@ def crear_producto(request):
                 descripcion=descripcion,
                 precio=precio
             )
-            return redirect("productos") 
+            return redirect("inventario") 
     return render(request, "productos.html")
