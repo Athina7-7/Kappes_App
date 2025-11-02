@@ -1,132 +1,174 @@
 .contenedor-mesas {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 👈 5 columnas por fila */
-  gap: 25px; /* Espaciado entre mesas */
-  justify-items: center; /* Centra cada mesa horizontalmente */
+  grid-template-columns: repeat(5, 1fr);
+  gap: 25px;
+  justify-items: center;
   margin-top: 20px;
 }
 
 .mesa-botones {
-  color: white;
-  width: 140px;               /* todos del mismo ancho */
-  height: 45px;               /* todos del mismo alto */
-  display: flex;              /*Se utiliza para alinear el texto + el icono*/
-  align-items: center;        /*Centra verticalmente el contenido*/
-  justify-content: center;    /*Centra horizontalmente el contenido*/
-  padding: 0 12px;            /* espacio interno a los lados*/
-  border-radius: 25px;        /* Esto es para hacerle los bordes */
-  white-space: nowrap;        /*Esto evita que, apartir de la mesa 10 para adelante, el contenido se desborde y se generen mas líneas de lo que debería*/
-  text-align: center;      /*Esto centra el texto en el botón*/;
-  position: relative;        /*Para poder posicionar el checkbox dentro del botón*/
-
+  width: 140px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 25px;
+  white-space: nowrap;
+  text-align: center;
+  position: relative;
+  overflow: hidden; /* Para que el botón interno no se salga */
 }
 
+/* 🟢 ESTADO LIBRE (VINOTINTO) */
+.mesa-libre {
+  background-color: #6a0d1a !important;
+}
+
+.mesa-libre button {
+  background-color: #6a0d1a !important; /* MISMO COLOR que el contenedor */
+  border: none !important;
+  color: white !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-weight: bold !important;
+}
+
+.mesa-libre button:hover {
+  background-color: #6a0d1a !important;
+  opacity: 0.9;
+}
+
+/* 🔴 ESTADO OCUPADO (NEGRO) */
+.mesa-ocupada {
+  background-color: #000 !important;
+}
+
+.mesa-ocupada button {
+  background-color: #000 !important; /* MISMO COLOR que el contenedor */
+  border: none !important;
+  color: white !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-weight: bold !important;
+  cursor: not-allowed !important;
+}
+
+.mesa-ocupada button:hover {
+  background-color: #000 !important;
+}
+
+/* Eliminar TODOS los estilos de Bootstrap del botón */
+.mesa-botones button.btn {
+  background-color: inherit !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.mesa-botones button.btn:focus,
+.mesa-botones button.btn:active {
+  background-color: inherit !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Formulario dentro de la mesa */
+.mesa-botones form {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Leyenda */
 .leyenda {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 30px; /* espacio entre "Libre" y "Ocupado" */
+  gap: 30px;
   font-size: 1rem;
   color: #333;
   margin-top: 20px;
 }
 
-
 .leyenda-item {
   display: flex;
   align-items: center;
-  gap: 6px; /* espacio entre el punto y el texto */
+  gap: 6px;
   font-weight: 500;
 }
-
 
 .dot {
   width: 15px;
   height: 15px;
-  border-radius: 50%; /* círculo perfecto */
+  border-radius: 50%;
   display: inline-block;
 }
 
-
 .dot.libre {
-  background-color: #6a0d1a; /* vinotinto */
+  background-color: #6a0d1a;
 }
 
 .dot.ocupado {
-  background-color: #000; /* negro */
-}
-
-.mesa-libre {
-  background-color: #6a0d1a; /* vinotinto */
-  color: white;
-}
-
-.mesa-ocupada {
-  background-color: #000; /* negro */
-  color: white;
+  background-color: #000;
 }
 
 .checkbox-mesa {
   position: absolute;
-  right: 12px; /* separa el checkbox del borde derecho del botón */
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  scale: 1.2; /* lo hace un poco más grande y visible */
+  scale: 1.2;
   cursor: pointer;
+  z-index: 10;
 }
 
-
-
-/*FILTRO DE BOTONCES - MESA Y DOMICILIO*/
-/* Estilo de los botones de filtro */
+/* FILTRO DE BOTONES */
 .boton-filtro .btn {
-  border-radius: 50px;      /* hace los bordes más redondeados */
-  padding: 8px 25px;        /* agranda el botón (alto y ancho) */
-  font-weight: 500;         /* texto más marcado */
-  font-size: 0.95rem;       /* tamaño de letra */
-  border: 2px solid #540c0c; /* color de borde vino */
-  color: #540c0c;           /* color del texto vino */
+  border-radius: 50px;
+  padding: 8px 25px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border: 2px solid #540c0c;
+  color: #540c0c;
   top: 10px;
   left: 20px;
-  z-index:2;
-  transition: all 0.3s ease; /* suaviza el cambio de color cuando se pasa por encima el boton */
+  z-index: 2;
+  transition: all 0.3s ease;
 }
 
-/* Efecto al pasar el mouse */
 .boton-filtro .btn:hover {
   background-color: #540c0c;
   color: white;
 }
 
-
-
-
-/*BARRA DE BUSQUEDA*/
-
-/* Contenedor principal de la barra */
+/* BARRA DE BÚSQUEDA */
 .barra-busqueda {
   width: 100%;
   max-width: 350px;
-  margin: 0 auto; /* centra horizontalmente */
+  margin: 0 auto;
 }
 
-/* Campo de texto */
 .input-busqueda {
   border: 2px solid #000;
-  border-radius: 50px;       /* bordes redondeados */
+  border-radius: 50px;
   padding: 8px 15px;
   outline: none;
   font-size: 0.95rem;
   transition: all 0.3s ease;
 }
 
-/* Efecto al hacer clic */
 .input-busqueda:focus {
   border-color: #540c0c;
   box-shadow: 0 0 5px rgba(84, 12, 12, 0.3);
 }
 
-/* Botón con ícono */
 .boton-buscar {
   background-color: white;
   border: 2px solid #000;
@@ -139,18 +181,13 @@
   transition: all 0.3s ease;
 }
 
-/* Hover del botón */
 .boton-buscar:hover {
   background-color: #540c0c;
   color: white;
   border-color: #540c0c;
 }
 
-
-
-
 /* ESTILO MODAL */
-/*Los nombres se colocaron en inglés para que me funcionara bien el bootstrap, porque si lo colocaba en espanol, tenía que hacer más trabajo*/
 .modal-content {
   border-radius: 15px;
   box-shadow: 0 5px 20px rgba(0,0,0,0.2);
@@ -162,40 +199,37 @@
 
 .modal-footer {
   justify-content: center !important;
-  padding: 1rem 1.5rem; /* agrega espacio a los lados */
+  padding: 1rem 1.5rem;
 }
 
-/* Evitar que el botón se pegue o se salga del borde */
 .modal-footer .btn {
-  min-width: 120px; /* ancho mínimo para que se vea proporcionado */
+  min-width: 120px;
   margin-top: 0.5rem;
 }
 
-/* Ajusta el contenido interno del modal */
 .modal-body {
-  max-height: 70vh; /* evita que se salga si hay muchos ítems */
+  max-height: 70vh;
   overflow-y: auto;
   padding: 1.5rem 2rem;
 }
 
-/* Aumenta un poco el ancho del modal */
 .modal-lg {
   max-width: 700px;
 }
 
 .modal-content {
-  min-height: 700px; /* o el valor que desees */
+  min-height: 700px;
 }
 
 #resultados {
   position: absolute;
-  top: 55px; /* antes estaba cerca del input, ahora más abajo */
+  top: 55px;
   background-color: #f8f9fa;
   border-radius: 8px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
   max-height: 200px;
   overflow-y: auto;
-  z-index: 1050; /* asegura que quede encima de todo */
+  z-index: 1050;
 }
 
 #resultados .list-group-item {
@@ -207,11 +241,10 @@
 }
 
 #resultados .list-group-item:hover {
-  background-color: #e8dcdc; /* tono vino claro */
-  color: #1f1a17; /* texto oscuro */
-  transform: scale(1.02); /* pequeño efecto visual */
+  background-color: #e8dcdc;
+  color: #1f1a17;
+  transform: scale(1.02);
 }
-
 
 #panel-adiciones {
   background-color: #f8f9fa;
@@ -219,20 +252,17 @@
 }
 
 #resultados-adiciones .list-group-item:hover {
-  background-color: #e4f1e4; /* tono verde claro */
+  background-color: #e4f1e4;
   color: #1f1a17;
   transform: scale(1.02);
 }
 
-
-/* Precio: estilo normal, más suave */
 .precio-item {
   font-weight: normal;
   color: #333;
 }
 
-
-/* Estilo unificado para ambos botones circulares */
+/* Botones circulares */
 .btn.btn-dark.btn-lg.rounded-circle {
   width: 60px;
   height: 60px;
@@ -244,6 +274,6 @@
 }
 
 .btn.btn-dark.btn-lg.rounded-circle:hover {
-  background-color: #721717; /* tono vino */
+  background-color: #721717;
   transform: scale(1.08);
 }
