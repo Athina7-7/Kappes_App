@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Editar Domicilio{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1 class="fw-bold mb-4">Editar Domicilio</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Lugar *</label>
+            <input type="text" name="lugar" class="form-control" value="{{ domicilio.lugar }}" required>
+        </div>
+        <div class="mb-3">
+            <label>Descripción</label>
+            <input type="text" name="descripcion" class="form-control" value="{{ domicilio.descripcion }}">
+        </div>
+        <div class="mb-3">
+            <label>Precio *</label>
+            <input type="number" name="precio" class="form-control" value="{{ domicilio.precio }}" required>
+        </div>
+        <div class="mb-3">
+            <label>Nombre cliente</label>
+            <input type="text" name="nombre_cliente" class="form-control" value="{{ domicilio.nombre_cliente }}">
+        </div>
+        <button type="submit" class="btn btn-save w-100">Guardar cambios</button>
+    </form>
+</div>
+{% endblock %}

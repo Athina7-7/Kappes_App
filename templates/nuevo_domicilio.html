@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Nuevo Domicilio{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/nuevo_domicilio.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1 class="fw-bold mb-4">Domicilio</h1>
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="mb-3 text-start">
+            <label class="form-label">Lugar *</label>
+            <input type="text" class="form-control" name="lugar" placeholder="Lugar del domicilio" required>
+        </div>
+
+        <div class="mb-3 text-start">
+            <label class="form-label">Descripción</label>
+            <input type="text" class="form-control" name="descripcion" placeholder="Descripción del domicilio">
+        </div>
+
+        <div class="mb-3 text-start">
+            <label class="form-label">Precio *</label>
+            <input type="number" class="form-control" name="precio" placeholder="Ej: 15000" required>
+        </div>
+
+        <div class="mb-3 text-start">
+            <label class="form-label">Nombre cliente</label>
+            <input type="text" class="form-control" name="nombre_cliente" placeholder="Nombre del cliente">
+        </div>
+        
+        <button type="submit" class="btn btn-save w-100">Guardar</button>
+    </form>
+</div>
+{% endblock %}

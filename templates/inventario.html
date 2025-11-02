@@ -11,11 +11,13 @@
 <div class="inventario-container">
     <h1 class="fw-bold mb-4 text-center">Productos</h1>
 
-    <!-- Barra de búsqueda -->
-    <div class="search-bar mb-4">
-        <input type="text" class="form-control" placeholder="Búsqueda de productos">
+<!-- Barra de búsqueda -->
+<form method="get" action="{% url 'inventario' %}" class="search-bar mb-4">
+    <input type="text" name="q" class="form-control" placeholder="Búsqueda de productos" value="{{ request.GET.q|default:'' }}">
+    <button type="submit" class="btn-search">
         <i class="bi bi-search"></i>
-    </div>
+    </button>
+</form>
 
     <!-- Lista de productos -->
     <div class="productos-list">
@@ -36,9 +38,17 @@
                 </form>
             </div>
         </div>
+        
         {% empty %}
         <p class="text-center">No hay productos registrados.</p>
         {% endfor %}
     </div>
+    
+    <!-- Botón para agregar nuevo producto -->
+        <div class="add-btn-container">
+            <a href="{% url 'productos' %}" class="btn-add">
+                <i class="bi bi-plus"></i>
+            </a>
+        </div>
 </div>
 {% endblock %}
