@@ -6,6 +6,8 @@ from django.db import connection
 from principal.models import Mesa, Producto, Orden, tipoVenta, Usuario
 from django.http import JsonResponse
 from django.db.models import Q
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 import json
 
 # la carpeta principal contiene toda la lógica de la página, se le 
@@ -13,8 +15,9 @@ import json
 
 def home(request):
     mesas = Mesa.objects.all().order_by('numero')
+    hoy = timezone.now().date()
     ordenes = Orden.objects.all().order_by('id_orden')
-    total_ordenes = Orden.objects.count()
+    total_ordenes = ordenes.count()
 
     # Agrega nuevamente esta línea:
     return render(request, 'home.html', {
@@ -148,14 +151,16 @@ def guardar_orden(request):
             precio = int(producto.precio) if producto else 2000
             total += precio * cantidad
 
-        #  Calcular el número de orden continuo
-        ordenes_existentes = list(Orden.objects.order_by('numero_orden'))
-        numeros_usados = [o.numero_orden for o in ordenes_existentes]
-        siguiente_numero = 1
-        while siguiente_numero in numeros_usados:
-            siguiente_numero += 1
+        # --- Calcular número de orden del día ---
+        hoy = timezone.now().date()
+        ordenes_hoy = Orden.objects.filter(fecha__date=hoy)
+        if ordenes_hoy.exists():
+            ultimo_numero = ordenes_hoy.order_by('-numero_orden').first().numero_orden
+            siguiente_numero = ultimo_numero + 1
+        else:
+            siguiente_numero = 1
 
-        # Crear la nueva orden
+        # --- Crear la nueva orden ---
         nueva_orden = Orden.objects.create(
             numero_orden=siguiente_numero,
             id_usuario=usuario,
@@ -291,3 +296,13 @@ def cambiar_estado(request, id_orden):
         except Orden.DoesNotExist:
             return JsonResponse({"success": False, "error": "Orden no encontrada."})
     return JsonResponse({"success": False, "error": "Método no permitido."})
+
+
+
+@csrf_exempt
+def resetear_dia(request):
+    if request.method == "POST":
+        # Liberar todas las mesas
+        Mesa.objects.all().update(estado=True)
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False, "error": "Método no permitido"})

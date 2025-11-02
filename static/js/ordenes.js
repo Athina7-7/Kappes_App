@@ -618,3 +618,136 @@ function getCookie(name) {
   }
   return cookieValue;
 }
+
+
+
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + "=")) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// Función que muestra el modal y resetea visualmente al confirmar
+// === 🔁 AUTO RESETEO DIARIO ===
+document.addEventListener("DOMContentLoaded", () => {
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + "=")) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function mostrarModalReseteo() {
+    const modalElement = document.getElementById("modalReseteo");
+    if (!modalElement) {
+      console.warn("⚠️ No se encontró el modal #modalReseteo");
+      return;
+    }
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+
+    document.getElementById("btnAceptarReseteo").addEventListener("click", function() {
+      fetch("/resetear-dia/", {
+        method: "POST",
+        headers: { "X-CSRFToken": getCookie("csrftoken") }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const contenedorPedidos = document.getElementById("lista-pedidos");
+          if (contenedorPedidos) {
+            contenedorPedidos.innerHTML = "<p class='text-muted text-center'>No hay órdenes registradas.</p>";
+          }
+
+          // 🔹 Liberar mesas visual y funcionalmente
+          document.querySelectorAll(".mesa-botones").forEach(mesa => {
+            mesa.classList.remove("mesa-ocupada", "mesa-seleccionada", "mesa-activa");
+            mesa.classList.add("mesa-libre");
+            mesa.style.backgroundColor = "#540c0c";
+            mesa.style.color = "#fff";
+          });
+
+          // 🔹 Reactivar interacción
+          document.querySelectorAll(".mesa-botones button, .mesa-botones").forEach(mesa => {
+            mesa.disabled = false;
+            mesa.removeAttribute("disabled");
+            mesa.style.backgroundColor = "#540c0c";
+            mesa.style.border = "none";
+            mesa.style.color = "#fff";
+          });
+
+          if (typeof inicializarMesas === "function") {
+            console.log("♻️ Reinicializando mesas...");
+            inicializarMesas(); // vuelve a asignar los listeners de clic
+          } else {
+            console.warn("⚠️ No se encontró la función inicializarMesas en mesas.js");
+          }
+
+          console.log("✅ Reseteo visual completado.");
+        }
+
+        // Evita warning aria-hidden
+        setTimeout(() => modal.hide(), 100);
+      });
+    });
+
+  }
+
+  // ⏰ Revisa la hora cada segundo
+  setInterval(() => {
+  const ahora = new Date();
+  const hora = ahora.getHours();
+  const minutos = ahora.getMinutes();
+  const segundos = ahora.getSeconds();
+
+  console.log(`🕒 Son las ${hora}:${minutos}:${segundos}`);
+
+  // Prueba: cambia la hora y minuto a 1 o 2 min después de la hora actual
+  if (hora === 22 && minutos === 2 && segundos === 0) {
+    mostrarModalReseteo(); // 👈 AQUÍ se llama al modal
+  }
+}, 1000);
+});
+
+
+// 🔹 Restaurar funcionalidad completa de los botones de mesa
+document.querySelectorAll(".mesa-botones button").forEach(botonMesa => {
+  const texto = botonMesa.textContent.trim(); // Ejemplo: "Mesa #3"
+  const numeroMesa = texto.match(/Mesa #(\d+)/)?.[1];
+
+  if (numeroMesa) {
+    botonMesa.disabled = false;
+    botonMesa.style.cursor = "pointer";
+    botonMesa.setAttribute("data-bs-toggle", "modal");
+    botonMesa.setAttribute("data-bs-target", "#modalOrden");
+    botonMesa.setAttribute("onclick", `abrirModal('${numeroMesa}')`);
+  }
+
+  // Eliminar cualquier clase residual
+  botonMesa.classList.remove("mesa-ocupada");
+  botonMesa.classList.add("mesa-libre");
+});
+
+
+
+
+

@@ -48,3 +48,56 @@ document.addEventListener("DOMContentLoaded", () => {
         formEliminar.submit(); //Enviar formulario
     });
 });
+
+// =============================
+// 🔁 REINICIALIZAR MESAS AL CARGAR O RESETEAR
+// =============================
+
+// Esta función se encarga de:
+// 1. Volver a habilitar las mesas libres.
+// 2. Permitir que se seleccionen para agregar órdenes.
+// 3. Mantener el color correcto visualmente.
+function inicializarMesas() {
+  const mesas = document.querySelectorAll(".mesa-botones");
+
+  mesas.forEach(mesa => {
+    // Limpia clases viejas
+    mesa.classList.remove("mesa-ocupada", "mesa-seleccionada", "mesa-activa");
+    mesa.classList.add("mesa-libre");
+
+    // Forzar colores (vinotinto)
+    mesa.style.backgroundColor = "#540c0c";
+    mesa.style.color = "#fff";
+
+    // Reactivar interacción y eventos
+    const boton = mesa.querySelector("button");
+    if (boton) {
+      const numeroMesa = boton.textContent.match(/\d+/)?.[0];
+      boton.disabled = false;
+      boton.removeAttribute("disabled");
+
+      // Restablecer atributos de modal de Bootstrap
+      boton.setAttribute("data-bs-toggle", "modal");
+      boton.setAttribute("data-bs-target", "#modalOrden");
+      boton.setAttribute("onclick", `abrirModal('${numeroMesa}')`);
+
+      // Estilo de cursor normal
+      boton.style.cursor = "pointer";
+    }
+
+    // Listener de consola (opcional)
+    mesa.addEventListener("click", () => {
+      if (mesa.classList.contains("mesa-ocupada")) {
+        console.log(`🚫 ${mesa.textContent.trim()} está ocupada`);
+      } else {
+        console.log(`✅ ${mesa.textContent.trim()} lista para nueva orden`);
+      }
+    });
+  });
+
+  console.log("♻️ Mesas reinicializadas correctamente y activas.");
+}
+
+// Ejecutar esta función cuando cargue la página
+document.addEventListener("DOMContentLoaded", inicializarMesas);
+

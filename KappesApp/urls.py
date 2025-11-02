@@ -32,6 +32,8 @@ urlpatterns = [
     path('editar_orden/<int:id_orden>/', views_home.editar_orden, name='editar_orden'),
     path('buscar_orden/', views_home.buscar_orden, name='buscar_orden'),
     path('cambiar_estado/<int:id_orden>/', views_home.cambiar_estado, name='cambiar_estado'),
+    path('resetear-dia/', views_home.resetear_dia, name='resetear_dia'),
+
 
 
     
