@@ -200,7 +200,7 @@ botonGuardar.addEventListener('click', async () => {
     if (response.ok && result.success) {
       alert('Orden guardada correctamente');
 
-      // 🟢 AGREGAR LA NUEVA ORDEN AL FINAL DE LA LISTA
+      // AGREGAR LA NUEVA ORDEN AL FINAL DE LA LISTA
       const listaPedidos = document.getElementById("lista-pedidos");
       const nuevaCard = document.createElement("div");
       nuevaCard.classList.add("card", "shadow-sm", "p-3", "border-0", "rounded-3");
@@ -230,7 +230,7 @@ botonGuardar.addEventListener('click', async () => {
         <p class="mt-2 fw-bold text-end text-vino">Total: $${total}</p>
       `;
 
-      listaPedidos.appendChild(nuevaCard); // 🟢 AGREGAR AL FINAL
+      listaPedidos.appendChild(nuevaCard); // AGREGAR AL FINAL
       asignarEventosCambioEstado();
 
       // Cerrar el modal
@@ -303,13 +303,13 @@ document.addEventListener('click', async function(e) {
       return;
     }
 
-    // 🟢 Detectar si es DOMICILIO o MESA
+    // Detectar si es DOMICILIO o MESA
     if (!data.mesa && data.id_tipoVenta === 'Domicilio') {
       abrirModalEditarDomicilio(data); // Nueva función que haremos abajo
       return;
     }
 
-    // 🍽️ Si es MESA (la lógica actual)
+    // Si es MESA (la lógica actual)
     document.getElementById("numeroOrden").textContent = data.numero_orden ?? data.id_orden;
     document.getElementById("numeroMesa").textContent = data.mesa;
     document.getElementById("nombre_cliente").value = data.nombre_cliente || "";

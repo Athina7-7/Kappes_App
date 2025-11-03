@@ -153,7 +153,7 @@
                     </div>
                 </div>
 
-                <!-- 🟢 MOSTRAR DATOS SEGÚN EL TIPO DE ORDEN -->
+                <!-- MOSTRAR DATOS SEGÚN EL TIPO DE ORDEN -->
                 {% if orden.id_tipoVenta.nombre == "Domicilio" %}
                     <p class="mb-1"><strong>Nombre del Cliente:</strong> {{ orden.nombre_cliente|default:"No especificado" }}</p>
                     <p class="mb-1"><strong>Lugar:</strong> {{ orden.lugar_domicilio|default:"No especificado" }}</p>
@@ -283,14 +283,14 @@
                       style="z-index: 1000; top: 45px;"></div>
                 </div>
 
-                <!-- 🟩 NUEVO CAMPO PARA NOMBRE DEL CLIENTE -->
+                <!-- NUEVO CAMPO PARA NOMBRE DEL CLIENTE -->
                 <div class="mt-3">
                   <label for="nombre_cliente_domicilio" class="form-label">Este pedido está a nombre de:</label>
                   <input type="text" id="nombre_cliente_domicilio" class="form-control"
                         placeholder="Nombre del cliente"
                         autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 </div>
-                <!-- 🟩 FIN DEL NUEVO CAMPO -->
+                <!--FIN DEL NUEVO CAMPO -->
 
                 <!-- Sección Domicilio -->
                 <h6 class="fw-bold mb-2 mt-4">Domicilio</h6>

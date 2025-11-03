@@ -237,9 +237,9 @@ if (botonGuardarDomicilio) {
         const detalles = document.getElementById('detalles_domicilio').children;
         const nombreClienteDomicilio = document.getElementById('nombre_cliente_domicilio').value.trim();
 
-        console.log("🔍 DEBUG - Datos a enviar:");
-        console.log("📍 Lugar:", lugarDomicilio);
-        console.log("👤 Nombre:", nombreClienteDomicilio);
+        console.log("DEBUG - Datos a enviar:");
+        console.log("Lugar:", lugarDomicilio);
+        console.log("Nombre:", nombreClienteDomicilio);
 
         if (!lugarDomicilio) {
             alert('Ingresa el lugar de domicilio.');
@@ -263,7 +263,7 @@ if (botonGuardarDomicilio) {
         // Calcular total incluyendo el precio del domicilio global (ya seleccionado)
         const total = productos.reduce((acc, p) => acc + (p.precio * p.cantidad), 0) + precioDomicilioGlobal;
         const numeroOrden = parseInt(document.getElementById("numeroOrdenDomicilio").textContent);
-        console.log("🧾 Total calculado:", total, " | Precio domicilio:", precioDomicilioGlobal);
+        console.log("Total calculado:", total, " | Precio domicilio:", precioDomicilioGlobal);
 
         const data = {
             lugar_domicilio: lugarDomicilio,
@@ -277,7 +277,7 @@ if (botonGuardarDomicilio) {
             let url = '/guardar_orden_domicilio/';
             let method = 'POST';
 
-            // 🟢 SI ESTAMOS EN MODO EDICIÓN
+            //  SI ESTAMOS EN MODO EDICIÓN
             if (modoEdicionDomicilio && idOrdenDomicilioActual) {
                 url = `/editar_orden_domicilio/${idOrdenDomicilioActual}/`;
                 method = 'POST';
@@ -295,15 +295,15 @@ if (botonGuardarDomicilio) {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                // 🟢 SI ES EDICIÓN, RECARGAR LA PÁGINA
+                // SI ES EDICIÓN, RECARGAR LA PÁGINA
                 if (modoEdicionDomicilio && idOrdenDomicilioActual) {
-                    alert("Orden actualizada correctamente ✅");
+                    alert("Orden actualizada correctamente ");
                     location.reload();
                     return;
                 }
 
-                // 🟢 SI ES NUEVA ORDEN, AGREGAR LA TARJETA
-                alert("Orden a domicilio guardada correctamente ✅");
+                // SI ES NUEVA ORDEN, AGREGAR LA TARJETA
+                alert("Orden a domicilio guardada correctamente ");
 
                 const listaPedidos = document.getElementById("lista-pedidos");
                 const nuevaCard = document.createElement("div");
@@ -311,7 +311,7 @@ if (botonGuardarDomicilio) {
                 nuevaCard.style.backgroundColor = "#f8f9fa";
                 nuevaCard.style.borderLeft = "6px solid #540c0c";
                 
-                // 🟢 USAR EL ID CORRECTO QUE VIENE DEL BACKEND
+                // USAR EL ID CORRECTO QUE VIENE DEL BACKEND
                 nuevaCard.dataset.id = result.id_orden;
 
                 const productosHTML = productos.map(p => `<li>• ${p.nombre} (${p.cantidad})</li>`).join("");
@@ -339,7 +339,7 @@ if (botonGuardarDomicilio) {
 
                 listaPedidos.appendChild(nuevaCard);
                 
-                // 🟢 Asignar eventos de cambio de estado
+                // Asignar eventos de cambio de estado
                 asignarEventosCambioEstado();
 
                 // Cerrar el modal
@@ -386,16 +386,16 @@ async function abrirModalEditarDomicilio(data) {
   // Mostrar número de orden
   document.getElementById('numeroOrdenDomicilio').textContent = data.numero_orden ?? data.id_orden;
 
-  // 🟢 IMPORTANTE: Usar los campos correctos del backend
+  // IMPORTANTE: Usar los campos correctos del backend
   // lugar_domicilio -> campo "Domicilio" (ej: Envigado, Sabaneta)
   // nombre_cliente_real -> campo "Este pedido está a nombre de:" (ej: pepe)
   const lugarDomicilio = data.lugar_domicilio || "";
   const nombreReal = data.nombre_cliente_real || "";
 
-  console.log("📍 Lugar recibido:", lugarDomicilio);
-  console.log("👤 Nombre recibido:", nombreReal);
+  console.log("Lugar recibido:", lugarDomicilio);
+  console.log("Nombre recibido:", nombreReal);
 
-  // 🟢 Rellenar campos correctamente
+  // Rellenar campos correctamente
   document.getElementById('lugar_domicilio').value = lugarDomicilio;  // Sabaneta/Envigado
   document.getElementById('nombre_cliente_domicilio').value = nombreReal;  // pepe
 

@@ -158,7 +158,7 @@ def guardar_orden(request):
         data = json.loads(request.body)
         id_mesa = data.get("mesa")
         detalles = data.get("productos", [])
-        numero_orden = int(data.get("numero_orden", 1))  # 🟢 Recibir del frontend
+        numero_orden = int(data.get("numero_orden", 1))  #Recibir del frontend
 
         # --- Buscar mesa ---
         try:
@@ -181,7 +181,7 @@ def guardar_orden(request):
 
         # --- Crear la nueva orden ---
         nueva_orden = Orden.objects.create(
-            numero_orden=numero_orden,  # 🟢 Usar el número del frontend
+            numero_orden=numero_orden,  # Usar el número del frontend
             id_usuario=usuario,
             id_mesa=mesa,
             id_tipoVenta=tipo_venta,
@@ -238,7 +238,7 @@ def editar_orden(request, id_orden):
         try:
             orden = Orden.objects.get(id_orden=id_orden)
             
-            # 🟢 Si es domicilio, obtener el lugar de la sesión
+            # Si es domicilio, obtener el lugar de la sesión
             lugar_domicilio = None
             if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio":
                 lugar_domicilio = request.session.get(f"lugar_{id_orden}", "No especificado")
@@ -313,7 +313,7 @@ def buscar_orden(request):
             #"estado_pago": orden.estado_pago
         }
         
-        # 🟢 Si es domicilio, agregar el lugar desde la sesión
+        # Si es domicilio, agregar el lugar desde la sesión
         if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio":
             orden_data["lugar_domicilio"] = request.session.get(f"lugar_{orden.id_orden}", "No especificado")
         else:
@@ -360,7 +360,7 @@ def guardar_orden_domicilio(request):
                     for item in detalles
                 )
 
-            # 🟢 GUARDAR SOLO EL NOMBRE DEL CLIENTE EN LA BD
+            # GUARDAR SOLO EL NOMBRE DEL CLIENTE EN LA BD
             nueva_orden = Orden.objects.create(
                 numero_orden=numero_orden,
                 nombre_cliente=nombre_cliente if nombre_cliente else "No especificado",
@@ -370,7 +370,7 @@ def guardar_orden_domicilio(request):
                 id_tipoVenta=tipo_domicilio
             )
 
-            # 🟢 GUARDAR EL LUGAR EN LA SESIÓN
+            # GUARDAR EL LUGAR EN LA SESIÓN
             request.session[f"lugar_{nueva_orden.id_orden}"] = lugar_domicilio
 
             return JsonResponse({
@@ -396,7 +396,7 @@ def editar_orden_domicilio(request, id_orden):
         try:
             orden = Orden.objects.get(id_orden=id_orden)
             
-            # 🟢 OBTENER EL LUGAR DE LA SESIÓN
+            # OBTENER EL LUGAR DE LA SESIÓN
             lugar_domicilio = request.session.get(f"lugar_{id_orden}", "No especificado")
             
             return JsonResponse({
@@ -419,11 +419,11 @@ def editar_orden_domicilio(request, id_orden):
         except Orden.DoesNotExist:
             return JsonResponse({"success": False, "error": "Orden no existe."})
 
-        # 🟢 ACTUALIZAR SOLO EL NOMBRE EN LA BD
+        # ACTUALIZAR SOLO EL NOMBRE EN LA BD
         nombre_cliente_real = data.get("nombre_cliente", "").strip()
         orden.nombre_cliente = nombre_cliente_real if nombre_cliente_real else "No especificado"
         
-        # 🟢 ACTUALIZAR EL LUGAR EN LA SESIÓN
+        # ACTUALIZAR EL LUGAR EN LA SESIÓN
         lugar_domicilio = data.get("lugar_domicilio", "").strip()
         request.session[f"lugar_{id_orden}"] = lugar_domicilio
         
