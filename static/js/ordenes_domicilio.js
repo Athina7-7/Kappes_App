@@ -261,9 +261,6 @@ if (botonGuardarDomicilio) {
         const numeroOrden = parseInt(document.getElementById("numeroOrdenDomicilio").textContent);
         console.log("🧾 Total calculado:", total, " | Precio domicilio:", precioDomicilioGlobal);
 
-
-
-
         const data = {
             lugar_domicilio: lugarDomicilio,
             nombre_cliente: nombreClienteDomicilio,
@@ -276,8 +273,10 @@ if (botonGuardarDomicilio) {
             let url = '/guardar_orden_domicilio/';
             let method = 'POST';
 
+            // 🟢 SI ESTAMOS EN MODO EDICIÓN
             if (modoEdicionDomicilio && idOrdenDomicilioActual) {
                 url = `/editar_orden_domicilio/${idOrdenDomicilioActual}/`;
+                method = 'POST';
             }
 
             const response = await fetch(url, {
@@ -292,15 +291,23 @@ if (botonGuardarDomicilio) {
             const result = await response.json();
 
             if (response.ok && result.success) {
+                // 🟢 SI ES EDICIÓN, RECARGAR LA PÁGINA
+                if (modoEdicionDomicilio && idOrdenDomicilioActual) {
+                    alert("Orden actualizada correctamente ✅");
+                    location.reload();
+                    return;
+                }
+
+                // 🟢 SI ES NUEVA ORDEN, AGREGAR LA TARJETA
                 alert("Orden a domicilio guardada correctamente ✅");
 
-                // Crear tarjeta de la nueva orden en el front
                 const listaPedidos = document.getElementById("lista-pedidos");
-
                 const nuevaCard = document.createElement("div");
                 nuevaCard.classList.add("card", "shadow-sm", "p-3", "border-0", "rounded-3");
                 nuevaCard.style.backgroundColor = "#f8f9fa";
                 nuevaCard.style.borderLeft = "6px solid #540c0c";
+                
+                // 🟢 USAR EL ID CORRECTO QUE VIENE DEL BACKEND
                 nuevaCard.dataset.id = result.id_orden;
 
                 const productosHTML = productos.map(p => `<li>• ${p.nombre} (${p.cantidad})</li>`).join("");
@@ -326,7 +333,9 @@ if (botonGuardarDomicilio) {
                 <p class="mt-2 fw-bold text-end text-vino">Total: $${total}</p>
                 `;
 
-                listaPedidos.appendChild(nuevaCard); // 🟢 AGREGAR AL FINAL
+                listaPedidos.appendChild(nuevaCard);
+                
+                // 🟢 Asignar eventos de cambio de estado
                 asignarEventosCambioEstado();
 
                 // Cerrar el modal
@@ -373,9 +382,13 @@ async function abrirModalEditarDomicilio(data) {
   // Mostrar número de orden
   document.getElementById('numeroOrdenDomicilio').textContent = data.numero_orden ?? data.id_orden;
 
-  // Nombre o zona del domicilio
+  // 🟢 Separar lugar de domicilio y nombre real del cliente
   const lugarDomicilio = data.nombre_cliente || "";
-  document.getElementById('nombre_cliente_domicilio').value = data.nombre_cliente_real || "";
+  const nombreReal = data.nombre_cliente_real || "";
+
+  // 🟢 Rellenar campos correctamente
+  document.getElementById('lugar_domicilio').value = lugarDomicilio;
+  document.getElementById('nombre_cliente_domicilio').value = nombreReal;
 
   // Buscar el precio del domicilio desde el backend
   try {
@@ -448,4 +461,16 @@ async function abrirModalEditarDomicilio(data) {
 }
 
 
+// --- FUNCIÓN PARA ASIGNAR EVENTOS DE EDICIÓN Y ELIMINACIÓN ---
+// Esta función se ejecuta después de crear una nueva tarjeta para que funcionen los botones
+function asignarEventosEdicionYEliminacion() {
+  // Reasignar eventos de edición
+  document.querySelectorAll('.btn-editar').forEach(boton => {
+    boton.replaceWith(boton.cloneNode(true));
+  });
 
+  // Reasignar eventos de eliminación
+  document.querySelectorAll('.btn-eliminar').forEach(boton => {
+    boton.replaceWith(boton.cloneNode(true));
+  });
+}

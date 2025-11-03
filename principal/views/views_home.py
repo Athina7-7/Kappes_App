@@ -344,7 +344,7 @@ def guardar_orden_domicilio(request):
             # Crear la orden (solo se guarda el nombre del cliente en BD)
             nueva_orden = Orden.objects.create(
                 numero_orden=numero_orden,
-                nombre_cliente=nombre_cliente,
+                nombre_cliente=nombre_cliente,  # Solo el nombre
                 detalles=detalles,
                 total=total,
                 id_mesa=None,
@@ -354,11 +354,14 @@ def guardar_orden_domicilio(request):
             # 🟢 Guardar el lugar temporalmente en la sesión
             request.session[f"lugar_{nueva_orden.id_orden}"] = lugar_domicilio
 
+            # 🟢 IMPORTANTE: devolver id_orden correctamente
             return JsonResponse({
                 "success": True,
-                "id": nueva_orden.id_orden,
+                "id_orden": nueva_orden.id_orden, 
+                "numero_orden": nueva_orden.numero_orden,
                 "nombre_cliente": nombre_cliente,
-                "lugar_domicilio": lugar_domicilio
+                "lugar_domicilio": lugar_domicilio,
+                "total": total
             })
 
         except Exception as e:
