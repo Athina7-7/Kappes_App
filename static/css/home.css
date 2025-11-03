@@ -277,3 +277,10 @@
   background-color: #721717;
   transform: scale(1.08);
 }
+
+#resultados-zona .list-group-item:hover {
+  background-color: #e8dcdc;
+  color: #1f1a17;
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}

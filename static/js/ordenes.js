@@ -263,6 +263,13 @@ document.addEventListener('click', async function(e) {
       return;
     }
 
+    // 🟢 Detectar si es DOMICILIO o MESA
+    if (!data.mesa && data.id_tipoVenta === 'Domicilio') {
+      abrirModalEditarDomicilio(data); // Nueva función que haremos abajo
+      return;
+    }
+
+    // 🍽️ Si es MESA (la lógica actual)
     document.getElementById("numeroOrden").textContent = data.numero_orden ?? data.id_orden;
     document.getElementById("numeroMesa").textContent = data.mesa;
     document.getElementById("nombre_cliente").value = data.nombre_cliente || "";
@@ -320,6 +327,7 @@ document.addEventListener('click', async function(e) {
 });
 
 
+
 // --- BÚSQUEDA DE ÓRDENES ---
 const buscadorOrden = document.getElementById('buscador-orden');
 const btnBuscarOrden = document.getElementById('btn-buscar-orden');
@@ -344,10 +352,12 @@ function renderizarPedidos(ordenes) {
       `<li>• ${item.nombre} (${item.cantidad})</li>`
     ).join('');
 
+    const lugar = orden.mesa ? `Mesa #${orden.mesa}` : 'Domicilio';
+
     card.innerHTML = `
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h6 class="fw-bold mb-0">
-          Orden #${orden.id_orden} — Mesa #${orden.mesa ?? '-'}
+          Orden #${orden.id_orden} — Mesa #${lugar}
         </h6>
         <div class="d-flex align-items-center gap-2">
           <span class="badge ${orden.estado_pago === 'pendiente' ? 'bg-danger' : 'bg-success'} estado-pago"

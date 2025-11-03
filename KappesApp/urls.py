@@ -31,6 +31,9 @@ urlpatterns = [
     path('editar_orden/<int:id_orden>/', views_home.editar_orden, name='editar_orden'),
     path('buscar_orden/', views_home.buscar_orden, name='buscar_orden'),
     path('cambiar_estado/<int:id_orden>/', views_home.cambiar_estado, name='cambiar_estado'),
+    path('guardar_orden_domicilio/', views_home.guardar_orden_domicilio, name='guardar_orden_domicilio'),
+    path('buscar_zona_domicilio/', views_home.buscar_zona_domicilio, name='buscar_zona_domicilio'),
+    path('editar_orden_domicilio/<int:id_orden>/', views_home.editar_orden_domicilio, name='editar_orden_domicilio'),
     path('resetear-dia/', views_home.resetear_dia, name='resetear_dia'),
 
 

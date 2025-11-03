@@ -18,7 +18,7 @@ class Orden(models.Model):
     id_tipoVenta = models.ForeignKey(tipoVenta, on_delete=models.CASCADE, related_name='ordenes')
     
     fecha = models.DateTimeField(auto_now_add=True)
-    total = models.IntegerField(default=0)
+    total = models.FloatField(default=0)
 
     # Nuevo campo: guarda los productos/adiciones en formato JSON
     detalles = models.JSONField(default=list)
@@ -27,19 +27,21 @@ class Orden(models.Model):
         return f"Orden #{self.id_orden} — Mesa {self.id_mesa.numero if self.id_mesa else 'Sin mesa'}"
 
     def save(self, *args, **kwargs):
-        total = 0
+        # Si el total no fue asignado manualmente (por ejemplo, desde una orden a domicilio)
+        if not self.total or self.total == 0:
+            total = 0
+            for item in self.detalles:
+                nombre_producto = item.get("nombre")
+                cantidad = int(item.get("cantidad", 1))
+                try:
+                    producto = Producto.objects.get(nombre=nombre_producto)
+                    total += producto.precio * cantidad
+                except Producto.DoesNotExist:
+                    total += 0
+            self.total = total
 
-        for item in self.detalles:
-            nombre_producto = item.get("nombre")
-            cantidad = int(item.get("cantidad", 1))
-            try:
-                producto = Producto.objects.get(nombre=nombre_producto)
-                total += producto.precio * cantidad
-            except Producto.DoesNotExist:
-                total += 0  # Si el producto no existe, no suma nada
-
-        self.total = total
         super().save(*args, **kwargs)
+
 
     estado_pago = models.CharField(
     max_length=10,

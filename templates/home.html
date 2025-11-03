@@ -124,7 +124,12 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <h6 class="fw-bold mb-0">
-                    Orden #{{ orden.numero_orden }} — Mesa #{{ orden.id_mesa.numero|default:"-" }}
+                    Orden #{{ orden.numero_orden }} — 
+                      {% if orden.id_mesa %}
+                        Mesa #{{ orden.id_mesa.numero }}
+                      {% else %}
+                        Domicilio
+                      {% endif %}
                   </h6>
                   <div class="d-flex align-items-center gap-2">
                     <span class="badge {% if orden.estado_pago == 'pendiente' %}bg-danger{% else %}bg-success{% endif %} estado-pago"
@@ -148,7 +153,13 @@
                     </div>
                   </div>
                 </div>
-              <p class="mb-1"><strong>Nombre del Cliente:</strong> {{ orden.nombre_cliente|default_if_none:"No especificado" }}</p>
+              {% if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio" %}
+                <p class="mb-1"><strong>Nombre del Cliente:</strong> {{ orden.nombre_cliente|default:"No especificado" }}</p>
+                <p class="mb-1"><strong>Lugar:</strong> {{ orden.lugar_domicilio|default:"No especificado" }}</p>
+              {% else %}
+                <p class="mb-1"><strong>Nombre del Cliente:</strong> {{ orden.nombre_cliente|default_if_none:"No especificado" }}</p>
+              {% endif %}
+
               <ul class="list-unstyled mb-0 ps-2">
                 {% for item in orden.detalles %}
                   <li>• {{ item.nombre }} ({{ item.cantidad }})</li>
@@ -167,7 +178,8 @@
           <button 
             type="button" 
             class="btn btn-dark btn-lg rounded-circle d-flex align-items-center justify-content-center shadow-sm"
-            title="Hacer nuevo pedido">
+            title="Hacer nuevo pedido a domicilio"
+            onclick="abrirModalDomicilio()">
             <i class="bi bi-plus-lg"></i>
           </button>
         </div>
@@ -243,7 +255,71 @@
           </div>
         </div>
 
-      
+        <!-- MODAL PARA ORDEN A DOMICILIO -->
+        <div class="modal fade" id="modalOrdenDomicilio" tabindex="-1" aria-labelledby="modalOrdenDomicilioLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+              
+              <!-- Encabezado -->
+              <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalOrdenDomicilioLabel">
+                  Orden #<span id="numeroOrdenDomicilio"></span> 
+                  <span class="badge bg-secondary ms-2">Domicilio</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+              </div>
+
+              <!-- Cuerpo -->
+              <div class="modal-body">
+
+                <!-- Sección Producto/Platillos -->
+                <h6 class="fw-bold mb-2">Producto/Platillos</h6>
+                <div class="barra-busqueda d-flex align-items-center mb-3 position-relative">
+                  <input type="text" id="buscador-producto-domicilio" class="form-control input-busqueda"
+                        placeholder="Busca platillos/productos"
+                        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                  <button class="btn boton-buscar ms-2"><i class="bi bi-search"></i></button>
+                  <div id="resultados-domicilio" class="list-group position-absolute w-100 mt-1 shadow"
+                      style="z-index: 1000; top: 45px;"></div>
+                </div>
+
+                <!-- 🟩 NUEVO CAMPO PARA NOMBRE DEL CLIENTE -->
+                <div class="mt-3">
+                  <label for="nombre_cliente_domicilio" class="form-label">Este pedido está a nombre de:</label>
+                  <input type="text" id="nombre_cliente_domicilio" class="form-control"
+                        placeholder="Nombre del cliente"
+                        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                </div>
+                <!-- 🟩 FIN DEL NUEVO CAMPO -->
+
+                <!-- Sección Domicilio -->
+                <h6 class="fw-bold mb-2 mt-4">Domicilio</h6>
+                <div class="barra-busqueda d-flex align-items-center mb-3">
+                  <input type="text" id="lugar_domicilio" class="form-control input-busqueda"
+                        placeholder="Busca lugar domicilio"
+                        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                  <button class="btn boton-buscar ms-2"><i class="bi bi-search"></i></button>
+                </div>
+
+                <!-- Detalles -->
+                <h6 class="fw-bold mb-2 mt-4">Detalles</h6>
+                <div id="detalles_domicilio" class="mb-3"></div>
+
+                <div class="d-flex justify-content-end">
+                  <h6 class="fw-bold">Total: <span id="total-dinamico-domicilio">$0</span></h6>
+                </div>
+
+              </div>
+
+
+              <!-- Pie -->
+              <div class="modal-footer">
+                <button type="button" class="btn btn-dark" id="guardar-orden-domicilio">Guardar</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
 
     </div>
   </div> <!-- Cierre fila principal -->
@@ -280,5 +356,6 @@
 <script src="{% static 'js/utils.js' %}"></script> <!--Funciones auxiliares-->
 <script src="{% static 'js/mesas.js' %}"></script> <!--Para seleccionar las mesas y ver cuáles se eliminar y cuáles no-->
 <script src="{% static 'js/ordenes.js' %}"></script> <!--Para crear una nueva orden-->
+<script src="{% static 'js/ordenes_domicilio.js' %}"></script>
 
 {% endblock %}

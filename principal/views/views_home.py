@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import connection 
 from principal.models import Mesa, Producto, Orden, tipoVenta, Usuario
+from principal.models.zonaDomicilio import Domicilio
 from django.http import JsonResponse
 from django.db.models import Q
 from django.utils import timezone
@@ -17,6 +18,14 @@ def home(request):
     mesas = Mesa.objects.all().order_by('numero')
     hoy = timezone.now().date()
     ordenes = Orden.objects.all().order_by('id_orden')
+    total_ordenes = ordenes.count()
+
+    # Enlazar lugar manualmente si es un pedido de domicilio
+    for orden in ordenes:
+        for orden in ordenes:
+            if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio":
+                orden.lugar_domicilio = request.session.get(f"lugar_{orden.id_orden}", "No especificado")
+
     total_ordenes = ordenes.count()
 
     # Agrega nuevamente esta línea:
@@ -125,6 +134,24 @@ def buscar_producto(request):
     return JsonResponse(data, safe=False)
 
 
+def buscar_zona_domicilio(request):
+    termino = request.GET.get('q', '').strip()
+    if not termino:
+        return JsonResponse([], safe=False)
+
+    zonas = Domicilio.objects.filter(lugar__icontains=termino)
+    data = [
+        {
+            'id_domicilio': z.id,
+            'nombre': z.lugar,
+            'precio': float(z.precio)
+        }
+        for z in zonas
+    ]
+    return JsonResponse(data, safe=False)
+
+
+
 
 def guardar_orden(request):
     if request.method == "POST":
@@ -192,21 +219,25 @@ def eliminar_orden(request, id_orden):
         try:
             orden = Orden.objects.get(id_orden=id_orden)
             mesa = orden.id_mesa
+
             orden.delete()
 
-            # Reasignar números continuos
+            # Reasignar números de orden
             ordenes_restantes = Orden.objects.all().order_by('id_orden')
             for i, o in enumerate(ordenes_restantes, start=1):
                 o.numero_orden = i
                 o.save()
 
-            mesa.estado = True
-            mesa.save()
+            # Solo actualizar mesa si existe (no en domicilios)
+            if mesa:
+                mesa.estado = True
+                mesa.save()
 
             return JsonResponse({"success": True})
         except Orden.DoesNotExist:
             return JsonResponse({"success": False, "error": "La orden no existe"})
     return JsonResponse({"success": False, "error": "Método no permitido"})
+
 
 
 
@@ -219,7 +250,8 @@ def editar_orden(request, id_orden):
                 "id": orden.id_orden,
                 "numero_orden": orden.numero_orden,
                 "nombre_cliente": orden.nombre_cliente,
-                "mesa": orden.id_mesa.numero,
+                "mesa": orden.id_mesa.numero if orden.id_mesa else None,
+                "id_tipoVenta": orden.id_tipoVenta.nombre if orden.id_tipoVenta else None,  # 👈 AGREGAR ESTO
                 "detalles": orden.detalles,
                 "total": orden.total
             })
@@ -233,7 +265,6 @@ def editar_orden(request, id_orden):
         except Orden.DoesNotExist:
             return JsonResponse({"success": False, "error": "Orden no existe."})
 
-        # Actualizar los datos
         orden.nombre_cliente = data.get("nombre_cliente", orden.nombre_cliente)
         orden.detalles = data.get("productos", orden.detalles)
 
@@ -255,6 +286,7 @@ def editar_orden(request, id_orden):
         return JsonResponse({"success": True, "total": total})
 
     return JsonResponse({"success": False, "error": "Método no permitido"})
+
 
 
 def buscar_orden(request):
@@ -296,6 +328,93 @@ def cambiar_estado(request, id_orden):
         except Orden.DoesNotExist:
             return JsonResponse({"success": False, "error": "Orden no encontrada."})
     return JsonResponse({"success": False, "error": "Método no permitido."})
+
+
+def guardar_orden_domicilio(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        try:
+            tipo_domicilio, _ = tipoVenta.objects.get_or_create(nombre="Domicilio")
+
+            numero_orden = int(data.get('numero_orden', 0))
+            nombre_cliente = data.get('nombre_cliente', '').strip()
+            lugar_domicilio = data.get('lugar_domicilio', '').strip()
+            detalles = data.get('productos', [])
+            total = float(data.get('total', 0))
+
+            # Si el total viene vacío, recalcular
+            if not total or total == 0:
+                total = sum(
+                    float(item.get('precio', 0)) * int(item.get('cantidad', 1))
+                    for item in detalles
+                )
+
+            # Crear la orden (solo se guarda el nombre del cliente en BD)
+            nueva_orden = Orden.objects.create(
+                numero_orden=numero_orden,
+                nombre_cliente=nombre_cliente,
+                detalles=detalles,
+                total=total,
+                id_mesa=None,
+                id_tipoVenta=tipo_domicilio
+            )
+
+            # 🟢 Guardar el lugar temporalmente en la sesión
+            request.session[f"lugar_{nueva_orden.id_orden}"] = lugar_domicilio
+
+            return JsonResponse({
+                "success": True,
+                "id": nueva_orden.id_orden,
+                "nombre_cliente": nombre_cliente,
+                "lugar_domicilio": lugar_domicilio
+            })
+
+        except Exception as e:
+            print("Error guardando orden domicilio:", e)
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+
+
+
+def editar_orden_domicilio(request, id_orden):
+    if request.method == "GET":
+        try:
+            orden = Orden.objects.get(id_orden=id_orden)
+            return JsonResponse({
+                "success": True,
+                "id": orden.id_orden,
+                "numero_orden": orden.numero_orden,
+                "nombre_cliente": orden.nombre_cliente,
+                "id_tipoVenta": orden.id_tipoVenta.nombre if orden.id_tipoVenta else None,
+                "detalles": orden.detalles,
+                "total": orden.total
+            })
+        except Orden.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Orden no encontrada."})
+
+    elif request.method == "POST":
+        data = json.loads(request.body)
+        try:
+            orden = Orden.objects.get(id_orden=id_orden)
+        except Orden.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Orden no existe."})
+
+        # Actualizar los datos
+        lugar_domicilio = data.get("lugar_domicilio", "")
+        nombre_cliente_domicilio = data.get("nombre_cliente", "")
+        orden.nombre_cliente = f"{lugar_domicilio} - {nombre_cliente_domicilio}" if nombre_cliente_domicilio else lugar_domicilio
+        orden.detalles = data.get("productos", orden.detalles)
+        orden.total = data.get("total", orden.total)
+        orden.save()
+
+        return JsonResponse({"success": True, "total": orden.total})
+
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+
+
 
 
 
