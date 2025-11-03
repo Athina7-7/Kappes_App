@@ -237,6 +237,10 @@ if (botonGuardarDomicilio) {
         const detalles = document.getElementById('detalles_domicilio').children;
         const nombreClienteDomicilio = document.getElementById('nombre_cliente_domicilio').value.trim();
 
+        console.log("🔍 DEBUG - Datos a enviar:");
+        console.log("📍 Lugar:", lugarDomicilio);
+        console.log("👤 Nombre:", nombreClienteDomicilio);
+
         if (!lugarDomicilio) {
             alert('Ingresa el lugar de domicilio.');
             return;
@@ -382,13 +386,18 @@ async function abrirModalEditarDomicilio(data) {
   // Mostrar número de orden
   document.getElementById('numeroOrdenDomicilio').textContent = data.numero_orden ?? data.id_orden;
 
-  // 🟢 Separar lugar de domicilio y nombre real del cliente
-  const lugarDomicilio = data.nombre_cliente || "";
+  // 🟢 IMPORTANTE: Usar los campos correctos del backend
+  // lugar_domicilio -> campo "Domicilio" (ej: Envigado, Sabaneta)
+  // nombre_cliente_real -> campo "Este pedido está a nombre de:" (ej: pepe)
+  const lugarDomicilio = data.lugar_domicilio || "";
   const nombreReal = data.nombre_cliente_real || "";
 
+  console.log("📍 Lugar recibido:", lugarDomicilio);
+  console.log("👤 Nombre recibido:", nombreReal);
+
   // 🟢 Rellenar campos correctamente
-  document.getElementById('lugar_domicilio').value = lugarDomicilio;
-  document.getElementById('nombre_cliente_domicilio').value = nombreReal;
+  document.getElementById('lugar_domicilio').value = lugarDomicilio;  // Sabaneta/Envigado
+  document.getElementById('nombre_cliente_domicilio').value = nombreReal;  // pepe
 
   // Buscar el precio del domicilio desde el backend
   try {

@@ -237,13 +237,21 @@ def editar_orden(request, id_orden):
     if request.method == "GET":
         try:
             orden = Orden.objects.get(id_orden=id_orden)
+            
+            # 🟢 Si es domicilio, obtener el lugar de la sesión
+            lugar_domicilio = None
+            if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio":
+                lugar_domicilio = request.session.get(f"lugar_{id_orden}", "No especificado")
+            
             return JsonResponse({
                 "success": True,
                 "id": orden.id_orden,
                 "numero_orden": orden.numero_orden,
                 "nombre_cliente": orden.nombre_cliente,
+                "nombre_cliente_real": orden.nombre_cliente,
+                "lugar_domicilio": lugar_domicilio,
                 "mesa": orden.id_mesa.numero if orden.id_mesa else None,
-                "id_tipoVenta": orden.id_tipoVenta.nombre if orden.id_tipoVenta else None,  # 👈 AGREGAR ESTO
+                "id_tipoVenta": orden.id_tipoVenta.nombre if orden.id_tipoVenta else None,
                 "detalles": orden.detalles,
                 "total": orden.total
             })
@@ -296,15 +304,26 @@ def buscar_orden(request):
     # Convertimos las órdenes a formato JSON
     data = []
     for orden in ordenes:
-        data.append({
+        orden_data = {
             "id_orden": orden.id_orden,
             "mesa": orden.id_mesa.numero if orden.id_mesa else None,
             "nombre_cliente": orden.nombre_cliente or "No especificado",
             "detalles": orden.detalles,
-            "total": orden.total
-        })
+            "total": orden.total,
+            #"estado_pago": orden.estado_pago
+        }
+        
+        # 🟢 Si es domicilio, agregar el lugar desde la sesión
+        if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio":
+            orden_data["lugar_domicilio"] = request.session.get(f"lugar_{orden.id_orden}", "No especificado")
+        else:
+            orden_data["lugar_domicilio"] = None
+        
+        data.append(orden_data)
     
     return JsonResponse(data, safe=False)
+
+
 
 def cambiar_estado(request, id_orden):
     if request.method == "POST":
@@ -341,23 +360,22 @@ def guardar_orden_domicilio(request):
                     for item in detalles
                 )
 
-            # Crear la orden (solo se guarda el nombre del cliente en BD)
+            # 🟢 GUARDAR SOLO EL NOMBRE DEL CLIENTE EN LA BD
             nueva_orden = Orden.objects.create(
                 numero_orden=numero_orden,
-                nombre_cliente=nombre_cliente,  # Solo el nombre
+                nombre_cliente=nombre_cliente if nombre_cliente else "No especificado",
                 detalles=detalles,
                 total=total,
                 id_mesa=None,
                 id_tipoVenta=tipo_domicilio
             )
 
-            # 🟢 Guardar el lugar temporalmente en la sesión
+            # 🟢 GUARDAR EL LUGAR EN LA SESIÓN
             request.session[f"lugar_{nueva_orden.id_orden}"] = lugar_domicilio
 
-            # 🟢 IMPORTANTE: devolver id_orden correctamente
             return JsonResponse({
                 "success": True,
-                "id_orden": nueva_orden.id_orden, 
+                "id_orden": nueva_orden.id_orden,
                 "numero_orden": nueva_orden.numero_orden,
                 "nombre_cliente": nombre_cliente,
                 "lugar_domicilio": lugar_domicilio,
@@ -377,11 +395,16 @@ def editar_orden_domicilio(request, id_orden):
     if request.method == "GET":
         try:
             orden = Orden.objects.get(id_orden=id_orden)
+            
+            # 🟢 OBTENER EL LUGAR DE LA SESIÓN
+            lugar_domicilio = request.session.get(f"lugar_{id_orden}", "No especificado")
+            
             return JsonResponse({
                 "success": True,
                 "id": orden.id_orden,
                 "numero_orden": orden.numero_orden,
-                "nombre_cliente": orden.nombre_cliente,
+                "lugar_domicilio": lugar_domicilio,  # Del session
+                "nombre_cliente_real": orden.nombre_cliente,  # De la BD
                 "id_tipoVenta": orden.id_tipoVenta.nombre if orden.id_tipoVenta else None,
                 "detalles": orden.detalles,
                 "total": orden.total
@@ -396,10 +419,14 @@ def editar_orden_domicilio(request, id_orden):
         except Orden.DoesNotExist:
             return JsonResponse({"success": False, "error": "Orden no existe."})
 
-        # Actualizar los datos
-        lugar_domicilio = data.get("lugar_domicilio", "")
-        nombre_cliente_domicilio = data.get("nombre_cliente", "")
-        orden.nombre_cliente = f"{lugar_domicilio} - {nombre_cliente_domicilio}" if nombre_cliente_domicilio else lugar_domicilio
+        # 🟢 ACTUALIZAR SOLO EL NOMBRE EN LA BD
+        nombre_cliente_real = data.get("nombre_cliente", "").strip()
+        orden.nombre_cliente = nombre_cliente_real if nombre_cliente_real else "No especificado"
+        
+        # 🟢 ACTUALIZAR EL LUGAR EN LA SESIÓN
+        lugar_domicilio = data.get("lugar_domicilio", "").strip()
+        request.session[f"lugar_{id_orden}"] = lugar_domicilio
+        
         orden.detalles = data.get("productos", orden.detalles)
         orden.total = data.get("total", orden.total)
         orden.save()
