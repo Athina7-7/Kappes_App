@@ -165,13 +165,14 @@ botonGuardar.addEventListener('click', async () => {
   });
 
   const total = productos.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+  const numeroOrden = parseInt(document.getElementById("numeroOrden").textContent);
 
   const data = {
     mesa: numeroMesa,
     productos: productos,
     nombre_cliente: nombreCliente,
     total: total,
-    numero_orden: document.getElementById("numeroOrden").textContent
+    numero_orden: numeroOrden
   };
 
   try {
@@ -180,6 +181,9 @@ botonGuardar.addEventListener('click', async () => {
 
     if (modoEdicion && idOrdenActual) {
       url = `/editar_orden/${idOrdenActual}/`;
+      alert('Orden actualizada correctamente');
+      location.reload();
+      return;
     }
 
     const response = await fetch(url, {
@@ -194,8 +198,44 @@ botonGuardar.addEventListener('click', async () => {
     const result = await response.json();
 
     if (response.ok && result.success) {
-      alert(modoEdicion ? 'Orden actualizada correctamente' : 'Orden guardada correctamente');
-      location.reload(); // Recarga para que Django renderice con estado actualizado
+      alert('Orden guardada correctamente');
+
+      // 🟢 AGREGAR LA NUEVA ORDEN AL FINAL DE LA LISTA
+      const listaPedidos = document.getElementById("lista-pedidos");
+      const nuevaCard = document.createElement("div");
+      nuevaCard.classList.add("card", "shadow-sm", "p-3", "border-0", "rounded-3");
+      nuevaCard.style.backgroundColor = "#f8f9fa";
+      nuevaCard.style.borderLeft = "6px solid #540c0c";
+      nuevaCard.dataset.id = result.id_orden;
+
+      const productosHTML = productos.map(p => `<li>• ${p.nombre} (${p.cantidad})</li>`).join("");
+
+      nuevaCard.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="fw-bold mb-0">Orden #${numeroOrden} — Mesa #${numeroMesa}</h6>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-danger estado-pago" data-id="${result.id_orden}" style="cursor:pointer;">Pendiente</span>
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-outline-dark btn-editar" data-id="${result.id_orden}">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar" data-id="${result.id_orden}" data-numero="${numeroOrden}">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="mb-1"><strong>Nombre del Cliente:</strong> ${nombreCliente || "No especificado"}</p>
+        <ul class="list-unstyled mb-0 ps-2">${productosHTML}</ul>
+        <p class="mt-2 fw-bold text-end text-vino">Total: $${total}</p>
+      `;
+
+      listaPedidos.appendChild(nuevaCard); // 🟢 AGREGAR AL FINAL
+      asignarEventosCambioEstado();
+
+      // Cerrar el modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalOrden'));
+      modal.hide();
     } else {
       alert('Error: ' + (result.error || 'No se pudo guardar la orden'));
     }

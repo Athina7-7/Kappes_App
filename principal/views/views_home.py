@@ -158,6 +158,7 @@ def guardar_orden(request):
         data = json.loads(request.body)
         id_mesa = data.get("mesa")
         detalles = data.get("productos", [])
+        numero_orden = int(data.get("numero_orden", 1))  # 🟢 Recibir del frontend
 
         # --- Buscar mesa ---
         try:
@@ -178,18 +179,9 @@ def guardar_orden(request):
             precio = int(producto.precio) if producto else 2000
             total += precio * cantidad
 
-        # --- Calcular número de orden del día ---
-        hoy = timezone.now().date()
-        ordenes_hoy = Orden.objects.filter(fecha__date=hoy)
-        if ordenes_hoy.exists():
-            ultimo_numero = ordenes_hoy.order_by('-numero_orden').first().numero_orden
-            siguiente_numero = ultimo_numero + 1
-        else:
-            siguiente_numero = 1
-
         # --- Crear la nueva orden ---
         nueva_orden = Orden.objects.create(
-            numero_orden=siguiente_numero,
+            numero_orden=numero_orden,  # 🟢 Usar el número del frontend
             id_usuario=usuario,
             id_mesa=mesa,
             id_tipoVenta=tipo_venta,
@@ -205,7 +197,7 @@ def guardar_orden(request):
         return JsonResponse({
             "success": True,
             "id_orden": nueva_orden.id_orden,
-            "numero_orden": nueva_orden.numero_orden,  # enviar este al frontend
+            "numero_orden": nueva_orden.numero_orden,
             "total": total
         })
 
