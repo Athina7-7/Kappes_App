@@ -284,3 +284,29 @@
   transform: scale(1.02);
   transition: all 0.2s ease;
 }
+
+/* Agregar al final de home.css */
+
+/* Botón Resetear */
+.btn-resetear {
+  background-color: #ff9800 !important;
+  border-color: #ff9800 !important;
+  color: white !important;
+}
+
+.btn-resetear:hover {
+  background-color: #f57c00 !important;
+  border-color: #f57c00 !important;
+}
+
+/* Botón Devolver */
+.btn-devolver {
+  background-color: #4caf50 !important;
+  border-color: #4caf50 !important;
+  color: white !important;
+}
+
+.btn-devolver:hover {
+  background-color: #388e3c !important;
+  border-color: #388e3c !important;
+}

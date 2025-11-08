@@ -490,3 +490,108 @@ function getCookie(name) {
   }
   return cookieValue;
 }
+
+
+// --- RESETEAR ÓRDENES (CON DEBUG) ---
+async function resetearOrdenes() {
+  console.log("🔄 Función resetearOrdenes() ejecutada");
+  
+  if (!confirm('¿Estás seguro de que deseas resetear todas las órdenes del día? Se ocultarán pero se mantendrán en la base de datos.')) {
+    console.log("❌ Usuario canceló el reseteo");
+    return;
+  }
+
+  console.log("✅ Usuario confirmó el reseteo");
+
+  try {
+    console.log("📡 Enviando petición a /resetear_ordenes/");
+    
+    const response = await fetch('/resetear_ordenes/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken')
+      }
+    });
+
+    console.log("📥 Respuesta recibida:", response);
+    
+    const result = await response.json();
+    console.log("📦 Datos de respuesta:", result);
+
+    if (result.success) {
+      alert(`Se han reseteado ${result.ordenes_ocultadas} órdenes correctamente.`);
+      console.log("✅ Recargando página...");
+      location.reload();
+    } else {
+      alert('Error: ' + (result.error || 'No se pudieron resetear las órdenes'));
+      console.error("❌ Error en la respuesta:", result);
+    }
+  } catch (error) {
+    console.error('❌ Error en la petición:', error);
+    alert('Error de conexión con el servidor.');
+  }
+}
+
+
+// --- DEVOLVER ÓRDENES (CON DEBUG) ---
+async function devolverOrdenes() {
+  console.log("↺ Función devolverOrdenes() ejecutada");
+  
+  if (!confirm('¿Deseas devolver todas las órdenes ocultas?')) {
+    console.log("❌ Usuario canceló la devolución");
+    return;
+  }
+
+  console.log("✅ Usuario confirmó la devolución");
+
+  try {
+    console.log("📡 Enviando petición a /devolver_ordenes/");
+    
+    const response = await fetch('/devolver_ordenes/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken')
+      }
+    });
+
+    console.log("📥 Respuesta recibida:", response);
+    
+    const result = await response.json();
+    console.log("📦 Datos de respuesta:", result);
+
+    if (result.success) {
+      alert(`Se han devuelto ${result.ordenes_devueltas} órdenes correctamente.`);
+      console.log("✅ Recargando página...");
+      location.reload();
+    } else {
+      alert('Error: ' + (result.error || 'No se pudieron devolver las órdenes'));
+      console.error("❌ Error en la respuesta:", result);
+    }
+  } catch (error) {
+    console.error('❌ Error en la petición:', error);
+    alert('Error de conexión con el servidor.');
+  }
+}
+
+// --- ASIGNAR EVENTOS A LOS BOTONES DE RESETEO ---
+document.addEventListener('DOMContentLoaded', function() {
+  const btnResetear = document.getElementById('btn-resetear-ordenes');
+  const btnDevolver = document.getElementById('btn-devolver-ordenes');
+  
+  if (btnResetear) {
+    btnResetear.addEventListener('click', resetearOrdenes);
+  }
+  
+  if (btnDevolver) {
+    btnDevolver.addEventListener('click', devolverOrdenes);
+  }
+});
+
+
+// --- VERIFICAR QUE getCookie EXISTE ---
+console.log("🔍 Verificando getCookie:", typeof getCookie);
+if (typeof getCookie === 'undefined') {
+  console.error("❌ ERROR: La función getCookie() no está definida");
+}
+
+console.log("✅ Funciones resetearOrdenes y devolverOrdenes cargadas correctamente");

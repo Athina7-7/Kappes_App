@@ -23,6 +23,9 @@ class Orden(models.Model):
     # Nuevo campo: guarda los productos/adiciones en formato JSON
     detalles = models.JSONField(default=list)
     nombre_cliente = models.CharField(max_length=100, null=True, blank=True)
+    #Para ocultar las ordenes cuando le de al botón de resetear
+    oculta = models.BooleanField(default=False)  
+
     def __str__(self):
         return f"Orden #{self.id_orden} — Mesa {self.id_mesa.numero if self.id_mesa else 'Sin mesa'}"
 

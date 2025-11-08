@@ -17,7 +17,7 @@ import json
 def home(request):
     mesas = Mesa.objects.all().order_by('numero')
     hoy = timezone.now().date()
-    ordenes = Orden.objects.all().order_by('id_orden')
+    ordenes = Orden.objects.filter(oculta=False).order_by('id_orden')
     total_ordenes = ordenes.count()
 
     # Enlazar lugar manualmente si es un pedido de domicilio
@@ -26,13 +26,15 @@ def home(request):
             if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio":
                 orden.lugar_domicilio = request.session.get(f"lugar_{orden.id_orden}", "No especificado")
 
-    total_ordenes = ordenes.count()
+    #Contar las ordenes ocultas
+    ordenes_ocultas = Orden.objects.filter(oculta=True).count()
 
     # Agrega nuevamente esta línea:
     return render(request, 'home.html', {
         'mesas': mesas,
         'ordenes': ordenes,
-        'total_ordenes': total_ordenes
+        'total_ordenes': total_ordenes,
+        'ordenes_ocultas': ordenes_ocultas 
     })
 
 
@@ -187,7 +189,8 @@ def guardar_orden(request):
             id_tipoVenta=tipo_venta,
             nombre_cliente=data.get("nombre_cliente", ""),
             detalles=detalles,
-            total=total
+            total=total,
+            oculta=False
         )
 
         mesa.estado = False
@@ -294,11 +297,12 @@ def buscar_orden(request):
 
     # Si no hay texto, devolver todas las órdenes
     if not termino:
-        ordenes = Orden.objects.all().order_by('id_orden')
+        ordenes = Orden.objects.filter(oculta=False).order_by('id_orden')
     else:
         ordenes = Orden.objects.filter(
             Q(nombre_cliente__icontains=termino) | 
-            Q(id_orden__icontains=termino)
+            Q(id_orden__icontains=termino),
+            oculta=False
         ).order_by('id_orden')
 
     # Convertimos las órdenes a formato JSON
@@ -367,7 +371,8 @@ def guardar_orden_domicilio(request):
                 detalles=detalles,
                 total=total,
                 id_mesa=None,
-                id_tipoVenta=tipo_domicilio
+                id_tipoVenta=tipo_domicilio,
+                oculta=False
             )
 
             # GUARDAR EL LUGAR EN LA SESIÓN
@@ -437,6 +442,50 @@ def editar_orden_domicilio(request, id_orden):
 
 
 
+@csrf_exempt
+def resetear_ordenes(request):
+    """Oculta todas las órdenes visibles actualmente"""
+    if request.method == "POST":
+        try:
+            # Marcar todas las órdenes visibles como ocultas
+            ordenes_actualizadas = Orden.objects.filter(oculta=False).update(oculta=True)
+            
+            # Liberar todas las mesas
+            Mesa.objects.all().update(estado=True)
+            
+            return JsonResponse({
+                "success": True, 
+                "ordenes_ocultadas": ordenes_actualizadas
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+
+@csrf_exempt
+def devolver_ordenes(request):
+    """Vuelve a mostrar todas las órdenes ocultas"""
+    if request.method == "POST":
+        try:
+            # Marcar todas las órdenes ocultas como visibles
+            ordenes_devueltas = Orden.objects.filter(oculta=True).update(oculta=False)
+            
+            # Actualizar el estado de las mesas según las órdenes
+            ordenes_con_mesa = Orden.objects.filter(oculta=False, id_mesa__isnull=False)
+            for orden in ordenes_con_mesa:
+                if orden.id_mesa:
+                    orden.id_mesa.estado = False
+                    orden.id_mesa.save()
+            
+            return JsonResponse({
+                "success": True, 
+                "ordenes_devueltas": ordenes_devueltas
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    
+    return JsonResponse({"success": False, "error": "Método no permitido"})
 
 
 

@@ -173,6 +173,34 @@
 
         </div>
 
+
+        <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+    
+          <!-- Botón Resetear Órdenes -->
+          <button 
+            type="button" 
+            id="btn-resetear-ordenes"
+            class="btn btn-warning btn-lg rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+            style="width: 60px; height: 60px;"
+            title="Resetear órdenes del día">
+            <i class="bi bi-arrow-clockwise fs-5"></i>
+          </button>
+
+          <!-- Botón Devolver Órdenes (solo si hay órdenes ocultas) -->
+          {% if ordenes_ocultas > 0 %}
+          <button 
+            type="button" 
+            id="btn-devolver-ordenes"
+            class="btn btn-success btn-lg rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+            style="width: 60px; height: 60px;"
+            title="Devolver órdenes ocultas ({{ ordenes_ocultas }})">
+            <i class="bi bi-arrow-counterclockwise fs-5"></i>
+          </button>
+          {% endif %}
+
+        </div>
+
+
         <!-- Botón para hacer un nuevo pedido -->
         <div class="d-flex justify-content-center mt-4">
           <button 
