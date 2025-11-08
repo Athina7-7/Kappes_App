@@ -233,6 +233,8 @@ botonGuardar.addEventListener('click', async () => {
       listaPedidos.appendChild(nuevaCard); // AGREGAR AL FINAL
       asignarEventosCambioEstado();
 
+      actualizarEstadoMesa(numeroMesa, false);
+
       // Cerrar el modal
       const modal = bootstrap.Modal.getInstance(document.getElementById('modalOrden'));
       modal.hide();
@@ -248,6 +250,7 @@ botonGuardar.addEventListener('click', async () => {
 
 
 // --- ELIMINAR ÓRDENES (UNA SOLA FUNCIÓN) ---
+// --- ELIMINAR ÓRDENES ---
 document.addEventListener('click', async function(e) {
   const boton = e.target.closest('.btn-eliminar');
   if (!boton) return;
@@ -255,6 +258,11 @@ document.addEventListener('click', async function(e) {
   const card = boton.closest('.card');
   const idOrden = card.getAttribute('data-id'); 
   const numeroOrden = boton.getAttribute('data-numero');
+
+  // ✅ EXTRAER EL NÚMERO DE MESA DE LA CARD
+  const textoMesa = card.querySelector('h6').textContent;
+  const matchMesa = textoMesa.match(/Mesa #(\d+)/);
+  const numeroMesa = matchMesa ? matchMesa[1] : null;
 
   if (!idOrden) {
     alert("No se encontró el ID de la orden.");
@@ -272,7 +280,15 @@ document.addEventListener('click', async function(e) {
 
       if (result.success) {
         alert(`Orden #${numeroOrden} eliminada correctamente.`);
-        location.reload(); // Recarga para que Django renderice con estado actualizado
+        
+        // ✅ ELIMINAR LA CARD VISUALMENTE
+        card.remove();
+        
+        // ✅ PINTAR LA MESA DE VINOTINTO SIN RECARGAR (solo si es mesa, no domicilio)
+        if (numeroMesa) {
+          actualizarEstadoMesa(numeroMesa, true); // true = libre (vinotinto)
+        }
+        
       } else {
         alert(`Error: ${result.error}`);
       }
@@ -590,9 +606,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // --- VERIFICAR QUE getCookie EXISTE ---
-console.log("🔍 Verificando getCookie:", typeof getCookie);
+console.log("Verificando getCookie:", typeof getCookie);
 if (typeof getCookie === 'undefined') {
-  console.error("❌ ERROR: La función getCookie() no está definida");
+  console.error("ERROR: La función getCookie() no está definida");
 }
 
-console.log("✅ Funciones resetearOrdenes y devolverOrdenes cargadas correctamente");
+console.log("Funciones resetearOrdenes y devolverOrdenes cargadas correctamente");
+
+
+
+// --- ACTUALIZAR ESTADO VISUAL DE LA MESA ---
+function actualizarEstadoMesa(numeroMesa, libre) {
+  // Buscar todas las mesas
+  const mesas = document.querySelectorAll('.mesa-botones');
+  
+  mesas.forEach(mesaDiv => {
+    const boton = mesaDiv.querySelector('button');
+    const textoBoton = boton?.textContent.trim();
+    
+    // Verificar si es la mesa correcta
+    if (textoBoton === `Mesa #${numeroMesa}`) {
+      if (libre) {
+        // LIBRE (vinotinto)
+        mesaDiv.classList.remove('mesa-ocupada');
+        mesaDiv.classList.add('mesa-libre');
+        boton.disabled = false;
+        boton.removeAttribute('onclick');
+        boton.setAttribute('data-bs-toggle', 'modal');
+        boton.setAttribute('data-bs-target', '#modalOrden');
+        boton.onclick = function() { abrirModal(numeroMesa); };
+      } else {
+        // OCUPADA (negro)
+        mesaDiv.classList.remove('mesa-libre');
+        mesaDiv.classList.add('mesa-ocupada');
+        boton.disabled = true;
+        boton.removeAttribute('data-bs-toggle');
+        boton.removeAttribute('data-bs-target');
+        boton.onclick = function() { 
+          alert('Esta mesa está ocupada. Elimina la orden para liberarla.'); 
+        };
+      }
+    }
+  });
+}
