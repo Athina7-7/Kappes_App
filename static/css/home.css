@@ -285,28 +285,35 @@
   transition: all 0.2s ease;
 }
 
-/* Agregar al final de home.css */
+/* ======================================
+   BOTONES DE ETIQUETA (OCULTAR / REGRESAR)
+   ====================================== */
 
-/* Botón Resetear */
-.btn-resetear {
-  background-color: #ff9800 !important;
-  border-color: #ff9800 !important;
-  color: white !important;
+/* Estilo base tipo etiqueta */
+.btn-etiqueta {
+  border: none;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  text-align: center;
 }
 
-.btn-resetear:hover {
-  background-color: #f57c00 !important;
-  border-color: #f57c00 !important;
+/* 🖤 Ocultar Órdenes */
+.btn-ocultar-ordenes {
+  background-color: #000000;
 }
 
-/* Botón Devolver */
-.btn-devolver {
-  background-color: #4caf50 !important;
-  border-color: #4caf50 !important;
-  color: white !important;
+.btn-ocultar-ordenes:hover {
+  background-color: #333333;
+  transform: scale(1.05);
 }
 
-.btn-devolver:hover {
-  background-color: #388e3c !important;
-  border-color: #388e3c !important;
+/* 🍷 Regresar Órdenes */
+.btn-regresar-ordenes {
+  background-color: #6a0d1a;
 }
+
+.btn-regresar-ordenes:hover {
+  background-color: #540c0c;
+  transform: scale(1.05);
+}
+

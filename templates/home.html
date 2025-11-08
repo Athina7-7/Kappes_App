@@ -176,25 +176,23 @@
 
         <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
     
-          <!-- Botón Resetear Órdenes -->
+          <!-- Botón de Eliminar las Órdenes en el home-->
           <button 
             type="button" 
-            id="btn-resetear-ordenes"
-            class="btn btn-warning btn-lg rounded-circle d-flex align-items-center justify-content-center shadow-sm"
-            style="width: 60px; height: 60px;"
-            title="Resetear órdenes del día">
-            <i class="bi bi-arrow-clockwise fs-5"></i>
+            id="btn-ocultar-ordenes"
+            class="btn-etiqueta btn-ocultar-ordenes fw-bold text-white px-4 py-2 rounded-pill shadow-sm"
+            title="Ocultar órdenes del día">
+            Ocultar Órdenes
           </button>
 
-          <!-- Botón Devolver Órdenes (solo si hay órdenes ocultas) -->
+          <!-- Botón Devolver  o Resetear las Órdenes en el home (solo si hay órdenes ocultas) -->
           {% if ordenes_ocultas > 0 %}
           <button 
             type="button" 
-            id="btn-devolver-ordenes"
-            class="btn btn-success btn-lg rounded-circle d-flex align-items-center justify-content-center shadow-sm"
-            style="width: 60px; height: 60px;"
-            title="Devolver órdenes ocultas ({{ ordenes_ocultas }})">
-            <i class="bi bi-arrow-counterclockwise fs-5"></i>
+            id="btn-resetear-ordenes"
+            class="btn-etiqueta btn-regresar-ordenes fw-bold text-white px-4 py-2 rounded-pill shadow-sm"
+            title="Regresar órdenes ocultas ({{ ordenes_ocultas }})">
+            Regresar Órdenes
           </button>
           {% endif %}
 

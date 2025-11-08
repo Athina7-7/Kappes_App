@@ -493,19 +493,20 @@ function getCookie(name) {
 
 
 // --- RESETEAR ÓRDENES (CON DEBUG) ---
-async function resetearOrdenes() {
+async function ocultarOrdenes() {
   console.log("🔄 Función resetearOrdenes() ejecutada");
   
-  if (!confirm('¿Estás seguro de que deseas resetear todas las órdenes del día? Se ocultarán pero se mantendrán en la base de datos.')) {
+  if (!confirm('¿Estás seguro de que deseas ocultar todas las órdenes del día? Se ocultarán pero se mantendrán en la base de datos.')) {
     console.log("❌ Usuario canceló el reseteo");
     return;
   }
 
-  console.log("✅ Usuario confirmó el reseteo");
+  console.log("✅ Usuario confirmó la eliminacion");
 
   try {
-    console.log("📡 Enviando petición a /resetear_ordenes/");
+    console.log("📡 Enviando petición a /ocultar_ordenes/");
     
+    //Aqui realmente debería ser "eliminar_ordenes", pero por los momentos se dejará así. Hasta ahora, funciona bien
     const response = await fetch('/resetear_ordenes/', {
       method: 'POST',
       headers: {
@@ -519,7 +520,7 @@ async function resetearOrdenes() {
     console.log("📦 Datos de respuesta:", result);
 
     if (result.success) {
-      alert(`Se han reseteado ${result.ordenes_ocultadas} órdenes correctamente.`);
+      alert(`Se han ocultado ${result.ordenes_ocultadas} órdenes correctamente.`);
       console.log("✅ Recargando página...");
       location.reload();
     } else {
@@ -534,10 +535,10 @@ async function resetearOrdenes() {
 
 
 // --- DEVOLVER ÓRDENES (CON DEBUG) ---
-async function devolverOrdenes() {
+async function resetearOrdenes() {
   console.log("↺ Función devolverOrdenes() ejecutada");
   
-  if (!confirm('¿Deseas devolver todas las órdenes ocultas?')) {
+  if (!confirm('¿Deseas resetear todas las órdenes ocultas?')) {
     console.log("❌ Usuario canceló la devolución");
     return;
   }
@@ -575,15 +576,15 @@ async function devolverOrdenes() {
 
 // --- ASIGNAR EVENTOS A LOS BOTONES DE RESETEO ---
 document.addEventListener('DOMContentLoaded', function() {
-  const btnResetear = document.getElementById('btn-resetear-ordenes');
-  const btnDevolver = document.getElementById('btn-devolver-ordenes');
+  const btnResetear = document.getElementById('btn-ocultar-ordenes');
+  const btnDevolver = document.getElementById('btn-resetear-ordenes');
   
   if (btnResetear) {
-    btnResetear.addEventListener('click', resetearOrdenes);
+    btnResetear.addEventListener('click', ocultarOrdenes);
   }
   
   if (btnDevolver) {
-    btnDevolver.addEventListener('click', devolverOrdenes);
+    btnDevolver.addEventListener('click', resetearOrdenes);
   }
 });
 

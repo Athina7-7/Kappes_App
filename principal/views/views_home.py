@@ -443,7 +443,9 @@ def editar_orden_domicilio(request, id_orden):
 
 
 @csrf_exempt
-def resetear_ordenes(request):
+#Esta función es para resetear el día, o sea, cuando le doy clic, todas las ordenes que me aparecieron hoy, no me van a 
+#aparecer el día de mañana
+def ocultar_ordenes(request):
     """Oculta todas las órdenes visibles actualmente"""
     if request.method == "POST":
         try:
@@ -464,7 +466,7 @@ def resetear_ordenes(request):
 
 
 @csrf_exempt
-def devolver_ordenes(request):
+def resetear_ordenes(request):
     """Vuelve a mostrar todas las órdenes ocultas"""
     if request.method == "POST":
         try:
