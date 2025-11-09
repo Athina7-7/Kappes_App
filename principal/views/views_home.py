@@ -295,37 +295,44 @@ def editar_orden(request, id_orden):
 def buscar_orden(request):
     termino = request.GET.get('q', '').strip().lower()
 
-    # Si no hay texto, devolver todas las órdenes
     if not termino:
+        # Si no se escribe nada, mostrar todas las órdenes visibles
         ordenes = Orden.objects.filter(oculta=False).order_by('id_orden')
     else:
-        ordenes = Orden.objects.filter(
-            Q(nombre_cliente__icontains=termino) | 
-            Q(id_orden__icontains=termino),
-            oculta=False
-        ).order_by('id_orden')
+        # Si el término es numérico (buscar por número parcial en orden o mesa)
+        if termino.isdigit():
+            ordenes = Orden.objects.filter(
+                Q(numero_orden__icontains=termino) | 
+                Q(id_mesa__numero__icontains=termino),
+                oculta=False
+            ).order_by('id_orden')
+        else:
+            # Si es texto, buscar por nombre del cliente
+            ordenes = Orden.objects.filter(
+                Q(nombre_cliente__icontains=termino),
+                oculta=False
+            ).order_by('id_orden')
 
-    # Convertimos las órdenes a formato JSON
+    # Convertir resultados a formato JSON
     data = []
     for orden in ordenes:
-        orden_data = {
+        data.append({
             "id_orden": orden.id_orden,
+            "numero_orden": orden.numero_orden,
             "mesa": orden.id_mesa.numero if orden.id_mesa else None,
             "nombre_cliente": orden.nombre_cliente or "No especificado",
             "detalles": orden.detalles,
             "total": orden.total,
-            #"estado_pago": orden.estado_pago
-        }
-        
-        # Si es domicilio, agregar el lugar desde la sesión
-        if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio":
-            orden_data["lugar_domicilio"] = request.session.get(f"lugar_{orden.id_orden}", "No especificado")
-        else:
-            orden_data["lugar_domicilio"] = None
-        
-        data.append(orden_data)
-    
+            "estado_pago": getattr(orden, "estado_pago", "pendiente"),
+            "lugar_domicilio": (
+                request.session.get(f"lugar_{orden.id_orden}", "No especificado")
+                if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio"
+                else None
+            )
+        })
+
     return JsonResponse(data, safe=False)
+
 
 
 

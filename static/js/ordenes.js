@@ -413,7 +413,7 @@ function renderizarPedidos(ordenes) {
     card.innerHTML = `
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h6 class="fw-bold mb-0">
-          Orden #${orden.id_orden} — Mesa #${lugar}
+          Orden #${orden.numero_orden || orden.id_orden} — ${lugar}
         </h6>
         <div class="d-flex align-items-center gap-2">
           <span class="badge ${orden.estado_pago === 'pendiente' ? 'bg-danger' : 'bg-success'} estado-pago"
@@ -424,8 +424,8 @@ function renderizarPedidos(ordenes) {
             <button type="button" class="btn btn-sm btn-outline-dark btn-editar" data-id="${orden.id_orden}">
               <i class="bi bi-pencil"></i>
             </button>
-            <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar" 
-                    data-id="${orden.id_orden}" data-numero="${orden.id_orden}">
+            <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar"
+                    data-id="${orden.id_orden}" data-numero="${orden.numero_orden || orden.id_orden}">
               <i class="bi bi-trash"></i>
             </button>
           </div>
