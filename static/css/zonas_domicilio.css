@@ -8,7 +8,7 @@
 /* Barra de búsqueda */
 .search-bar {
   display: flex;
-  align-items: center;
+  align-items: left;
   justify-content: center;
   border: 2px solid #2d2a2a;
   border-radius: 30px;
