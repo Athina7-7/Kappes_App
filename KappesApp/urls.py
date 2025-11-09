@@ -37,6 +37,7 @@ urlpatterns = [
     path('resetear-dia/', views_home.resetear_dia, name='resetear_dia'),
     path('resetear_ordenes/', views_home.ocultar_ordenes, name='resetear_ordenes'),
     path('devolver_ordenes/', views_home.resetear_ordenes, name='devolver_ordenes'),
+    path('buscar_orden_por_mesa/<int:numero_mesa>/', views_home.buscar_orden_por_mesa, name='buscar_orden_por_mesa'),
 
 
 

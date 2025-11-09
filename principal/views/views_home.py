@@ -449,6 +449,50 @@ def editar_orden_domicilio(request, id_orden):
 
 
 
+
+# Esto es para buscar una orden desde la mesa bloqueada
+# Esto es para ver qué orden tiene esa mesa, en vez de estar scrolleando para averigüar donde está la orden de una mesa en específico
+def buscar_orden_por_mesa(request, numero_mesa):
+    """Busca la orden activa de una mesa específica"""
+    try:
+        # Buscar la mesa
+        mesa = Mesa.objects.get(numero=numero_mesa)
+        
+        # Buscar la orden activa (no oculta) de esa mesa
+        orden = Orden.objects.filter(
+            id_mesa=mesa,
+            oculta=False
+        ).first()
+        
+        if not orden:
+            return JsonResponse({
+                "success": False,
+                "error": "No hay orden activa para esta mesa"
+            })
+        
+        return JsonResponse({
+            "success": True,
+            "id_orden": orden.id_orden,
+            "numero_orden": orden.numero_orden,
+            "nombre_cliente": orden.nombre_cliente,
+            "detalles": orden.detalles,
+            "total": orden.total
+        })
+        
+    except Mesa.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "error": "La mesa no existe"
+        })
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        })
+
+
+
+
 @csrf_exempt
 #Esta función es para resetear el día, o sea, cuando le doy clic, todas las ordenes que me aparecieron hoy, no me van a 
 #aparecer el día de mañana

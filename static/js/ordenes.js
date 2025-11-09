@@ -179,12 +179,29 @@ botonGuardar.addEventListener('click', async () => {
     let url = '/guardar_orden/';
     let method = 'POST';
 
-    if (modoEdicion && idOrdenActual) {
-      url = `/editar_orden/${idOrdenActual}/`;
-      alert('Orden actualizada correctamente');
-      location.reload();
-      return;
-    }
+     if (modoEdicion && idOrdenActual) {
+        url = `/editar_orden/${idOrdenActual}/`;
+        method = 'POST';
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          alert('Orden actualizada correctamente');
+          location.reload(); // Recargar para ver los cambios
+        } else {
+          alert('Error: ' + (result.error || 'No se pudo actualizar la orden'));
+        }
+        return;
+      }
 
     const response = await fetch(url, {
       method,
@@ -616,6 +633,7 @@ console.log("Funciones resetearOrdenes y devolverOrdenes cargadas correctamente"
 
 
 // --- ACTUALIZAR ESTADO VISUAL DE LA MESA ---
+// --- ACTUALIZAR ESTADO VISUAL DE LA MESA ---
 function actualizarEstadoMesa(numeroMesa, libre) {
   // Buscar todas las mesas
   const mesas = document.querySelectorAll('.mesa-botones');
@@ -627,25 +645,106 @@ function actualizarEstadoMesa(numeroMesa, libre) {
     // Verificar si es la mesa correcta
     if (textoBoton === `Mesa #${numeroMesa}`) {
       if (libre) {
-        // LIBRE (vinotinto)
+        // LIBRE (vinotinto) - Abrir modal para crear nueva orden
         mesaDiv.classList.remove('mesa-ocupada');
         mesaDiv.classList.add('mesa-libre');
         boton.disabled = false;
-        boton.removeAttribute('onclick');
         boton.setAttribute('data-bs-toggle', 'modal');
         boton.setAttribute('data-bs-target', '#modalOrden');
         boton.onclick = function() { abrirModal(numeroMesa); };
       } else {
-        // OCUPADA (negro)
+        // OCUPADA (negro) - Abrir modal para editar orden existente
         mesaDiv.classList.remove('mesa-libre');
         mesaDiv.classList.add('mesa-ocupada');
-        boton.disabled = true;
+        boton.disabled = false; // CAMBIAR A false para que se pueda hacer clic
         boton.removeAttribute('data-bs-toggle');
         boton.removeAttribute('data-bs-target');
         boton.onclick = function() { 
-          alert('Esta mesa está ocupada. Elimina la orden para liberarla.'); 
+          abrirModalEdicionMesa(numeroMesa); // ABRIR MODAL DE EDICIÓN
         };
       }
     }
   });
+}
+
+
+
+// --- ABRIR MODAL DE EDICIÓN DESDE MESA OCUPADA ---
+async function abrirModalEdicionMesa(numeroMesa) {
+  console.log("Buscando orden de la mesa #" + numeroMesa);
+  
+  try {
+    // Buscar la orden de esa mesa
+    const response = await fetch(`/buscar_orden_por_mesa/${numeroMesa}/`);
+    const data = await response.json();
+    
+    if (!data.success) {
+      alert("No se encontró ninguna orden para esta mesa.");
+      return;
+    }
+    
+    // Activar modo edición
+    modoEdicion = true;
+    idOrdenActual = data.id_orden;
+    
+    // Llenar el modal con los datos de la orden
+    document.getElementById("numeroOrden").textContent = data.numero_orden;
+    document.getElementById("numeroMesa").textContent = numeroMesa;
+    document.getElementById("nombre_cliente").value = data.nombre_cliente || "";
+    document.getElementById("detalles").innerHTML = "";
+    
+    // Agregar los productos
+    data.detalles.forEach(item => {
+      const contenedor = document.createElement('div');
+      contenedor.classList.add('d-flex', 'align-items-center', 'justify-content-between', 'mb-2', 'border', 'p-2', 'rounded');
+      
+      const info = document.createElement('div');
+      info.classList.add('d-flex', 'align-items-center', 'gap-1');
+      
+      const nombre = document.createElement('strong');
+      nombre.textContent = item.nombre;
+      
+      const precio = document.createElement('span');
+      precio.textContent = ` $${item.precio}`;
+      precio.classList.add('text-muted');
+      
+      info.appendChild(nombre);
+      info.appendChild(precio);
+      
+      const cantidad = document.createElement('input');
+      cantidad.type = 'number';
+      cantidad.min = '1';
+      cantidad.value = item.cantidad;
+      cantidad.classList.add('form-control', 'w-25', 'me-2');
+      cantidad.addEventListener('change', () => {
+        cantidad.setAttribute('value', cantidad.value);
+        actualizarTotal();
+      });
+      
+      const eliminar = document.createElement('button');
+      eliminar.classList.add('btn', 'btn-outline-danger', 'btn-sm');
+      eliminar.textContent = 'X';
+      eliminar.addEventListener('click', () => {
+        contenedor.remove();
+        actualizarTotal();
+      });
+      
+      contenedor.appendChild(info);
+      contenedor.appendChild(cantidad);
+      contenedor.appendChild(eliminar);
+      
+      document.getElementById("detalles").appendChild(contenedor);
+    });
+    
+    // Actualizar el total
+    actualizarTotal();
+    
+    // Mostrar el modal
+    const modal = new bootstrap.Modal(document.getElementById('modalOrden'));
+    modal.show();
+    
+  } catch (error) {
+    console.error("Error al cargar la orden:", error);
+    alert("Error al intentar abrir la orden de esta mesa.");
+  }
 }

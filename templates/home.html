@@ -26,13 +26,12 @@
               <button
                 type="button"
                 class="btn text-white p-0 fw-bold w-100"
-                {% if not mesa.estado %}disabled{% endif %}
                 {% if mesa.estado %}
                   data-bs-toggle="modal"
                   data-bs-target="#modalOrden"
                   onclick="abrirModal('{{ mesa.numero }}')"
                 {% else %}
-                  onclick="alert('Esta mesa está ocupada. Elimina la orden para liberarla.')"
+                  onclick="abrirModalEdicionMesa('{{ mesa.numero }}')"
                 {% endif %}
               >
                 Mesa #{{ mesa.numero }}
