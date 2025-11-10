@@ -23,6 +23,9 @@ function abrirModal(numeroMesa) {
     document.getElementById("nombre_cliente").value = "";
     document.getElementById("detalles").innerHTML = "";
     document.getElementById("total-dinamico").textContent = "$0";
+
+    //Se resetea metodo de pago para efectivo
+    document.getElementById("metodo_pago").value = "efectivo";
 }
 
 
@@ -150,6 +153,9 @@ botonGuardar.addEventListener('click', async () => {
   const detalles = document.getElementById('detalles').children;
   const nombreCliente = document.getElementById('nombre_cliente').value;
 
+  //Obtener el metodo de pago seleccionado
+  const metodoPago = document.getElementById('metodo_pago').value;
+
   if (detalles.length === 0) {
     alert('Agrega al menos un producto antes de guardar.');
     return;
@@ -172,7 +178,8 @@ botonGuardar.addEventListener('click', async () => {
     productos: productos,
     nombre_cliente: nombreCliente,
     total: total,
-    numero_orden: numeroOrden
+    numero_orden: numeroOrden,
+    metodo_pago: metodoPago 
   };
 
   try {
@@ -196,7 +203,20 @@ botonGuardar.addEventListener('click', async () => {
         
         if (response.ok && result.success) {
           alert('Orden actualizada correctamente');
-          location.reload(); // Recargar para ver los cambios
+
+          // Buscar la card de la orden
+          const card = document.querySelector(`.card[data-id="${idOrdenActual}"]`);
+          if (card) {
+            const badgeMetodo = card.querySelector('.metodo-pago-badge');
+            if (badgeMetodo) {
+              const metodoActualizado = result.metodo_pago.charAt(0).toUpperCase() + result.metodo_pago.slice(1);
+              badgeMetodo.textContent = metodoActualizado;
+            }
+          }
+
+          // Cerrar modal sin recargar
+          const modal = bootstrap.Modal.getInstance(document.getElementById('modalOrden'));
+          modal.hide();
         } else {
           alert('Error: ' + (result.error || 'No se pudo actualizar la orden'));
         }
@@ -227,11 +247,15 @@ botonGuardar.addEventListener('click', async () => {
 
       const productosHTML = productos.map(p => `<li>• ${p.nombre} (${p.cantidad})</li>`).join("");
 
+      //Mostrar método de pago en la tarjeta o card
+      const metodoPagoTexto = metodoPago.charAt(0).toUpperCase() + metodoPago.slice(1);
+
       nuevaCard.innerHTML = `
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="fw-bold mb-0">Orden #${numeroOrden} — Mesa #${numeroMesa}</h6>
           <div class="d-flex align-items-center gap-2">
             <span class="badge bg-danger estado-pago" data-id="${result.id_orden}" style="cursor:pointer;">Pendiente</span>
+            <span class="badge bg-secondary metodo-pago-badge">${metodoPagoTexto}</span>
             <div class="btn-group">
               <button type="button" class="btn btn-sm btn-outline-dark btn-editar" data-id="${result.id_orden}">
                 <i class="bi bi-pencil"></i>
@@ -346,7 +370,12 @@ document.addEventListener('click', async function(e) {
     document.getElementById("numeroOrden").textContent = data.numero_orden ?? data.id_orden;
     document.getElementById("numeroMesa").textContent = data.mesa;
     document.getElementById("nombre_cliente").value = data.nombre_cliente || "";
+
+    // 🆕 CARGAR EL MÉTODO DE PAGO GUARDADO
+    document.getElementById("metodo_pago").value = data.metodo_pago || "efectivo";
+
     document.getElementById("detalles").innerHTML = "";
+
 
     data.detalles.forEach(item => {
       const contenedor = document.createElement('div');
@@ -427,6 +456,9 @@ function renderizarPedidos(ordenes) {
 
     const lugar = orden.mesa ? `Mesa #${orden.mesa}` : 'Domicilio';
 
+    //Obtener método de pago
+    const metodoPago = (orden.metodo_pago || 'efectivo').charAt(0).toUpperCase() + (orden.metodo_pago || 'efectivo').slice(1);
+
     card.innerHTML = `
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h6 class="fw-bold mb-0">
@@ -437,6 +469,7 @@ function renderizarPedidos(ordenes) {
                 data-id="${orden.id_orden}" style="cursor:pointer;">
             ${orden.estado_pago.charAt(0).toUpperCase() + orden.estado_pago.slice(1)}
           </span>
+          <span class="badge bg-secondary metodo-pago-badge">${metodoPago}</span>
           <div class="btn-group">
             <button type="button" class="btn btn-sm btn-outline-dark btn-editar" data-id="${orden.id_orden}">
               <i class="bi bi-pencil"></i>
@@ -537,7 +570,7 @@ async function ocultarOrdenes() {
   console.log("✅ Usuario confirmó la eliminacion");
 
   try {
-    console.log("📡 Enviando petición a /ocultar_ordenes/");
+    console.log("📡 Enviando petición a /resetear_ordenes/");
     
     //Aqui realmente debería ser "eliminar_ordenes", pero por los momentos se dejará así. Hasta ahora, funciona bien
     const response = await fetch('/resetear_ordenes/', {
@@ -633,7 +666,6 @@ console.log("Funciones resetearOrdenes y devolverOrdenes cargadas correctamente"
 
 
 // --- ACTUALIZAR ESTADO VISUAL DE LA MESA ---
-// --- ACTUALIZAR ESTADO VISUAL DE LA MESA ---
 function actualizarEstadoMesa(numeroMesa, libre) {
   // Buscar todas las mesas
   const mesas = document.querySelectorAll('.mesa-botones');
@@ -691,6 +723,10 @@ async function abrirModalEdicionMesa(numeroMesa) {
     document.getElementById("numeroOrden").textContent = data.numero_orden;
     document.getElementById("numeroMesa").textContent = numeroMesa;
     document.getElementById("nombre_cliente").value = data.nombre_cliente || "";
+
+    //Cargar método de pago
+    document.getElementById("metodo_pago").value = data.metodo_pago || "efectivo";
+
     document.getElementById("detalles").innerHTML = "";
     
     // Agregar los productos

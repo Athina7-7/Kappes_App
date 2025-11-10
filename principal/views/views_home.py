@@ -20,16 +20,28 @@ def home(request):
     ordenes = Orden.objects.filter(oculta=False).order_by('id_orden')
     total_ordenes = ordenes.count()
 
+    # 🔥 SINCRONIZAR ESTADO DE MESAS CON ÓRDENES ACTIVAS
+    for mesa in mesas:
+        tiene_orden_activa = Orden.objects.filter(
+            id_mesa=mesa,
+            oculta=False
+        ).exists()
+        
+        if tiene_orden_activa:
+            mesa.estado = False  # Ocupada (negra)
+        else:
+            mesa.estado = True   # Libre (vinotinto)
+        
+        mesa.save()
+
     # Enlazar lugar manualmente si es un pedido de domicilio
     for orden in ordenes:
-        for orden in ordenes:
-            if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio":
-                orden.lugar_domicilio = request.session.get(f"lugar_{orden.id_orden}", "No especificado")
+        if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio":
+            orden.lugar_domicilio = request.session.get(f"lugar_{orden.id_orden}", "No especificado")
 
-    #Contar las ordenes ocultas
+    # Contar las ordenes ocultas
     ordenes_ocultas = Orden.objects.filter(oculta=True).count()
 
-    # Agrega nuevamente esta línea:
     return render(request, 'home.html', {
         'mesas': mesas,
         'ordenes': ordenes,
@@ -162,6 +174,9 @@ def guardar_orden(request):
         detalles = data.get("productos", [])
         numero_orden = int(data.get("numero_orden", 1))  #Recibir del frontend
 
+        #Recibir el metodo de Pago
+        metodo_pago = data.get("metodo_pago", "efectivo")
+
         # --- Buscar mesa ---
         try:
             mesa = Mesa.objects.get(numero=id_mesa)
@@ -190,7 +205,8 @@ def guardar_orden(request):
             nombre_cliente=data.get("nombre_cliente", ""),
             detalles=detalles,
             total=total,
-            oculta=False
+            oculta=False,
+            metodo_pago=metodo_pago 
         )
 
         mesa.estado = False
@@ -201,7 +217,8 @@ def guardar_orden(request):
             "success": True,
             "id_orden": nueva_orden.id_orden,
             "numero_orden": nueva_orden.numero_orden,
-            "total": total
+            "total": total,
+            "metodo_pago": metodo_pago #Devolve el metodo de pago
         })
 
     return JsonResponse({"success": False, "error": "Método no permitido"})
@@ -256,7 +273,8 @@ def editar_orden(request, id_orden):
                 "mesa": orden.id_mesa.numero if orden.id_mesa else None,
                 "id_tipoVenta": orden.id_tipoVenta.nombre if orden.id_tipoVenta else None,
                 "detalles": orden.detalles,
-                "total": orden.total
+                "total": orden.total,
+                "metodo_pago": orden.metodo_pago if hasattr(orden, 'metodo_pago') else "efectivo"
             })
         except Orden.DoesNotExist:
             return JsonResponse({"success": False, "error": "Orden no encontrada."})
@@ -270,6 +288,9 @@ def editar_orden(request, id_orden):
 
         orden.nombre_cliente = data.get("nombre_cliente", orden.nombre_cliente)
         orden.detalles = data.get("productos", orden.detalles)
+
+        #Actualizar metodo de pago
+        orden.metodo_pago = data.get("metodo_pago", orden.metodo_pago if hasattr(orden, 'metodo_pago') else "efectivo")
 
         # Recalcular total
         total = 0
@@ -286,7 +307,7 @@ def editar_orden(request, id_orden):
         orden.total = total
         orden.save()
 
-        return JsonResponse({"success": True, "total": total})
+        return JsonResponse({"success": True, "total": total, "metodo_pago": orden.metodo_pago})
 
     return JsonResponse({"success": False, "error": "Método no permitido"})
 
@@ -324,6 +345,7 @@ def buscar_orden(request):
             "detalles": orden.detalles,
             "total": orden.total,
             "estado_pago": getattr(orden, "estado_pago", "pendiente"),
+            "metodo_pago": getattr(orden, "metodo_pago", "efectivo"), 
             "lugar_domicilio": (
                 request.session.get(f"lugar_{orden.id_orden}", "No especificado")
                 if orden.id_tipoVenta and orden.id_tipoVenta.nombre == "Domicilio"
@@ -363,6 +385,7 @@ def guardar_orden_domicilio(request):
             lugar_domicilio = data.get('lugar_domicilio', '').strip()
             detalles = data.get('productos', [])
             total = float(data.get('total', 0))
+            metodo_pago = data.get('metodo_pago', 'efectivo')
 
             # Si el total viene vacío, recalcular
             if not total or total == 0:
@@ -379,7 +402,8 @@ def guardar_orden_domicilio(request):
                 total=total,
                 id_mesa=None,
                 id_tipoVenta=tipo_domicilio,
-                oculta=False
+                oculta=False,
+                metodo_pago=metodo_pago
             )
 
             # GUARDAR EL LUGAR EN LA SESIÓN
@@ -391,7 +415,8 @@ def guardar_orden_domicilio(request):
                 "numero_orden": nueva_orden.numero_orden,
                 "nombre_cliente": nombre_cliente,
                 "lugar_domicilio": lugar_domicilio,
-                "total": total
+                "total": total,
+                "metodo_pago": metodo_pago 
             })
 
         except Exception as e:
@@ -419,7 +444,8 @@ def editar_orden_domicilio(request, id_orden):
                 "nombre_cliente_real": orden.nombre_cliente,  # De la BD
                 "id_tipoVenta": orden.id_tipoVenta.nombre if orden.id_tipoVenta else None,
                 "detalles": orden.detalles,
-                "total": orden.total
+                "total": orden.total,
+                "metodo_pago": orden.metodo_pago if hasattr(orden, 'metodo_pago') else "efectivo"
             })
         except Orden.DoesNotExist:
             return JsonResponse({"success": False, "error": "Orden no encontrada."})
@@ -441,9 +467,12 @@ def editar_orden_domicilio(request, id_orden):
         
         orden.detalles = data.get("productos", orden.detalles)
         orden.total = data.get("total", orden.total)
+
+        orden.metodo_pago = data.get("metodo_pago", orden.metodo_pago if hasattr(orden, 'metodo_pago') else "efectivo")
+
         orden.save()
 
-        return JsonResponse({"success": True, "total": orden.total})
+        return JsonResponse({"success": True, "total": orden.total, "metodo_pago": orden.metodo_pago})
 
     return JsonResponse({"success": False, "error": "Método no permitido"})
 
@@ -476,7 +505,8 @@ def buscar_orden_por_mesa(request, numero_mesa):
             "numero_orden": orden.numero_orden,
             "nombre_cliente": orden.nombre_cliente,
             "detalles": orden.detalles,
-            "total": orden.total
+            "total": orden.total,
+            "metodo_pago": orden.metodo_pago if hasattr(orden, 'metodo_pago') else "efectivo" 
         })
         
     except Mesa.DoesNotExist:
@@ -523,6 +553,8 @@ def resetear_ordenes(request):
         try:
             # Marcar todas las órdenes ocultas como visibles
             ordenes_devueltas = Orden.objects.filter(oculta=True).update(oculta=False)
+
+            Mesa.objects.all().update(estado=True)  # Liberar todas
             
             # Actualizar el estado de las mesas según las órdenes
             ordenes_con_mesa = Orden.objects.filter(oculta=False, id_mesa__isnull=False)

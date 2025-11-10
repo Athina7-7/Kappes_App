@@ -37,6 +37,8 @@ function abrirModalDomicilio() {
     precioDomicilioGlobal = 0;
     document.getElementById("nombre_cliente_domicilio").value = "";
 
+    //Resetear metodo de pago a efectivo
+    document.getElementById("metodo_pago_domicilio").value = "efectivo";
     // Mostrar modal
     const modal = new bootstrap.Modal(document.getElementById('modalOrdenDomicilio'));
     modal.show();
@@ -237,6 +239,9 @@ if (botonGuardarDomicilio) {
         const detalles = document.getElementById('detalles_domicilio').children;
         const nombreClienteDomicilio = document.getElementById('nombre_cliente_domicilio').value.trim();
 
+        //Obtener metodo de pago
+        const metodoPago = document.getElementById('metodo_pago_domicilio').value;
+
         console.log("DEBUG - Datos a enviar:");
         console.log("Lugar:", lugarDomicilio);
         console.log("Nombre:", nombreClienteDomicilio);
@@ -270,7 +275,8 @@ if (botonGuardarDomicilio) {
             nombre_cliente: nombreClienteDomicilio,
             productos: productos,
             total: total,
-            numero_orden: numeroOrden
+            numero_orden: numeroOrden,
+            metodo_pago: metodoPago
         };
 
         try {
@@ -316,11 +322,15 @@ if (botonGuardarDomicilio) {
 
                 const productosHTML = productos.map(p => `<li>• ${p.nombre} (${p.cantidad})</li>`).join("");
 
+                //Mostrar Metodo de pago
+                const metodoPagoTexto = metodoPago.charAt(0).toUpperCase() + metodoPago.slice(1);
+
                 nuevaCard.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h6 class="fw-bold mb-0">Orden #${numeroOrden} — Domicilio</h6>
                     <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-danger estado-pago" data-id="${result.id_orden}" style="cursor:pointer;">Pendiente</span>
+                    <span class="badge bg-secondary metodo-pago-badge">${metodoPagoTexto}</span>
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-outline-dark btn-editar" data-id="${result.id_orden}">
                         <i class="bi bi-pencil"></i>
@@ -397,7 +407,10 @@ async function abrirModalEditarDomicilio(data) {
 
   // Rellenar campos correctamente
   document.getElementById('lugar_domicilio').value = lugarDomicilio;  // Sabaneta/Envigado
-  document.getElementById('nombre_cliente_domicilio').value = nombreReal;  // pepe
+  document.getElementById('nombre_cliente_domicilio').value = nombreReal;  
+
+  //Metodo de Pago
+  document.getElementById('metodo_pago_domicilio').value = data.metodo_pago || "efectivo";
 
   // Buscar el precio del domicilio desde el backend
   try {

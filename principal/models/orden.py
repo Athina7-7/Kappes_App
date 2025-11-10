@@ -24,7 +24,9 @@ class Orden(models.Model):
     detalles = models.JSONField(default=list)
     nombre_cliente = models.CharField(max_length=100, null=True, blank=True)
     #Para ocultar las ordenes cuando le de al botón de resetear
-    oculta = models.BooleanField(default=False)  
+    oculta = models.BooleanField(default=False)
+    
+      
 
     def __str__(self):
         return f"Orden #{self.id_orden} — Mesa {self.id_mesa.numero if self.id_mesa else 'Sin mesa'}"
@@ -50,4 +52,15 @@ class Orden(models.Model):
     max_length=10,
     choices=[('pendiente', 'Pendiente'), ('pago', 'Pago')],
     default='pendiente'
-)
+    )
+
+    metodo_pago = models.CharField(
+        max_length=20,
+        choices=[
+            ('efectivo', 'Efectivo'),
+            ('tarjeta', 'Tarjeta'),
+            ('transferencia', 'Transferencia')
+        ],
+        default='efectivo'
+    )
+

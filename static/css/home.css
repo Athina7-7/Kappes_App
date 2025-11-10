@@ -55,11 +55,12 @@
   padding: 0 !important;
   margin: 0 !important;
   font-weight: bold !important;
-  cursor: not-allowed !important;
+  cursor: pointer !important;
 }
 
 .mesa-ocupada button:hover {
   background-color: #000 !important;
+  opacity: 0.9;
 }
 
 /* Eliminar TODOS los estilos de Bootstrap del botón */
@@ -317,3 +318,26 @@
   transform: scale(1.05);
 }
 
+
+/* ESTILOS PARA BADGE DE MÉTODO DE PAGO */
+.metodo-pago-badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* ESTILOS PARA EL SELECT DE MÉTODO DE PAGO */
+.form-select {
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.form-select:focus {
+  border-color: #540c0c;
+  box-shadow: 0 0 5px rgba(84, 12, 12, 0.3);
+  outline: none;
+}
