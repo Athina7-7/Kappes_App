@@ -12,12 +12,12 @@
     <h1 class="fw-bold mb-4 text-center">Zonas de Domicilio</h1>
 
     <!-- Barra de búsqueda -->
-    <div class="search-bar">
-        <form method="get" action="{% url 'zonas_domicilio' %}">
-            <input type="text" name="q" placeholder="Buscar zona" value="{{ request.GET.q|default:'' }}">
-            <button type="submit"><i class="bi bi-search"></i></button>
-        </form>
-    </div>
+    <form method="get" action="{% url 'zonas_domicilio' %}" class="search-bar mb-4">
+        <input type="text" name="q" class="form-control" placeholder="Búsqueda de zonas" value="{{ request.GET.q|default:'' }}">
+        <button type="submit" class="btn-search">
+            <i class="bi bi-search"></i>
+        </button>
+    </form>
 
     <!-- Lista de domicilios -->
     <div class="productos-list">
