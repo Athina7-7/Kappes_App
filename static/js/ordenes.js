@@ -23,8 +23,6 @@ function abrirModal(numeroMesa) {
     document.getElementById("nombre_cliente").value = "";
     document.getElementById("detalles").innerHTML = "";
     document.getElementById("total-dinamico").textContent = "$0";
-
-    //Se resetea metodo de pago para efectivo
     document.getElementById("metodo_pago").value = "efectivo";
 }
 
@@ -34,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const buscador = document.getElementById('buscador-producto');
     const resultados = document.getElementById('resultados');
     const detalles = document.getElementById('detalles');
+
+    if (!buscador) return;
 
     buscador.addEventListener('input', async () => {
         const query = buscador.value.trim();
@@ -148,176 +148,164 @@ let idOrdenActual = null;
 
 const botonGuardar = document.getElementById('guardar-orden');
 
-botonGuardar.addEventListener('click', async () => {
-  const numeroMesa = document.getElementById('numeroMesa').textContent.trim();
-  const detalles = document.getElementById('detalles').children;
-  const nombreCliente = document.getElementById('nombre_cliente').value;
+if (botonGuardar) {
+  botonGuardar.addEventListener('click', async () => {
+    const numeroMesa = document.getElementById('numeroMesa').textContent.trim();
+    const detalles = document.getElementById('detalles').children;
+    const nombreCliente = document.getElementById('nombre_cliente').value;
+    const metodoPago = document.getElementById('metodo_pago').value;
 
-  //Obtener el metodo de pago seleccionado
-  const metodoPago = document.getElementById('metodo_pago').value;
-
-  if (detalles.length === 0) {
-    alert('Agrega al menos un producto antes de guardar.');
-    return;
-  }
-
-  const productos = Array.from(detalles).map(div => {
-    const nombre = div.querySelector('strong')?.textContent.trim() || 'Producto sin nombre';
-    const precioMatch = div.textContent.match(/\$([0-9]+)/);
-    const precio = precioMatch ? parseInt(precioMatch[1]) : 0;
-    const cantidad = parseInt(div.querySelector('input').value);
-
-    return { nombre, cantidad, precio };
-  });
-
-  const total = productos.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
-  const numeroOrden = parseInt(document.getElementById("numeroOrden").textContent);
-
-  const data = {
-    mesa: numeroMesa,
-    productos: productos,
-    nombre_cliente: nombreCliente,
-    total: total,
-    numero_orden: numeroOrden,
-    metodo_pago: metodoPago 
-  };
-
-  try {
-    let url = '/guardar_orden/';
-    let method = 'POST';
-
-     if (modoEdicion && idOrdenActual) {
-        url = `/editar_orden/${idOrdenActual}/`;
-        method = 'POST';
-        
-        const response = await fetch(url, {
-          method,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-          },
-          body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-        
-        // REEMPLAZA ESTA SECCIÓN EN ordenes.js (aproximadamente línea 120-160)
-        // Dentro del bloque: if (response.ok && result.success) { ... }
-
-        if (response.ok && result.success) {
-          alert('Orden actualizada correctamente');
-
-          // Buscar la card de la orden
-          const card = document.querySelector(`.card[data-id="${idOrdenActual}"]`);
-          if (card) {
-            // Actualizar badge de método de pago
-            const badgeMetodo = card.querySelector('.metodo-pago-badge');
-            if (badgeMetodo) {
-              const metodoActualizado = result.metodo_pago.charAt(0).toUpperCase() + result.metodo_pago.slice(1);
-              badgeMetodo.textContent = metodoActualizado;
-            }
-
-            // ACTUALIZAR LISTA DE PRODUCTOS
-            const productosHTML = productos.map(p => `<li>• ${p.nombre} (${p.cantidad})</li>`).join("");
-            const listaProductos = card.querySelector('ul');
-            if (listaProductos) {
-              listaProductos.innerHTML = productosHTML;
-            }
-
-            // ACTUALIZAR TOTAL
-            const totalElement = card.querySelector('.text-vino');
-            if (totalElement) {
-              totalElement.textContent = `Total: $${total}`;
-            }
-
-            // ACTUALIZAR NOMBRE DEL CLIENTE (CORREGIDO)
-            const clienteElement = card.querySelector('p:first-of-type'); // Buscar el primer <p>
-            if (clienteElement) {
-              clienteElement.innerHTML = `<strong>Cliente:</strong> ${nombreCliente || "No especificado"}`;
-            }
-          }
-
-          // Cerrar modal sin recargar
-          let modal = bootstrap.Modal.getInstance(document.getElementById('modalOrden'));
-          if (!modal) {
-            modal = new bootstrap.Modal(document.getElementById('modalOrden'));
-          }
-          setTimeout(() => modal.hide(), 100);
-          return;
-        } else {
-          alert('Error: ' + (result.error || 'No se pudo actualizar la orden'));
-        }
-        return;
-      }
-
-    const response = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCookie('csrftoken')
-      },
-      body: JSON.stringify(data)
-    });
-
-    const result = await response.json();
-
-    if (response.ok && result.success) {
-      alert('Orden guardada correctamente');
-
-      // AGREGAR LA NUEVA ORDEN AL FINAL DE LA LISTA
-      const listaPedidos = document.getElementById("lista-pedidos");
-      const nuevaCard = document.createElement("div");
-      nuevaCard.classList.add("card", "shadow-sm", "p-3", "border-0", "rounded-3");
-      nuevaCard.style.backgroundColor = "#f8f9fa";
-      nuevaCard.style.borderLeft = "6px solid #540c0c";
-      nuevaCard.dataset.id = result.id_orden;
-
-      const productosHTML = productos.map(p => `<li>• ${p.nombre} (${p.cantidad})</li>`).join("");
-
-      //Mostrar método de pago en la tarjeta o card
-      const metodoPagoTexto = metodoPago.charAt(0).toUpperCase() + metodoPago.slice(1);
-
-      nuevaCard.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="fw-bold mb-0">Orden #${numeroOrden} — Mesa #${numeroMesa}</h6>
-          <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-danger estado-pago" data-id="${result.id_orden}" style="cursor:pointer;">Pendiente</span>
-            <span class="badge bg-secondary metodo-pago-badge">${metodoPagoTexto}</span>
-            <div class="btn-group">
-              <button type="button" class="btn btn-sm btn-outline-dark btn-editar" data-id="${result.id_orden}">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar" data-id="${result.id_orden}" data-numero="${numeroOrden}">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        <p class="mb-1"><strong>Nombre del Cliente:</strong> ${nombreCliente || "No especificado"}</p>
-        <ul class="list-unstyled mb-0 ps-2">${productosHTML}</ul>
-        <p class="mt-2 fw-bold text-end text-vino">Total: $${total}</p>
-      `;
-
-      listaPedidos.appendChild(nuevaCard); // AGREGAR AL FINAL
-      asignarEventosCambioEstado();
-      actualizarEstadoMesa(numeroMesa, false);
-      aplicarFiltroActual(); //Para el filtrado de mesas y domicilio
-
-      // Cerrar el modal
-      const modal = bootstrap.Modal.getInstance(document.getElementById('modalOrden'));
-      modal.hide();
-    } else {
-      alert('Error: ' + (result.error || 'No se pudo guardar la orden'));
+    if (detalles.length === 0) {
+      alert('Agrega al menos un producto antes de guardar.');
+      return;
     }
 
-  } catch (error) {
-    console.error('Error:', error);
-    alert('Error de conexión con el servidor.');
-  }
-});
+    const productos = Array.from(detalles).map(div => {
+      const nombre = div.querySelector('strong')?.textContent.trim() || 'Producto sin nombre';
+      const precioMatch = div.textContent.match(/\$([0-9]+)/);
+      const precio = precioMatch ? parseInt(precioMatch[1]) : 0;
+      const cantidad = parseInt(div.querySelector('input').value);
+
+      return { nombre, cantidad, precio };
+    });
+
+    const total = productos.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+    const numeroOrden = parseInt(document.getElementById("numeroOrden").textContent);
+
+    const data = {
+      mesa: numeroMesa,
+      productos: productos,
+      nombre_cliente: nombreCliente,
+      total: total,
+      numero_orden: numeroOrden,
+      metodo_pago: metodoPago 
+    };
+
+    try {
+      let url = '/guardar_orden/';
+      let method = 'POST';
+
+      if (modoEdicion && idOrdenActual) {
+          url = `/editar_orden/${idOrdenActual}/`;
+          method = 'POST';
+          
+          const response = await fetch(url, {
+            method,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(data)
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            alert('Orden actualizada correctamente');
+
+            const card = document.querySelector(`.card[data-id="${idOrdenActual}"]`);
+            if (card) {
+              const badgeMetodo = card.querySelector('.metodo-pago-badge');
+              if (badgeMetodo) {
+                const metodoActualizado = result.metodo_pago.charAt(0).toUpperCase() + result.metodo_pago.slice(1);
+                badgeMetodo.textContent = metodoActualizado;
+              }
+
+              const productosHTML = productos.map(p => `<li>• ${p.nombre} (${p.cantidad})</li>`).join("");
+              const listaProductos = card.querySelector('ul');
+              if (listaProductos) {
+                listaProductos.innerHTML = productosHTML;
+              }
+
+              const totalElement = card.querySelector('.text-vino');
+              if (totalElement) {
+                totalElement.textContent = `Total: $${total}`;
+              }
+
+              const clienteElement = card.querySelector('p:first-of-type');
+              if (clienteElement) {
+                clienteElement.innerHTML = `<strong>Cliente:</strong> ${nombreCliente || "No especificado"}`;
+              }
+            }
+
+            let modal = bootstrap.Modal.getInstance(document.getElementById('modalOrden'));
+            if (!modal) {
+              modal = new bootstrap.Modal(document.getElementById('modalOrden'));
+            }
+            setTimeout(() => modal.hide(), 100);
+            return;
+          } else {
+            alert('Error: ' + (result.error || 'No se pudo actualizar la orden'));
+          }
+          return;
+        }
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        alert('Orden guardada correctamente');
+
+        const listaPedidos = document.getElementById("lista-pedidos");
+        const nuevaCard = document.createElement("div");
+        nuevaCard.classList.add("card", "shadow-sm", "p-3", "border-0", "rounded-3");
+        nuevaCard.style.backgroundColor = "#f8f9fa";
+        nuevaCard.style.borderLeft = "6px solid #540c0c";
+        nuevaCard.dataset.id = result.id_orden;
+
+        const productosHTML = productos.map(p => `<li>• ${p.nombre} (${p.cantidad})</li>`).join("");
+        const metodoPagoTexto = metodoPago.charAt(0).toUpperCase() + metodoPago.slice(1);
+
+        nuevaCard.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold mb-0">Orden #${numeroOrden} — Mesa #${numeroMesa}</h6>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-danger estado-pago" data-id="${result.id_orden}" style="cursor:pointer;">Pendiente</span>
+              <span class="badge bg-secondary metodo-pago-badge">${metodoPagoTexto}</span>
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-dark btn-editar" data-id="${result.id_orden}">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar" data-id="${result.id_orden}" data-numero="${numeroOrden}">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <p class="mb-1"><strong>Nombre del Cliente:</strong> ${nombreCliente || "No especificado"}</p>
+          <ul class="list-unstyled mb-0 ps-2">${productosHTML}</ul>
+          <p class="mt-2 fw-bold text-end text-vino">Total: $${total}</p>
+        `;
+
+        listaPedidos.appendChild(nuevaCard);
+        asignarEventosCambioEstado();
+        actualizarEstadoMesa(numeroMesa, false);
+        if (typeof aplicarFiltroActual !== 'undefined') {
+          aplicarFiltroActual();
+        }
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalOrden'));
+        modal.hide();
+      } else {
+        alert('Error: ' + (result.error || 'No se pudo guardar la orden'));
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error de conexión con el servidor.');
+    }
+  });
+}
 
 
-// --- ELIMINAR ÓRDENES (UNA SOLA FUNCIÓN) ---
 // --- ELIMINAR ÓRDENES ---
 document.addEventListener('click', async function(e) {
   const boton = e.target.closest('.btn-eliminar');
@@ -327,7 +315,6 @@ document.addEventListener('click', async function(e) {
   const idOrden = card.getAttribute('data-id'); 
   const numeroOrden = boton.getAttribute('data-numero');
 
-  // ✅ EXTRAER EL NÚMERO DE MESA DE LA CARD
   const textoMesa = card.querySelector('h6').textContent;
   const matchMesa = textoMesa.match(/Mesa #(\d+)/);
   const numeroMesa = matchMesa ? matchMesa[1] : null;
@@ -348,15 +335,11 @@ document.addEventListener('click', async function(e) {
 
       if (result.success) {
         alert(`Orden #${numeroOrden} eliminada correctamente.`);
-        
-        // ✅ ELIMINAR LA CARD VISUALMENTE
         card.remove();
         
-        // ✅ PINTAR LA MESA DE VINOTINTO SIN RECARGAR (solo si es mesa, no domicilio)
         if (numeroMesa) {
-          actualizarEstadoMesa(numeroMesa, true); // true = libre (vinotinto)
+          actualizarEstadoMesa(numeroMesa, true);
         }
-        
       } else {
         alert(`Error: ${result.error}`);
       }
@@ -369,15 +352,13 @@ document.addEventListener('click', async function(e) {
 });
 
 
-// --- EDITAR ÓRDENES ---
-// --- EDITAR ÓRDENES ---
+// --- EDITAR ÓRDENES (CORREGIDO) ---
 document.addEventListener('click', async function(e) {
   const boton = e.target.closest('.btn-editar');
   if (!boton) return;
 
   const idOrden = boton.getAttribute('data-id');
-  modoEdicion = true;
-  idOrdenActual = idOrden;
+  console.log("Editando orden ID:", idOrden);
 
   try {
     const response = await fetch(`/editar_orden/${idOrden}/`);
@@ -388,20 +369,22 @@ document.addEventListener('click', async function(e) {
       return;
     }
 
-    // Detectar si es DOMICILIO o MESA
+    // DETECTAR SI ES DOMICILIO Y SALIR INMEDIATAMENTE
     if (!data.mesa && data.id_tipoVenta === 'Domicilio') {
+      console.log("Abriendo modal de DOMICILIO");
       abrirModalEditarDomicilio(data);
-      return;
+      return; // ⚡ IMPORTANTE: SALIR AQUÍ
     }
 
-    // Si es MESA (la lógica actual)
+    // SI LLEGAMOS AQUÍ, ES UNA MESA
+    console.log(" Abriendo modal de MESA");
+    modoEdicion = true;
+    idOrdenActual = idOrden;
+
     document.getElementById("numeroOrden").textContent = data.numero_orden ?? data.id_orden;
     document.getElementById("numeroMesa").textContent = data.mesa;
     document.getElementById("nombre_cliente").value = data.nombre_cliente || "";
-    
-    // Cargar método de pago
     document.getElementById("metodo_pago").value = data.metodo_pago || "efectivo";
-    
     document.getElementById("detalles").innerHTML = "";
 
     data.detalles.forEach(item => {
@@ -450,11 +433,10 @@ document.addEventListener('click', async function(e) {
     modal.show();
 
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error al cargar la orden:", error);
     alert('Error al cargar la orden.');
   }
 });
-
 
 
 // --- BÚSQUEDA DE ÓRDENES ---
@@ -463,6 +445,8 @@ const btnBuscarOrden = document.getElementById('btn-buscar-orden');
 const listaPedidos = document.getElementById('lista-pedidos');
 
 function renderizarPedidos(ordenes) {
+  if (!listaPedidos) return;
+  
   listaPedidos.innerHTML = '';
 
   if (ordenes.length === 0) {
@@ -482,8 +466,6 @@ function renderizarPedidos(ordenes) {
     ).join('');
 
     const lugar = orden.mesa ? `Mesa #${orden.mesa}` : 'Domicilio';
-
-    //Obtener método de pago
     const metodoPago = (orden.metodo_pago || 'efectivo').charAt(0).toUpperCase() + (orden.metodo_pago || 'efectivo').slice(1);
 
     card.innerHTML = `
@@ -564,7 +546,6 @@ function asignarEventosCambioEstado() {
   });
 }
 
-// Asignar eventos al cargar la página
 document.addEventListener('DOMContentLoaded', asignarEventosCambioEstado);
 
 
@@ -585,84 +566,59 @@ function getCookie(name) {
 }
 
 
-// --- RESETEAR ÓRDENES (CON DEBUG) ---
+// --- RESETEAR ÓRDENES ---
 async function ocultarOrdenes() {
-  console.log("🔄 Función resetearOrdenes() ejecutada");
-  
-  if (!confirm('¿Estás seguro de que deseas ocultar todas las órdenes del día? Se ocultarán pero se mantendrán en la base de datos.')) {
-    console.log("❌ Usuario canceló el reseteo");
+  if (!confirm('¿Estás seguro de que deseas ocultar todas las órdenes del día?')) {
     return;
   }
 
-  console.log("✅ Usuario confirmó la eliminacion");
-
   try {
-    console.log("📡 Enviando petición a /resetear_ordenes/");
-    
-    //Aqui realmente debería ser "eliminar_ordenes", pero por los momentos se dejará así. Hasta ahora, funciona bien
     const response = await fetch('/resetear_ordenes/', {
       method: 'POST',
       headers: {
         'X-CSRFToken': getCookie('csrftoken')
       }
     });
-
-    console.log("📥 Respuesta recibida:", response);
     
     const result = await response.json();
-    console.log("📦 Datos de respuesta:", result);
 
     if (result.success) {
       alert(`Se han ocultado ${result.ordenes_ocultadas} órdenes correctamente.`);
-      console.log("✅ Recargando página...");
       location.reload();
     } else {
       alert('Error: ' + (result.error || 'No se pudieron resetear las órdenes'));
-      console.error("❌ Error en la respuesta:", result);
     }
   } catch (error) {
-    console.error('❌ Error en la petición:', error);
+    console.error('Error:', error);
     alert('Error de conexión con el servidor.');
   }
 }
 
 
-// --- DEVOLVER ÓRDENES (CON DEBUG) ---
+// --- DEVOLVER ÓRDENES ---
 async function resetearOrdenes() {
-  console.log("↺ Función devolverOrdenes() ejecutada");
-  
   if (!confirm('¿Deseas resetear todas las órdenes ocultas?')) {
-    console.log("❌ Usuario canceló la devolución");
     return;
   }
 
-  console.log("✅ Usuario confirmó la devolución");
-
   try {
-    console.log("📡 Enviando petición a /devolver_ordenes/");
-    
     const response = await fetch('/devolver_ordenes/', {
       method: 'POST',
       headers: {
         'X-CSRFToken': getCookie('csrftoken')
       }
     });
-
-    console.log("📥 Respuesta recibida:", response);
     
     const result = await response.json();
-    console.log("📦 Datos de respuesta:", result);
 
     if (result.success) {
       alert(`Se han devuelto ${result.ordenes_devueltas} órdenes correctamente.`);
-      console.log("✅ Recargando página...");
       location.reload();
     } else {
       alert('Error: ' + (result.error || 'No se pudieron devolver las órdenes'));
-      console.error("❌ Error en la respuesta:", result);
     }
   } catch (error) {
-    console.error('❌ Error en la petición:', error);
+    console.error('Error:', error);
     alert('Error de conexión con el servidor.');
   }
 }
@@ -682,29 +638,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-// --- VERIFICAR QUE getCookie EXISTE ---
-console.log("Verificando getCookie:", typeof getCookie);
-if (typeof getCookie === 'undefined') {
-  console.error("ERROR: La función getCookie() no está definida");
-}
-
-console.log("Funciones resetearOrdenes y devolverOrdenes cargadas correctamente");
-
-
-
 // --- ACTUALIZAR ESTADO VISUAL DE LA MESA ---
 function actualizarEstadoMesa(numeroMesa, libre) {
-  // Buscar todas las mesas
   const mesas = document.querySelectorAll('.mesa-botones');
   
   mesas.forEach(mesaDiv => {
     const boton = mesaDiv.querySelector('button');
     const textoBoton = boton?.textContent.trim();
     
-    // Verificar si es la mesa correcta
     if (textoBoton === `Mesa #${numeroMesa}`) {
       if (libre) {
-        // LIBRE (vinotinto) - Abrir modal para crear nueva orden
         mesaDiv.classList.remove('mesa-ocupada');
         mesaDiv.classList.add('mesa-libre');
         boton.disabled = false;
@@ -712,14 +655,13 @@ function actualizarEstadoMesa(numeroMesa, libre) {
         boton.setAttribute('data-bs-target', '#modalOrden');
         boton.onclick = function() { abrirModal(numeroMesa); };
       } else {
-        // OCUPADA (negro) - Abrir modal para editar orden existente
         mesaDiv.classList.remove('mesa-libre');
         mesaDiv.classList.add('mesa-ocupada');
-        boton.disabled = false; // CAMBIAR A false para que se pueda hacer clic
+        boton.disabled = false;
         boton.removeAttribute('data-bs-toggle');
         boton.removeAttribute('data-bs-target');
         boton.onclick = function() { 
-          abrirModalEdicionMesa(numeroMesa); // ABRIR MODAL DE EDICIÓN
+          abrirModalEdicionMesa(numeroMesa);
         };
       }
     }
@@ -727,13 +669,9 @@ function actualizarEstadoMesa(numeroMesa, libre) {
 }
 
 
-
 // --- ABRIR MODAL DE EDICIÓN DESDE MESA OCUPADA ---
 async function abrirModalEdicionMesa(numeroMesa) {
-  console.log("Buscando orden de la mesa #" + numeroMesa);
-  
   try {
-    // Buscar la orden de esa mesa
     const response = await fetch(`/buscar_orden_por_mesa/${numeroMesa}/`);
     const data = await response.json();
     
@@ -742,21 +680,15 @@ async function abrirModalEdicionMesa(numeroMesa) {
       return;
     }
     
-    // Activar modo edición
     modoEdicion = true;
     idOrdenActual = data.id_orden;
     
-    // Llenar el modal con los datos de la orden
     document.getElementById("numeroOrden").textContent = data.numero_orden;
     document.getElementById("numeroMesa").textContent = numeroMesa;
     document.getElementById("nombre_cliente").value = data.nombre_cliente || "";
-
-    //Cargar método de pago
     document.getElementById("metodo_pago").value = data.metodo_pago || "efectivo";
-
     document.getElementById("detalles").innerHTML = "";
     
-    // Agregar los productos
     data.detalles.forEach(item => {
       const contenedor = document.createElement('div');
       contenedor.classList.add('d-flex', 'align-items-center', 'justify-content-between', 'mb-2', 'border', 'p-2', 'rounded');
@@ -799,10 +731,8 @@ async function abrirModalEdicionMesa(numeroMesa) {
       document.getElementById("detalles").appendChild(contenedor);
     });
     
-    // Actualizar el total
     actualizarTotal();
     
-    // Mostrar el modal
     const modal = new bootstrap.Modal(document.getElementById('modalOrden'));
     modal.show();
     
