@@ -341,3 +341,46 @@
   box-shadow: 0 0 5px rgba(84, 12, 12, 0.3);
   outline: none;
 }
+
+
+
+/* FILTRO DE BOTONES */
+.boton-filtro .btn {
+  border-radius: 50px;
+  padding: 8px 25px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border: 2px solid #540c0c;
+  color: #540c0c;
+  background-color: white;
+  top: 10px;
+  left: 20px;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+/* ⚪ BOTÓN INACTIVO (blanco con borde y texto vinotinto) */
+.boton-filtro .btn-outline-dark {
+  background-color: white;
+  color: #540c0c;
+  border: 2px solid #540c0c;
+}
+
+.boton-filtro .btn-outline-dark:hover {
+  background-color: #f8f9fa;
+  color: #540c0c;
+  border: 2px solid #540c0c;
+}
+
+/* BOTÓN ACTIVO (negro con texto blanco) */
+.boton-filtro .btn-dark.activo {
+  background-color: #6a0d1a !important;   /* vinotinto */
+  color: white !important;
+  border: 2px solid #6a0d1a !important;
+}
+
+.boton-filtro .btn-dark.activo:hover {
+  background-color: #540c0c !important;   /* vinotinto oscuro */
+  color: white !important;
+  border: 2px solid #540c0c !important;
+}

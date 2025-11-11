@@ -391,6 +391,7 @@ if (botonGuardarDomicilio) {
                 
                 // Asignar eventos de cambio de estado
                 asignarEventosCambioEstado();
+                aplicarFiltroActual();
 
                 // Cerrar el modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('modalOrdenDomicilio'));

@@ -300,8 +300,8 @@ botonGuardar.addEventListener('click', async () => {
 
       listaPedidos.appendChild(nuevaCard); // AGREGAR AL FINAL
       asignarEventosCambioEstado();
-
       actualizarEstadoMesa(numeroMesa, false);
+      aplicarFiltroActual(); //Para el filtrado de mesas y domicilio
 
       // Cerrar el modal
       const modal = bootstrap.Modal.getInstance(document.getElementById('modalOrden'));
