@@ -7,15 +7,22 @@ def editar_orden(request, id_orden):
 
     if request.method == 'POST':
         orden.nombre_cliente = request.POST.get('nombre_cliente', orden.nombre_cliente)
-        orden.total = request.POST.get('total', orden.total)
         orden.metodo_pago = request.POST.get('metodo_pago', orden.metodo_pago)
 
+        # Convertir correctamente el total (evita errores con coma)
+        total_str = request.POST.get('total', str(orden.total)).replace(',', '.')
+        try:
+            orden.total = float(total_str)
+        except ValueError:
+            orden.total = orden.total  # si algo falla, se deja igual
+
+        # Asignar tipo de venta
         tipo_id = request.POST.get('id_tipoVenta')
         if tipo_id:
             orden.id_tipoVenta = tipoVenta.objects.filter(id_tipoVenta=tipo_id).first()
 
         orden.save()
-        return redirect('ventas')  # <- ventas solo muestra las pagadas
+        return redirect('ventas')  # ventas solo muestra las pagadas
 
     # Traer los tipos de venta para el select
     tiposVenta = tipoVenta.objects.all()

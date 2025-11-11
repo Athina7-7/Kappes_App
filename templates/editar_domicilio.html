@@ -1,39 +1,52 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Editar Domicilio{% endblock %}
+{% block title %}Editar Orden{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/nuevo_domicilio.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <h1 class="fw-bold mb-4">Editar Domicilio</h1>
-    <form method="post">
-        {% csrf_token %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="form-container text-start shadow p-4 rounded" style="max-width: 500px; width: 100%; background-color: #fff;">
+        <h1 class="fw-bold mb-4 text-center">Editar Orden</h1>
+        <form method="post">
+            {% csrf_token %}
 
-        <div class="mb-3">
-            <label>Lugar *</label>
-            <input type="text" name="lugar" class="form-control" value="{{ domicilio.lugar }}" required>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Nombre del cliente *</label>
+                <input type="text" name="nombre_cliente" class="form-control" value="{{ orden.nombre_cliente }}" required>
+            </div>
 
-        <div class="mb-3">
-            <label>Descripción</label>
-            <input type="text" name="descripcion" class="form-control" value="{{ domicilio.descripcion }}">
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Total *</label>
+                <input type="number" name="total" class="form-control" value="{{ orden.total }}" required>
+            </div>
 
-        <div class="mb-3">
-            <label>Precio *</label>
-            <input type="number" name="precio" class="form-control" value="{{ domicilio.precio }}" required>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Tipo de venta *</label>
+                <select name="id_tipoVenta" class="form-control" required>
+                    {% for tipo in tiposVenta %}
+                        <option value="{{ tipo.id_tipoVenta }}"
+                            {% if orden.id_tipoVenta.id_tipoVenta == tipo.id_tipoVenta %}selected{% endif %}>
+                            {{ tipo.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <div class="mb-3">
-            <label>Nombre cliente</label>
-            <input type="text" name="nombre_cliente" class="form-control" value="{{ domicilio.nombre_cliente }}">
-        </div>
-        
-        <button type="submit" class="btn btn-save w-100">Guardar cambios</button>
-    </form>
+            <div class="mb-3">
+                <label class="form-label">Método de pago *</label>
+                <select name="metodo_pago" class="form-control" required>
+                    <option value="efectivo" {% if orden.metodo_pago == 'efectivo' %}selected{% endif %}>Efectivo</option>
+                    <option value="tarjeta" {% if orden.metodo_pago == 'tarjeta' %}selected{% endif %}>Tarjeta</option>
+                    <option value="transferencia" {% if orden.metodo_pago == 'transferencia' %}selected{% endif %}>Transferencia</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-save w-100 mt-3">Guardar cambios</button>
+        </form>
+    </div>
 </div>
 {% endblock %}

@@ -5,6 +5,8 @@ from principal.views import views_home, views_producto, views_inventario,views_r
 from principal.views import views_inicio_sesion
 from principal.views.views_ventas import mostrar_ventas
 from principal.views.views_editar_orden import editar_orden
+from principal.views import views_home, views_editar_orden
+
 
 # en el archivo que se encuentra en la raiz de la carpeta del proyecto el 
 # cual es urls.py, este indica las urls que usará el usuario para ingresar a los templates.
@@ -31,6 +33,8 @@ urlpatterns = [
     path('guardar_orden/', views_home.guardar_orden, name='guardar_orden'),
     path('eliminar_orden/<int:id_orden>/', views_home.eliminar_orden, name='eliminar_orden'),
     path('editar_orden/<int:id_orden>/', views_home.editar_orden, name='editar_orden'),
+    path('ventas/editar_orden/<int:id_orden>/', views_editar_orden.editar_orden, name='editar_orden_ventas'),
+
     path('buscar_orden/', views_home.buscar_orden, name='buscar_orden'),
     path('cambiar_estado/<int:id_orden>/', views_home.cambiar_estado, name='cambiar_estado'),
     path('guardar_orden_domicilio/', views_home.guardar_orden_domicilio, name='guardar_orden_domicilio'),

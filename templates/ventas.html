@@ -17,8 +17,6 @@
         </button>
     </form>
 
-
-
     <!-- Lista de órdenes -->
     <div class="productos-list">
         {% for orden in ordenes %}
@@ -27,7 +25,7 @@
             <span class="precio">${{ orden.total|floatformat:0 }}</span>
             <div class="acciones">
                 {% if orden.id_orden %}
-                <button type="button" class="accion editar btn-editar" data-id="{{ orden.id_orden }}">
+                <a href="{% url 'editar_orden_ventas' orden.id_orden %}" class="accion editar btn-editar">
                     <i class="bi bi-pencil-square"></i>
                 </a>
                 <form action="{% url 'eliminar_orden' orden.id_orden %}" method="post" style="display:inline;">
@@ -45,12 +43,4 @@
         {% endfor %}
     </div>
 </div>
-
-{% include 'modal_orden.html' %}
-{% include 'modal_orden_domicilio.html' %}
-{% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'js/ordenes.js' %}"></script>
-<script src="{% static 'js/ordenes_domicilio.js' %}"></script>
 {% endblock %}
