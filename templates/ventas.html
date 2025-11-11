@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Inventario{% endblock %}
+{% block title %}Ventas{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/inventario.css' %}">
@@ -9,46 +9,40 @@
 
 {% block content %}
 <div class="inventario-container">
-    <h1 class="fw-bold mb-4 text-center">Productos</h1>
+    <h1 class="fw-bold mb-4 text-center">Venta total</h1>
+    <form method="get" action="{% url 'ventas' %}" class="search-bar mb-4">
+        <input type="text" name="q" class="form-control" placeholder="Búsqueda por número de orden" value="{{ query }}">
+        <button type="submit" class="btn-search">
+            <i class="bi bi-search"></i>
+        </button>
+    </form>
 
-<!-- Barra de búsqueda -->
-<form method="get" action="{% url 'inventario' %}" class="search-bar mb-4">
-    <input type="text" name="q" class="form-control" placeholder="Búsqueda de productos" value="{{ request.GET.q|default:'' }}">
-    <button type="submit" class="btn-search">
-        <i class="bi bi-search"></i>
-    </button>
-</form>
 
-    <!-- Lista de productos -->
+
+    <!-- Lista de órdenes -->
     <div class="productos-list">
-        {% for producto in productos %}
+        {% for orden in ordenes %}
         <div class="producto-item">
-            <span class="nombre">{{ producto.nombre }}</span>
-            <span class="precio">${{ producto.precio|floatformat:0 }}</span>
+            <span class="nombre">Pedido #{{ orden.numero_orden }}</span>
+            <span class="precio">${{ orden.total|floatformat:0 }}</span>
             <div class="acciones">
-                <a href="{% url 'editar_producto' producto.id_producto %}" class="accion editar">
+                {% if orden.id_orden %}
+                <a href="{% url 'editar_orden' orden.id_orden %}" class="accion editar">
                     <i class="bi bi-pencil-square"></i>
                 </a>
-                <form action="{% url 'eliminar_producto' producto.id_producto %}" method="post" style="display:inline;">
+                <form action="{% url 'eliminar_orden' orden.id_orden %}" method="post" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="accion eliminar"
-                        onclick="return confirm('¿Seguro que deseas eliminar este producto?');">
+                        onclick="return confirm('¿Seguro que deseas eliminar esta orden?');">
                         <i class="bi bi-trash"></i>
                     </button>
                 </form>
+                {% endif %}
             </div>
         </div>
-        
         {% empty %}
-        <p class="text-center">No hay productos registrados.</p>
+        <p class="text-center">No hay ventas registradas.</p>
         {% endfor %}
     </div>
-    
-    <!-- Botón para agregar nuevo producto -->
-        <div class="add-btn-container">
-            <a href="{% url 'productos' %}" class="btn-add">
-                <i class="bi bi-plus"></i>
-            </a>
-        </div>
 </div>
 {% endblock %}

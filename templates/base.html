@@ -55,11 +55,11 @@
         <!-- Primer item del menú principal
          dropdown es una opción de bootstrap para tener un mini-menú desplegable -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle text-white" href="#" id="submenu" role="button"> <i class="bi bi-box-seam"></i> Productos</a>
-            <ul class="dropdown-menu text-center" aria-labelledby="submenu">
+          <a class="nav-link text-white" href="{% url 'inventario' %}" id="submenu" role="button"> <i class="bi bi-box-seam"></i> Productos</a>
+            <!-- <ul class="dropdown-menu text-center" aria-labelledby="submenu">
               <li><a class="dropdown-item" href="{% url 'inventario' %}">Ver productos</a></li>
               <li><a class="dropdown-item" href="{% url 'productos' %}">Creación de productos</a></li>
-            </ul>
+            </ul> -->
         </li>
 
         <!-- Segundo item del menú principal
@@ -70,7 +70,7 @@
 
         <!-- Tercer item del menú principal -->
         <li class="nav-item">
-          <a class="nav-link text-white" href="#"> <i class="bi bi-bar-chart-line-fill"></i> Ventas</a>
+          <a class="nav-link text-white" href="{%url 'ventas'%}"> <i class="bi bi-bar-chart-line-fill"></i> Ventas</a>
         </li>
       </ul>
     </div>
