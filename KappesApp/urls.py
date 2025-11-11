@@ -3,6 +3,8 @@ from django.urls import path
 from principal import views
 from principal.views import views_home, views_producto, views_inventario,views_registro, views_nuevo_domicilio, views_zonas_domicilio
 from principal.views import views_inicio_sesion
+from principal.views.views_ventas import mostrar_ventas
+from principal.views.views_editar_orden import editar_orden
 
 # en el archivo que se encuentra en la raiz de la carpeta del proyecto el 
 # cual es urls.py, este indica las urls que usará el usuario para ingresar a los templates.
@@ -28,7 +30,7 @@ urlpatterns = [
     path('buscar_producto/', views_home.buscar_producto, name='buscar_producto'),
     path('guardar_orden/', views_home.guardar_orden, name='guardar_orden'),
     path('eliminar_orden/<int:id_orden>/', views_home.eliminar_orden, name='eliminar_orden'),
-    path('editar_orden/<int:id_orden>/', views_home.editar_orden, name='editar_orden'),
+    # path('editar_orden/<int:id_orden>/', views_home.editar_orden, name='editar_orden'),
     path('buscar_orden/', views_home.buscar_orden, name='buscar_orden'),
     path('cambiar_estado/<int:id_orden>/', views_home.cambiar_estado, name='cambiar_estado'),
     path('guardar_orden_domicilio/', views_home.guardar_orden_domicilio, name='guardar_orden_domicilio'),
@@ -46,6 +48,8 @@ urlpatterns = [
     # PRODUCTO - INVENTARIO
     path('productos/', views_producto.crear_producto, name='productos'),
     path('inventario/', views_inventario.inventario, name='inventario'),
+    path('ventas/', mostrar_ventas, name='ventas'),
+    path('editar_orden/<int:id_orden>/', editar_orden, name='editar_orden'),
     path('producto/eliminar/<int:producto_id>/', views_inventario.eliminar_producto, name='eliminar_producto'),
     path('producto/editar/<int:producto_id>/', views_inventario.editar_producto, name='editar_producto'),
     path('registro/', views_registro.registro_usuario, name='registro'),

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Editar Orden{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/nuevo_domicilio.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1 class="fw-bold mb-4">Editar Orden</h1>
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label>Nombre del cliente *</label>
+            <input type="text" name="nombre_cliente" class="form-control" value="{{ orden.nombre_cliente }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Total *</label>
+            <input type="number" name="total" class="form-control" value="{{ orden.total }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Tipo de venta *</label>
+            <select name="id_tipoVenta" class="form-control" required>
+                {% for tipo in tiposVenta %}
+                    <option value="{{ tipo.id_tipoVenta }}"
+                        {% if orden.id_tipoVenta and orden.id_tipoVenta.id_tipoVenta == tipo.id_tipoVenta %}
+                            selected
+                        {% endif %}>
+                        {{ tipo.nombre_tipo }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Método de pago</label>
+            <select name="metodo_pago" class="form-control">
+                <option value="efectivo" {% if orden.metodo_pago == 'efectivo' %}selected{% endif %}>Efectivo</option>
+                <option value="tarjeta" {% if orden.metodo_pago == 'tarjeta' %}selected{% endif %}>Tarjeta</option>
+                <option value="transferencia" {% if orden.metodo_pago == 'transferencia' %}selected{% endif %}>Transferencia</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-save w-100">Guardar cambios</button>
+    </form>
+</div>
+{% endblock %}
