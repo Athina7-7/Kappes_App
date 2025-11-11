@@ -359,7 +359,7 @@
   transition: all 0.3s ease;
 }
 
-/* ⚪ BOTÓN INACTIVO (blanco con borde y texto vinotinto) */
+/* BOTÓN INACTIVO (blanco con borde y texto vinotinto) */
 .boton-filtro .btn-outline-dark {
   background-color: white;
   color: #540c0c;

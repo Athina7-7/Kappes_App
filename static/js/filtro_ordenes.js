@@ -41,13 +41,13 @@ function actualizarEstiloBotones(tipoActivo) {
   const btnDomicilio = document.querySelector('.boton-filtro button:first-child');
   const btnMesas = document.querySelector('.boton-filtro button:last-child');
   
-  // ⚪ RESTABLECER AMBOS BOTONES AL ESTILO INACTIVO (blanco con borde vinotinto)
+  // RESTABLECER AMBOS BOTONES AL ESTILO INACTIVO (blanco con borde vinotinto)
   btnDomicilio.classList.remove('btn-dark', 'activo');
   btnDomicilio.classList.add('btn-outline-dark');
   btnMesas.classList.remove('btn-dark', 'activo');
   btnMesas.classList.add('btn-outline-dark');
   
-  // 🖤 APLICAR ESTILO ACTIVO (negro con letra blanca) AL BOTÓN CORRESPONDIENTE
+  // APLICAR ESTILO ACTIVO (negro con letra blanca) AL BOTÓN CORRESPONDIENTE
   if (tipoActivo === 'domicilio') {
     btnDomicilio.classList.remove('btn-outline-dark');
     btnDomicilio.classList.add('btn-dark', 'activo');
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (btnDomicilio) {
     btnDomicilio.addEventListener('click', () => {
       if (filtroActual === 'domicilio') {
-        // ✅ Si ya está activo, volver a mostrar TODAS las órdenes
+        // Si ya está activo, volver a mostrar TODAS las órdenes
         filtrarOrdenes('todas');
       } else {
         // Filtrar solo domicilios
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (btnMesas) {
     btnMesas.addEventListener('click', () => {
       if (filtroActual === 'mesas') {
-        // ✅ Si ya está activo, volver a mostrar TODAS las órdenes
+        // Si ya está activo, volver a mostrar TODAS las órdenes
         filtrarOrdenes('todas');
       } else {
         // Filtrar solo mesas
@@ -129,4 +129,4 @@ if (buscarOrdenOriginal) {
   };
 }
 
-console.log('✅ Sistema de filtrado de órdenes cargado correctamente');
+console.log('Sistema de filtrado de órdenes cargado correctamente');
