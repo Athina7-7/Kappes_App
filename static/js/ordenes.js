@@ -201,22 +201,49 @@ botonGuardar.addEventListener('click', async () => {
 
         const result = await response.json();
         
+        // REEMPLAZA ESTA SECCIÓN EN ordenes.js (aproximadamente línea 120-160)
+        // Dentro del bloque: if (response.ok && result.success) { ... }
+
         if (response.ok && result.success) {
           alert('Orden actualizada correctamente');
 
           // Buscar la card de la orden
           const card = document.querySelector(`.card[data-id="${idOrdenActual}"]`);
           if (card) {
+            // Actualizar badge de método de pago
             const badgeMetodo = card.querySelector('.metodo-pago-badge');
             if (badgeMetodo) {
               const metodoActualizado = result.metodo_pago.charAt(0).toUpperCase() + result.metodo_pago.slice(1);
               badgeMetodo.textContent = metodoActualizado;
             }
+
+            // ACTUALIZAR LISTA DE PRODUCTOS
+            const productosHTML = productos.map(p => `<li>• ${p.nombre} (${p.cantidad})</li>`).join("");
+            const listaProductos = card.querySelector('ul');
+            if (listaProductos) {
+              listaProductos.innerHTML = productosHTML;
+            }
+
+            // ACTUALIZAR TOTAL
+            const totalElement = card.querySelector('.text-vino');
+            if (totalElement) {
+              totalElement.textContent = `Total: $${total}`;
+            }
+
+            // ACTUALIZAR NOMBRE DEL CLIENTE (CORREGIDO)
+            const clienteElement = card.querySelector('p:first-of-type'); // Buscar el primer <p>
+            if (clienteElement) {
+              clienteElement.innerHTML = `<strong>Cliente:</strong> ${nombreCliente || "No especificado"}`;
+            }
           }
 
           // Cerrar modal sin recargar
-          const modal = bootstrap.Modal.getInstance(document.getElementById('modalOrden'));
-          modal.hide();
+          let modal = bootstrap.Modal.getInstance(document.getElementById('modalOrden'));
+          if (!modal) {
+            modal = new bootstrap.Modal(document.getElementById('modalOrden'));
+          }
+          setTimeout(() => modal.hide(), 100);
+          return;
         } else {
           alert('Error: ' + (result.error || 'No se pudo actualizar la orden'));
         }
@@ -343,6 +370,7 @@ document.addEventListener('click', async function(e) {
 
 
 // --- EDITAR ÓRDENES ---
+// --- EDITAR ÓRDENES ---
 document.addEventListener('click', async function(e) {
   const boton = e.target.closest('.btn-editar');
   if (!boton) return;
@@ -362,7 +390,7 @@ document.addEventListener('click', async function(e) {
 
     // Detectar si es DOMICILIO o MESA
     if (!data.mesa && data.id_tipoVenta === 'Domicilio') {
-      abrirModalEditarDomicilio(data); // Nueva función que haremos abajo
+      abrirModalEditarDomicilio(data);
       return;
     }
 
@@ -370,12 +398,11 @@ document.addEventListener('click', async function(e) {
     document.getElementById("numeroOrden").textContent = data.numero_orden ?? data.id_orden;
     document.getElementById("numeroMesa").textContent = data.mesa;
     document.getElementById("nombre_cliente").value = data.nombre_cliente || "";
-
-    // 🆕 CARGAR EL MÉTODO DE PAGO GUARDADO
+    
+    // Cargar método de pago
     document.getElementById("metodo_pago").value = data.metodo_pago || "efectivo";
-
+    
     document.getElementById("detalles").innerHTML = "";
-
 
     data.detalles.forEach(item => {
       const contenedor = document.createElement('div');

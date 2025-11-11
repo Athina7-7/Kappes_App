@@ -304,7 +304,47 @@ if (botonGuardarDomicilio) {
                 // SI ES EDICIÓN, RECARGAR LA PÁGINA
                 if (modoEdicionDomicilio && idOrdenDomicilioActual) {
                     alert("Orden actualizada correctamente ");
-                    location.reload();
+                    //location.reload();
+                    //return;
+
+                    const card = document.querySelector(`.card[data-id="${idOrdenDomicilioActual}"]`);
+                    if (card) {
+                        // Actualizar badge de método de pago
+                        const badgeMetodoPago = card.querySelector('.metodo-pago-badge');
+                        if (badgeMetodoPago) {
+                            const metodoPagoTexto = metodoPago.charAt(0).toUpperCase() + metodoPago.slice(1);
+                            badgeMetodoPago.textContent = metodoPagoTexto;
+                        }
+                        
+                        // ESTO ES NUEVO - ACTUALIZAR NOMBRE DEL CLIENTE
+                        const clienteP = card.querySelector('p:first-of-type');
+                        if (clienteP) {
+                            clienteP.innerHTML = `<strong>Nombre del Cliente:</strong> ${nombreClienteDomicilio || "No especificado"}`;
+                        }
+                        
+                        // ESTO ES NUEVO - ACTUALIZAR LUGAR
+                        const lugarP = card.querySelector('p:nth-of-type(2)');
+                        if (lugarP) {
+                            lugarP.innerHTML = `<strong>Lugar:</strong> ${lugarDomicilio}`;
+                        }
+                        
+                        // ESTO ES NUEVO - ACTUALIZAR TOTAL
+                        const totalElement = card.querySelector('.text-vino');
+                        if (totalElement) {
+                            totalElement.textContent = `Total: $${total}`;
+                        }
+                        
+                        // ESTO ES NUEVO - ACTUALIZAR LISTA DE PRODUCTOS
+                        const productosHTML = productos.map(p => `<li>• ${p.nombre} (${p.cantidad})</li>`).join("");
+                        const listaProductos = card.querySelector('ul');
+                        if (listaProductos) {
+                            listaProductos.innerHTML = productosHTML;
+                        }
+                    }
+                    
+                    // Cerrar modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalOrdenDomicilio'));
+                    modal.hide();
                     return;
                 }
 
