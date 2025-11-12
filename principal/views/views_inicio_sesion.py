@@ -8,25 +8,17 @@ def inicio_sesion(request):
         nombre = request.POST.get("Nombre")
         contrasena = request.POST.get("Contraseña")
 
-        #1) Verificar si uno o ambos campos están vacíos
         if not nombre or not contrasena:
             messages.warning(request, "Datos incompletos")
             return render(request, "inicio_sesion.html")
 
-
-        #2) Se busca el usuario en la base de datos
-        try:
-            usuario = Usuario.objects.get(nombre=nombre)
-
-            # 3) Comparamos usando check_password
+        usuario = Usuario.objects.filter(nombre__iexact=nombre).first()
+        if usuario:
             if check_password(contrasena, usuario.contrasena):
-                # Si la contraseña es correcta
-                return redirect("home")  # o a donde quieras llevarlo
+                return redirect("home")
             else:
-                #Contraseña incorrecta
                 messages.error(request, "Usuario o contraseña incorrectos")
-        except Usuario.DoesNotExist:
-            #Usuario no encontrado
+        else:
             messages.error(request, "Usuario o contraseña incorrectos")
 
     return render(request, "inicio_sesion.html")
