@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from principal.models import Orden, Usuario, tipoVenta
+from django.db.models import Sum
+
 
 def editar_orden(request, id_orden):
     # Buscar la orden por ID sin importar el estado
@@ -29,4 +31,28 @@ def editar_orden(request, id_orden):
     return render(request, 'editar_orden.html', {
         'orden': orden,
         'tiposVenta': tiposVenta,
+    })
+
+
+def eliminar_orden(request, id_orden):
+    if request.method == "POST":
+        orden = get_object_or_404(Orden, id_orden=id_orden)
+        orden.delete()
+    return redirect('ventas')
+
+def ventas(request):
+    query = request.GET.get('q', '')
+
+    if query:
+        ordenes = Orden.objects.filter(numero_orden__icontains=query, estado='pagada')
+    else:
+        ordenes = Orden.objects.filter(estado='pagada')
+
+    # Sumar los totales convirtiendo a float
+    venta_total = sum(float(o.total.replace(',', '.')) for o in ordenes)
+
+    return render(request, 'ventas.html', {
+        'ordenes': ordenes,
+        'query': query,
+        'venta_total': venta_total,
     })
